@@ -320,6 +320,44 @@ tr.winner { background: #fffce8 !important; }
 /* progress bar */
 .prog-bar { height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden; margin: 4px 0; }
 .prog-fill { height: 100%; border-radius: 3px; transition: width .4s; }
+
+/* ─── PIN GATE ─── */
+#pin-gate {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--green-dark);
+  display: flex; align-items: center; justify-content: center;
+}
+.pin-box {
+  background: var(--white); border-radius: 14px;
+  padding: 40px 36px; width: 320px; text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+}
+.pin-box .pin-logo {
+  font-size: 1.6em; font-weight: bold; letter-spacing: 3px;
+  color: var(--gold-dark); margin-bottom: 4px;
+}
+.pin-box .pin-title {
+  font-size: 1.05em; color: var(--green-dark); margin-bottom: 6px;
+}
+.pin-box .pin-sub {
+  font-size: .8em; color: var(--gray); margin-bottom: 22px; font-style: italic;
+}
+.pin-box input[type="password"] {
+  width: 100%; padding: 12px; font-size: 1.4em; letter-spacing: 8px;
+  text-align: center; border: 2px solid var(--border); border-radius: 8px;
+  margin-bottom: 14px; font-family: monospace;
+}
+.pin-box input[type="password"]:focus { border-color: var(--green); outline: none; }
+.pin-box .pin-btn {
+  width: 100%; padding: 12px; background: var(--green); color: var(--white);
+  border: none; border-radius: 8px; font-size: 1em; font-weight: bold;
+  cursor: pointer; font-family: Georgia, serif; transition: background .2s;
+}
+.pin-box .pin-btn:hover { background: var(--green-dark); }
+.pin-error {
+  color: #c0392b; font-size: .85em; margin-top: 10px;
+  min-height: 20px; font-style: italic;
+}
 </style>
 <!-- Firebase SDK (loaded from CDN — internet required for live sync) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -328,6 +366,19 @@ tr.winner { background: #fffce8 !important; }
 <body>
 
 <!-- HEADER -->
+<!-- PIN GATE — hidden once correct PIN is entered -->
+<div id="pin-gate">
+  <div class="pin-box">
+    <div class="pin-logo">G · B · I</div>
+    <div class="pin-title">Garland Bend Invitational 2026</div>
+    <div class="pin-sub">Enter your access PIN to continue</div>
+    <input type="password" id="pin-input" maxlength="8" placeholder="••••"
+      onkeydown="if(event.key==='Enter') submitPin()" autofocus />
+    <button class="pin-btn" onclick="submitPin()">Enter →</button>
+    <div class="pin-error" id="pin-error"></div>
+  </div>
+</div>
+
 <header class="site-header">
   <div class="year-tag">GBI 2026</div>
   <div class="conn-status" id="conn-status">○ Offline</div>
@@ -438,6 +489,9 @@ const FB = {
 const FB_PATH   = 'gbi2026/state';
 const CLIENT_ID = Math.random().toString(36).slice(2);  // unique per browser tab
 
+// ─── SITE PIN ─── change this to whatever PIN you want to share with players
+const SITE_PIN  = 'GBI2026';
+
 let _db = null, _ref = null;
 let S = defaultState();
 
@@ -477,6 +531,35 @@ function save() {
 
 /* ═══════════════════════════════════════════════════════
    BOOT  (replaces the old synchronous init)
+═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════
+   PIN GATE
+═══════════════════════════════════════════════════════ */
+function checkPin() {
+  return sessionStorage.getItem('gbi_auth') === SITE_PIN;
+}
+
+function submitPin() {
+  const val = document.getElementById('pin-input').value.trim();
+  if (val.toUpperCase() === SITE_PIN.toUpperCase()) {
+    sessionStorage.setItem('gbi_auth', SITE_PIN);
+    document.getElementById('pin-gate').style.display = 'none';
+  } else {
+    const err = document.getElementById('pin-error');
+    err.textContent = 'Incorrect PIN — try again.';
+    document.getElementById('pin-input').value = '';
+    document.getElementById('pin-input').focus();
+    setTimeout(() => { err.textContent = ''; }, 3000);
+  }
+}
+
+// Hide the gate immediately if already authenticated this session
+if (checkPin()) {
+  document.getElementById('pin-gate').style.display = 'none';
+}
+
+/* ═══════════════════════════════════════════════════════
+   ROSTER SYNC
 ═══════════════════════════════════════════════════════ */
 // Always rebuild roster from the current PLAYERS array so renames take effect
 // immediately, while preserving any existing team assignments by matching names.
