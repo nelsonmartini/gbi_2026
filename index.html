@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garland Bend Invitational 2026</title>
+<style>
+:root {
+  --green: #006747;
+  --green-dark: #004d35;
+  --green-mid: #005a3d;
+  --green-light: #e8f4ef;
+  --gold: #C9A84C;
+  --gold-light: #f0d98a;
+  --gold-dark: #9a7a2e;
+  --cream: #f7f3eb;
+  --cream-dark: #ede7d8;
+  --white: #ffffff;
+  --dark: #1a1a1a;
+  --gray: #666;
+  --gray-light: #999;
+  --border: #ddd;
+  --t1: #1a4a8a;
+  --t2: #7a1a1a;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Georgia, 'Times New Roman', serif;
+  background: var(--cream);
+  color: var(--dark);
+  min-height: 100vh;
+  font-size: 15px;
+}
+
+/* ─── HEADER ─── */
+.site-header {
+  background: var(--green);
+  color: var(--white);
+  text-align: center;
+  padding: 18px 20px 14px;
+  border-bottom: 5px solid var(--gold);
+  position: relative;
+}
+.site-header .year-tag {
+  position: absolute; top: 18px; right: 24px;
+  background: var(--gold); color: var(--green-dark);
+  font-size: 1em; font-weight: bold;
+  padding: 4px 12px; border-radius: 20px; letter-spacing: 1px;
+}
+.conn-status {
+  position: absolute; top: 20px; left: 20px;
+  font-size: .78em; color: rgba(255,255,255,.5);
+  letter-spacing: .5px;
+}
+.site-header h1 {
+  font-size: 2em; letter-spacing: 3px;
+  color: var(--gold); text-shadow: 1px 2px 4px rgba(0,0,0,.4);
+  margin-bottom: 4px;
+}
+.site-header .subtitle {
+  font-size: .9em; color: rgba(255,255,255,.75); font-style: italic;
+}
+.site-header .gbi-abbr {
+  font-size: .8em; color: var(--gold-light); letter-spacing: 2px; margin-top: 2px;
+}
+
+/* ─── NAV TABS ─── */
+.tab-nav {
+  background: var(--green-dark);
+  display: flex; overflow-x: auto;
+  border-bottom: 3px solid var(--gold);
+  scrollbar-width: none;
+}
+.tab-nav::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 11px 18px;
+  background: none; border: none; border-bottom: 3px solid transparent;
+  margin-bottom: -3px;
+  color: rgba(255,255,255,.65);
+  cursor: pointer; font-family: Georgia, serif; font-size: .9em;
+  white-space: nowrap; transition: color .2s, border-color .2s;
+}
+.tab-btn:hover { color: var(--gold-light); }
+.tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); background: rgba(255,255,255,.07); }
+
+/* ─── CONTENT AREA ─── */
+.tab-pane { display: none; padding: 22px 20px; max-width: 1260px; margin: 0 auto; }
+.tab-pane.active { display: block; }
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--white); border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.09);
+  margin-bottom: 18px; overflow: hidden;
+}
+.card-header {
+  background: var(--green); color: var(--white);
+  padding: 11px 16px; font-size: 1em; font-weight: bold;
+  letter-spacing: .5px; display: flex; align-items: center;
+  justify-content: space-between; gap: 8px;
+}
+.card-header .badge-gold { color: var(--gold); }
+.card-body { padding: 16px; }
+.card-subheader {
+  background: var(--green-light); padding: 8px 16px;
+  font-size: .85em; color: var(--green-dark); font-weight: bold;
+  letter-spacing: .3px; border-bottom: 1px solid var(--border);
+}
+
+/* ─── TABLES ─── */
+table { width: 100%; border-collapse: collapse; font-size: .88em; }
+thead th {
+  background: var(--green); color: var(--gold);
+  padding: 9px 11px; text-align: left; font-size: .82em;
+  letter-spacing: .4px; white-space: nowrap;
+}
+th.c, td.c { text-align: center; }
+tbody tr:nth-child(even) { background: #f8f5f0; }
+tbody tr:hover { background: #edf5f0; }
+td { padding: 8px 11px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: none; }
+
+/* ─── RANK BADGES ─── */
+.rank {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--green); color: var(--gold);
+  font-size: .78em; font-weight: bold;
+}
+.rank.gold { background: var(--gold); color: var(--white); }
+
+/* ─── TEAM BADGES ─── */
+.tb {
+  display: inline-block; padding: 3px 9px; border-radius: 12px;
+  font-size: .76em; font-weight: bold; color: var(--white);
+  white-space: nowrap;
+}
+.tb-none { background: #888; }
+
+/* ─── MATCHUP BLOCK ─── */
+.matchup {
+  display: grid; grid-template-columns: 1fr 52px 1fr;
+  gap: 16px; align-items: center; text-align: center;
+  padding: 16px 0;
+}
+.team-block {
+  background: var(--green); color: var(--white);
+  border-radius: 12px; padding: 18px 12px;
+}
+.team-block.leading { border: 3px solid var(--gold); }
+.t-name { font-size: 1.1em; color: var(--gold); font-weight: bold; margin-bottom: 6px; }
+.t-pts { font-size: 2.8em; font-weight: bold; line-height: 1; }
+.t-sub { font-size: .78em; color: rgba(255,255,255,.65); margin-top: 6px; }
+.vs-mid { font-size: 1.8em; font-weight: bold; color: var(--green); font-style: italic; }
+
+/* ─── ALERTS ─── */
+.alert {
+  padding: 11px 15px; border-radius: 6px;
+  margin-bottom: 14px; font-size: .88em; line-height: 1.5;
+}
+.alert-gold { background: #fff8e1; border-left: 4px solid var(--gold); color: #5a420a; }
+.alert-green { background: var(--green-light); border-left: 4px solid var(--green); color: var(--green-dark); }
+.alert-info { background: #e3f1fb; border-left: 4px solid #1976d2; color: #0d3d6e; }
+.alert-red { background: #fdeaea; border-left: 4px solid #c0392b; color: #6e1a12; }
+
+/* ─── FORMS ─── */
+.form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+label { font-size: .8em; color: var(--gray); font-weight: bold; letter-spacing: .3px; }
+input[type="text"], input[type="number"], select {
+  padding: 7px 10px; border: 1px solid var(--border);
+  border-radius: 5px; font-family: Georgia, serif; font-size: .9em;
+  background: var(--white); transition: border-color .2s;
+}
+input[type="text"]:focus, input[type="number"]:focus, select:focus {
+  outline: none; border-color: var(--green);
+  box-shadow: 0 0 0 2px rgba(0,103,71,.12);
+}
+input.score-in { width: 80px; text-align: center; }
+
+/* ─── BUTTONS ─── */
+.btn {
+  padding: 8px 16px; border: none; border-radius: 5px;
+  cursor: pointer; font-family: Georgia, serif;
+  font-size: .88em; font-weight: bold; transition: all .18s;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.btn-green { background: var(--green); color: var(--white); }
+.btn-green:hover { background: var(--green-dark); }
+.btn-gold { background: var(--gold); color: var(--white); }
+.btn-gold:hover { background: var(--gold-dark); }
+.btn-red { background: #c0392b; color: var(--white); }
+.btn-red:hover { background: #a02820; }
+.btn-sm { padding: 4px 10px; font-size: .78em; }
+.btn-xs { padding: 3px 8px; font-size: .72em; }
+
+/* ─── PLAYER CHIPS ─── */
+.chip-pool {
+  display: flex; flex-wrap: wrap; gap: 7px;
+  padding: 11px; background: #f2ede3;
+  border-radius: 7px; min-height: 52px;
+  border: 2px dashed #ccc;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border-radius: 16px;
+  background: var(--white); border: 2px solid var(--border);
+  font-size: .85em; cursor: pointer;
+  transition: all .18s; user-select: none; white-space: nowrap;
+}
+.chip:hover { border-color: var(--green); }
+.chip.t1 { background: #e8f0fb; border-color: var(--t1); color: var(--t1); }
+.chip.t2 { background: #fbe8e8; border-color: var(--t2); color: var(--t2); }
+
+/* ─── GROUP / MATCH PANELS ─── */
+.gpanel {
+  border: 1px solid var(--border); border-radius: 8px;
+  margin-bottom: 12px; overflow: hidden;
+}
+.gpanel-head {
+  background: #eef6f1; padding: 9px 13px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--border); font-weight: bold; font-size: .93em;
+}
+.gpanel-body { padding: 13px; }
+.match-sides {
+  display: grid; grid-template-columns: 1fr 44px 1fr;
+  gap: 14px; align-items: start;
+}
+.side-t1 { background: #edf2fb; padding: 11px; border-radius: 7px; border: 2px solid rgba(26,74,138,.25); }
+.side-t2 { background: #fbedee; padding: 11px; border-radius: 7px; border: 2px solid rgba(122,26,26,.25); }
+.side-label { font-weight: bold; margin-bottom: 8px; font-size: .9em; }
+.vs-center { display: flex; align-items: center; justify-content: center; font-size: 1.4em; font-weight: bold; color: var(--green); font-style: italic; padding-top: 30px; }
+
+/* ─── PAYOUT CATEGORY COLORS ─── */
+.cat { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: .75em; font-weight: bold; }
+.cat-LD  { background: #fde8e8; color: #b03030; }
+.cat-C2P { background: #e8f0fd; color: #2060a0; }
+.cat-LP  { background: #f0e8fd; color: #7030a0; }
+.cat-NP  { background: #f0f0f0; color: #888; }
+
+/* ─── COLOR HELPERS ─── */
+.green  { color: var(--green); }
+.gold   { color: var(--gold-dark); }
+.money  { color: #1a7a1a; font-weight: bold; }
+.pts    { color: var(--green); font-weight: bold; }
+.hi     { color: var(--gold-dark); font-weight: bold; }
+
+/* ─── SECTION HEADER ─── */
+.sec-head {
+  display: flex; align-items: center; gap: 8px;
+  margin: 20px 0 12px; padding-bottom: 7px;
+  border-bottom: 2px solid var(--green);
+}
+.sec-head h3 { font-size: 1.1em; color: var(--green-dark); }
+
+/* ─── STAT BOXES ─── */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px,1fr)); gap: 10px; margin-bottom: 14px; }
+.stat-box {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px; text-align: center;
+}
+.stat-box .slabel { font-size: .72em; color: var(--gray); margin-bottom: 3px; }
+.stat-box .sval { font-size: 1.5em; font-weight: bold; color: var(--green); }
+.stat-box .ssub { font-size: .75em; color: var(--gray-light); }
+
+/* ─── FORMAT TABLE ─── */
+.fmt-table { width: 100%; border-collapse: collapse; font-size: .87em; margin-top: 6px; }
+.fmt-table th { background: var(--green); color: var(--gold); padding: 7px 11px; text-align: left; }
+.fmt-table td { padding: 7px 11px; border-bottom: 1px solid var(--border); }
+.fmt-table tbody tr:last-child td { border-bottom: none; }
+
+/* ─── TWO-COL LAYOUT ─── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+/* ─── WINNER ROW ─── */
+tr.winner td:first-child { border-left: 3px solid var(--gold); }
+tr.winner { background: #fffce8 !important; }
+
+/* ─── SAVE TOAST ─── */
+#toast {
+  position: fixed; bottom: 20px; right: 20px;
+  background: var(--green); color: var(--white);
+  padding: 9px 18px; border-radius: 20px; font-size: .83em;
+  opacity: 0; transition: opacity .3s; z-index: 999; pointer-events: none;
+}
+#toast.show { opacity: 1; }
+
+/* ─── EMPTY STATE ─── */
+.empty {
+  text-align: center; padding: 32px 20px;
+  color: var(--gray-light); font-style: italic;
+}
+.empty .eicon { font-size: 2.4em; margin-bottom: 8px; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 720px) {
+  .two-col, .three-col { grid-template-columns: 1fr; }
+  .matchup { grid-template-columns: 1fr; }
+  .vs-mid { display: none; }
+  .match-sides { grid-template-columns: 1fr; }
+  .vs-center { display: none; }
+  .site-header h1 { font-size: 1.4em; }
+  .site-header .year-tag { position: static; margin-bottom: 6px; display: inline-block; }
+}
+
+/* ─── SEARCH HIGHLIGHT ─── */
+.player-result-card {
+  border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 12px;
+}
+.player-result-head {
+  padding: 10px 14px; color: var(--white); font-weight: bold;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.player-result-body { padding: 12px 14px; }
+
+/* progress bar */
+.prog-bar { height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden; margin: 4px 0; }
+.prog-fill { height: 100%; border-radius: 3px; transition: width .4s; }
+</style>
+<!-- Firebase SDK (loaded from CDN — internet required for live sync) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="year-tag">GBI 2026</div>
+  <div class="conn-status" id="conn-status">○ Offline</div>
+  <h1>GARLAND BEND INVITATIONAL</h1>
+  <div class="subtitle">The Masters of the Midwest</div>
+  <div class="gbi-abbr">G · B · I</div>
+</header>
+
+<!-- TAB NAV -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="tab('scoreboard')">🏆 Scoreboard</button>
+  <button class="tab-btn" onclick="tab('roster')">👥 Roster &amp; Teams</button>
+  <button class="tab-btn" onclick="tab('day1')">⛳ Day 1</button>
+  <button class="tab-btn" onclick="tab('day2')">⛳ Day 2</button>
+  <button class="tab-btn" onclick="tab('payouts')">💰 Hole Payouts</button>
+  <button class="tab-btn" onclick="tab('format')">📋 Format &amp; Rules</button>
+</nav>
+
+<!-- PANES (filled by JS) -->
+<main>
+  <div id="pane-scoreboard" class="tab-pane active"></div>
+  <div id="pane-roster"     class="tab-pane"></div>
+  <div id="pane-day1"       class="tab-pane"></div>
+  <div id="pane-day2"       class="tab-pane"></div>
+  <div id="pane-payouts"    class="tab-pane"></div>
+  <div id="pane-format"     class="tab-pane"></div>
+</main>
+
+<div id="toast">✓ Saved</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   CONSTANTS
+═══════════════════════════════════════════════════════ */
+const PLAYERS = [
+  "Basham","Bode","Bryce","Carney","Chris O'Boyle",
+  "Evan","Grant","Jake Benjamin","Moose","Nail",
+  "NateDawg","Neebs","Ponzi","Rusty","Shawn",
+  "Tanner","Tom","Trevor","Ty","Zach M."
+];
+
+const SC = {
+  day1: {
+    fourMan:   [8, 6, 4, 2, 1],
+    matchWin:  3, matchTie: 1,
+    matchRank: [10,9,8,7,6,5,4,3,2,1]
+  },
+  day2: {
+    fourMan:   [10.5, 8.5, 6.5, 4.5, 2],
+    matchWin:  5, matchTie: 2.5,
+    matchRank: [15,12,10,9,8,7,6,5,4,3]
+  },
+  payoutPts: 2, payoutMoney: 20
+};
+
+// 27 holes per day (20 payout, 7 No Prize) — mirrors 2025 structure
+const HOLE_CATS = [
+  'LD','LP','C2P','NP','LP','LD','NP','C2P','LP',
+  'NP','LD','NP','LP','C2P','LD','C2P','NP','LP',
+  'LD','LP','C2P','NP','LP','LD','NP','C2P','LP'
+];
+
+/* ═══════════════════════════════════════════════════════
+   DEFAULT STATE
+═══════════════════════════════════════════════════════ */
+function defaultState() {
+  return {
+    teams: {
+      t1: { name: "Team O'Hara", color: '#1a4a8a' },
+      t2: { name: 'Team Bode',   color: '#7a1a1a' }
+    },
+    roster: PLAYERS.map(n => ({ name: n, team: null })),
+    day1: defaultDayState(),
+    day2: defaultDayState()
+  };
+}
+
+function defaultDayState() {
+  return {
+    groups: Array.from({length:5}, (_,i) => ({
+      id: i+1, teeTime: '',
+      players: ['','','',''],
+      score: ''
+    })),
+    matches: Array.from({length:5}, (_,i) => ({
+      id: i+1, teeTime: '',
+      p1a: '', p1b: '', score1: '',
+      p2a: '', p2b: '', score2: ''
+    })),
+    payouts: HOLE_CATS.map((cat,i) => ({ hole: i+1, cat, winner: '' }))
+  };
+}
+
+/* ═══════════════════════════════════════════════════════
+   FIREBASE CONFIG
+   Paste your Firebase project values here.
+   Leave databaseURL empty to run in offline-only mode.
+═══════════════════════════════════════════════════════ */
+const FB = {
+  apiKey:            "",
+  authDomain:        "",
+  databaseURL:       "",   // e.g. "https://your-project-default-rtdb.firebaseio.com"
+  projectId:         "",
+  storageBucket:     "",
+  messagingSenderId: "",
+  appId:             ""
+};
+const FB_PATH   = 'gbi2026/state';
+const CLIENT_ID = Math.random().toString(36).slice(2);  // unique per browser tab
+
+let _db = null, _ref = null;
+let S = defaultState();
+
+function fbReady() { return _ref !== null; }
+
+function initFB() {
+  if (!FB.databaseURL) return;
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(FB);
+    _db  = firebase.database();
+    _ref = _db.ref(FB_PATH);
+  } catch(e) { console.warn('Firebase init error:', e); }
+}
+
+function setConnStatus(online) {
+  const el = document.getElementById('conn-status');
+  if (!el) return;
+  el.textContent = online ? '● Live' : '○ Offline';
+  el.style.color  = online ? '#7fff7f' : 'rgba(255,255,255,.45)';
+}
+
+/* ═══════════════════════════════════════════════════════
+   PERSISTENCE
+═══════════════════════════════════════════════════════ */
+function save() {
+  S._cid = CLIENT_ID;                                    // stamp so we can ignore our own echoes
+  localStorage.setItem('gbi2026v1', JSON.stringify(S));
+  if (fbReady()) {
+    _ref.set(S).catch(e => console.warn('Sync error:', e));
+  }
+  const t = document.getElementById('toast');
+  t.textContent = fbReady() ? '✓ Saved & Synced' : '✓ Saved (offline)';
+  t.classList.add('show');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* ═══════════════════════════════════════════════════════
+   BOOT  (replaces the old synchronous init)
+═══════════════════════════════════════════════════════ */
+async function boot() {
+  initFB();
+
+  if (fbReady()) {
+    // Show connecting spinner on scoreboard pane while we fetch
+    document.getElementById('pane-scoreboard').innerHTML =
+      '<div style="text-align:center;padding:80px 20px;color:#888">' +
+      '<div style="font-size:2.4em;margin-bottom:14px">🔄</div>' +
+      'Connecting to live scoreboard…</div>';
+
+    try {
+      const snap = await _ref.once('value');
+      if (snap.exists()) {
+        S = { ...defaultState(), ...snap.val() };
+      } else {
+        await _ref.set(S);   // first run — push defaults up
+      }
+
+      // Real-time listener: update all clients when anyone saves
+      _ref.on('value', snap => {
+        if (!snap.exists()) return;
+        const d = snap.val();
+        if (d._cid === CLIENT_ID) return;   // ignore our own write echoes
+        S = { ...defaultState(), ...d };
+        render(_cur);
+      });
+
+      // Track Firebase connection state for the status indicator
+      firebase.database().ref('.info/connected').on('value', snap => setConnStatus(!!snap.val()));
+
+    } catch(e) {
+      console.warn('Firebase load failed, falling back to localStorage:', e);
+      try { const r = localStorage.getItem('gbi2026v1'); if (r) S = JSON.parse(r); } catch(_) {}
+      setConnStatus(false);
+    }
+  } else {
+    // No Firebase config — use localStorage only
+    try { const r = localStorage.getItem('gbi2026v1'); if (r) S = JSON.parse(r); } catch(_) {}
+    setConnStatus(false);
+  }
+
+  render('scoreboard');
+}
+
+/* ═══════════════════════════════════════════════════════
+   CALCULATIONS
+═══════════════════════════════════════════════════════ */
+function rank(scores) {
+  // returns array of ranks (1-based, ties averaged)
+  return scores.map((s,_,arr) => {
+    if (s === '' || s === null) return null;
+    const v = parseFloat(s);
+    if (isNaN(v)) return null;
+    const below = arr.filter(x => x !== '' && x !== null && !isNaN(parseFloat(x)) && parseFloat(x) < v).length;
+    const eq    = arr.filter(x => x !== '' && x !== null && !isNaN(parseFloat(x)) && parseFloat(x) === v).length;
+    return below + (eq + 1) / 2;  // average rank for ties
+  });
+}
+
+function avgPts(table, rankVal) {
+  if (rankVal === null) return 0;
+  // For a fractional rank (tie), average the corresponding table slots
+  const lo = Math.floor(rankVal - 0.5);
+  const hi = Math.ceil(rankVal - 0.5);
+  if (lo === hi) return table[lo] || 0;
+  return ((table[lo] || 0) + (table[hi] || 0)) / 2;
+}
+
+function fourManPoints(day) {
+  const groups = S[day].groups;
+  const scores = groups.map(g => g.score);
+  const ranks  = rank(scores);
+  return ranks.map(r => r === null ? null : avgPts(SC[day].fourMan, r));
+}
+
+function matchResults(day) {
+  const matches = S[day].matches;
+  const sc = SC[day];
+  const allScores = [];
+  matches.forEach(m => { allScores.push(m.score1); allScores.push(m.score2); });
+  const ranks = rank(allScores);
+
+  return matches.map((m, i) => {
+    const s1 = m.score1, s2 = m.score2;
+    const r1 = ranks[i*2], r2 = ranks[i*2+1];
+    let w1 = 0, w2 = 0;
+    if (s1 !== '' && s2 !== '' && s1 !== null && s2 !== null && !isNaN(parseFloat(s1)) && !isNaN(parseFloat(s2))) {
+      const v1 = parseFloat(s1), v2 = parseFloat(s2);
+      if (v1 < v2)      { w1 = sc.matchWin; }
+      else if (v2 < v1) { w2 = sc.matchWin; }
+      else              { w1 = sc.matchTie; w2 = sc.matchTie; }
+    }
+    const rk1 = avgPts(sc.matchRank, r1);
+    const rk2 = avgPts(sc.matchRank, r2);
+    return {
+      p1: { win: w1, rankPts: rk1, total: w1 + rk1 },
+      p2: { win: w2, rankPts: rk2, total: w2 + rk2 }
+    };
+  });
+}
+
+function playerStats(name) {
+  const st = { name, team: teamOf(name),
+    d1: { fourMan:0, matchWin:0, matchRank:0, payout:0, total:0, money:0 },
+    d2: { fourMan:0, matchWin:0, matchRank:0, payout:0, total:0, money:0 },
+    total:0, money:0 };
+
+  ['day1','day2'].forEach(day => {
+    const dk = day === 'day1' ? 'd1' : 'd2';
+    const fmPts = fourManPoints(day);
+    S[day].groups.forEach((g,gi) => {
+      if (g.players.includes(name)) st[dk].fourMan = fmPts[gi] || 0;
+    });
+    const mrs = matchResults(day);
+    S[day].matches.forEach((m,mi) => {
+      const r = mrs[mi];
+      if ([m.p1a, m.p1b].includes(name)) { st[dk].matchWin = r.p1.win; st[dk].matchRank = r.p1.rankPts; }
+      if ([m.p2a, m.p2b].includes(name)) { st[dk].matchWin = r.p2.win; st[dk].matchRank = r.p2.rankPts; }
+    });
+    S[day].payouts.forEach(p => {
+      if (p.cat !== 'NP' && p.winner === name) {
+        st[dk].payout += SC.payoutPts;
+        st[dk].money  += SC.payoutMoney;
+      }
+    });
+    st[dk].total = st[dk].fourMan + st[dk].matchWin + st[dk].matchRank + st[dk].payout;
+  });
+  st.total = st.d1.total + st.d2.total;
+  st.money = st.d1.money + st.d2.money;
+  return st;
+}
+
+function allPlayerStats() {
+  return PLAYERS.map(n => playerStats(n)).sort((a,b) => b.total - a.total || a.name.localeCompare(b.name));
+}
+
+function teamTotals() {
+  let r = { t1: {name:S.teams.t1.name, d1:0, d2:0, total:0}, t2: {name:S.teams.t2.name, d1:0, d2:0, total:0} };
+  S.roster.forEach(p => {
+    if (!p.team) return;
+    const s = playerStats(p.name);
+    r[p.team].d1    += s.d1.total;
+    r[p.team].d2    += s.d2.total;
+    r[p.team].total += s.total;
+  });
+  return r;
+}
+
+function teamOf(name) {
+  const p = S.roster.find(r => r.name === name);
+  return p ? p.team : null;
+}
+
+/* ═══════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════ */
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function jsq(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function fmt(n) {
+  if (n === null || n === undefined || n === '') return '—';
+  const v = parseFloat(n);
+  if (isNaN(v)) return '—';
+  return v % 1 === 0 ? String(v) : v.toFixed(1);
+}
+function fmtM(n) { return n ? `$${n}` : '$0'; }
+
+function tBadge(team) {
+  if (!team) return `<span class="tb tb-none">Unassigned</span>`;
+  const t = S.teams[team];
+  return `<span class="tb" style="background:${esc(t.color)}">${esc(t.name)}</span>`;
+}
+
+function playerOpts(val='') {
+  return PLAYERS.map(n => `<option value="${esc(n)}" ${n===val?'selected':''}>${esc(n)}</option>`).join('');
+}
+
+function scoreInfo(day, groupOrMatchIdx, side) {
+  // side: 'group', 'p1', 'p2'
+}
+
+/* ═══════════════════════════════════════════════════════
+   TAB ROUTING
+═══════════════════════════════════════════════════════ */
+let _cur = 'scoreboard';
+function tab(id) {
+  _cur = id;
+  document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pane-'+id).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.getAttribute('onclick') === `tab('${id}')`) b.classList.add('active');
+  });
+  render(id);
+}
+
+function render(id) {
+  const map = { scoreboard: renderScoreboard, roster: renderRoster, day1: ()=>renderDay('day1'), day2: ()=>renderDay('day2'), payouts: renderPayouts, format: renderFormat };
+  if (map[id]) map[id]();
+}
+
+function rerender() { render(_cur); }
+
+/* ═══════════════════════════════════════════════════════
+   SCOREBOARD
+═══════════════════════════════════════════════════════ */
+function playerScoreToPar(name) {
+  let total = 0, count = 0;
+  ['day1','day2'].forEach(day => {
+    S[day].groups.forEach(g => {
+      if (g.players.includes(name) && g.score !== '' && !isNaN(parseFloat(g.score))) {
+        total += parseFloat(g.score); count++;
+      }
+    });
+    S[day].matches.forEach(m => {
+      if ([m.p1a,m.p1b].includes(name) && m.score1 !== '' && !isNaN(parseFloat(m.score1))) {
+        total += parseFloat(m.score1); count++;
+      }
+      if ([m.p2a,m.p2b].includes(name) && m.score2 !== '' && !isNaN(parseFloat(m.score2))) {
+        total += parseFloat(m.score2); count++;
+      }
+    });
+  });
+  return count > 0 ? total : null;
+}
+
+function fmtPar(n) {
+  if (n === null) return '—';
+  if (n === 0) return 'E';
+  return (n > 0 ? '+' : '') + n;
+}
+
+function renderScoreboard() {
+  const el = document.getElementById('pane-scoreboard');
+  const tt = teamTotals();
+  const all = allPlayerStats();
+  const anyScores = all.some(p => p.total > 0);
+  const unassigned = S.roster.filter(p => !p.team).length;
+
+  let html = '';
+
+  if (unassigned > 0) {
+    html += `<div class="alert alert-gold">⚠️ <strong>${unassigned} player${unassigned>1?'s':''} not yet assigned to a team.</strong> Visit the <strong>Roster &amp; Teams</strong> tab to assign all players before scoring begins.</div>`;
+  }
+
+  // 1 — Team matchup
+  const t1lead = tt.t1.total > tt.t2.total;
+  const t2lead = tt.t2.total > tt.t1.total;
+  html += `
+  <div class="card">
+    <div class="card-header">🏆 GBI Team Championship — Overall</div>
+    <div class="card-body">
+      <div class="matchup">
+        <div class="team-block${t1lead?' leading':''}">
+          <div class="t-name">${esc(tt.t1.name)}</div>
+          <div class="t-pts">${fmt(tt.t1.total)}</div>
+          <div class="t-sub">Day 1: ${fmt(tt.t1.d1)} &nbsp;|&nbsp; Day 2: ${fmt(tt.t1.d2)}</div>
+        </div>
+        <div class="vs-mid">VS</div>
+        <div class="team-block${t2lead?' leading':''}">
+          <div class="t-name">${esc(tt.t2.name)}</div>
+          <div class="t-pts">${fmt(tt.t2.total)}</div>
+          <div class="t-sub">Day 1: ${fmt(tt.t2.d1)} &nbsp;|&nbsp; Day 2: ${fmt(tt.t2.d2)}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  // 2 — Overall player standings (simplified), directly below team card
+  html += `<div class="card"><div class="card-header">👑 Overall Player Championship Standings</div><div class="card-body">`;
+  if (!anyScores) {
+    html += `<div class="empty"><div class="eicon">🏌️</div>No scores entered yet — head to Day 1 to get started!</div>`;
+  } else {
+    html += `<table><thead><tr>
+      <th>Rank</th><th>Player</th><th>Team</th>
+      <th class="c">Total Points</th><th class="c">Score to Par</th><th class="c">Money Earned</th>
+    </tr></thead><tbody>`;
+    let rk=1, prev=null;
+    all.forEach((p,i) => {
+      if (p.total !== prev) rk = i+1;
+      const par = playerScoreToPar(p.name);
+      const parClass = par === null ? '' : par < 0 ? ' style="color:var(--green);font-weight:bold"' : par > 0 ? ' style="color:#b03030;font-weight:bold"' : ' style="font-weight:bold"';
+      html += `<tr${rk<=3?' class="winner"':''}>
+        <td><span class="rank${rk<=3?' gold':''}">${rk}</span></td>
+        <td><strong>${esc(p.name)}</strong></td>
+        <td>${tBadge(p.team)}</td>
+        <td class="c"><strong class="pts">${fmt(p.total)}</strong></td>
+        <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
+        <td class="c"><strong class="money">${fmtM(p.money)}</strong></td>
+      </tr>`;
+      prev = p.total;
+    });
+    html += `</tbody></table>`;
+  }
+  html += `</div></div>`;
+
+  // 3 — Day 1 + Day 2 side by side at the bottom
+  html += `<div class="two-col">`;
+  ['day1','day2'].forEach((day,di) => {
+    const label = di === 0 ? 'Day 1' : 'Day 2';
+    const sorted = all.map(p => ({...p, dp: di===0?p.d1.total:p.d2.total, dm: di===0?p.d1.money:p.d2.money})).sort((a,b)=>b.dp-a.dp||a.name.localeCompare(b.name));
+    html += `
+    <div class="card">
+      <div class="card-header">📅 ${label} Standings</div>
+      <div class="card-body">`;
+    if (sorted.every(p=>p.dp===0)) {
+      html += `<div class="empty"><div class="eicon">⛳</div>No scores yet</div>`;
+    } else {
+      html += `<table><thead><tr><th>Rank</th><th>Player</th><th>Team</th><th class="c">Pts</th><th class="c">$</th></tr></thead><tbody>`;
+      let rk=1, prev=null;
+      sorted.forEach((p,i) => {
+        if (p.dp !== prev) rk = i+1;
+        html += `<tr${rk<=3?' class="winner"':''}><td><span class="rank${rk<=3?' gold':''}">${rk}</span></td><td><strong>${esc(p.name)}</strong></td><td>${tBadge(p.team)}</td><td class="c pts">${fmt(p.dp)}</td><td class="c money">${fmtM(p.dm)}</td></tr>`;
+        prev = p.dp;
+      });
+      html += `</tbody></table>`;
+    }
+    html += `</div></div>`;
+  });
+  html += `</div>`;
+
+  el.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ROSTER & TEAMS
+═══════════════════════════════════════════════════════ */
+function renderRoster() {
+  const el = document.getElementById('pane-roster');
+  const t1p = S.roster.filter(p=>p.team==='t1');
+  const t2p = S.roster.filter(p=>p.team==='t2');
+  const unp = S.roster.filter(p=>!p.team);
+
+  let html = `
+  <div class="alert alert-gold">Assign all 20 players to teams, and set each team's name. Team assignments drive all scoring calculations.</div>
+
+  <div class="card">
+    <div class="card-header">⚙️ Team Names &amp; Colors</div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Team 1 Name</label>
+          <input type="text" value="${esc(S.teams.t1.name)}" onchange="S.teams.t1.name=this.value;save();renderRoster()" placeholder="e.g. Team Bode" />
+        </div>
+        <div class="form-group">
+          <label>Team 1 Color</label>
+          <input type="color" value="${esc(S.teams.t1.color)}" onchange="S.teams.t1.color=this.value;save();renderRoster()" style="height:36px;cursor:pointer;border-radius:5px" />
+        </div>
+        <div class="form-group">
+          <label>Team 2 Name</label>
+          <input type="text" value="${esc(S.teams.t2.name)}" onchange="S.teams.t2.name=this.value;save();renderRoster()" placeholder="e.g. Team O'Hara" />
+        </div>
+        <div class="form-group">
+          <label>Team 2 Color</label>
+          <input type="color" value="${esc(S.teams.t2.color)}" onchange="S.teams.t2.color=this.value;save();renderRoster()" style="height:36px;cursor:pointer;border-radius:5px" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="card">
+    <div class="card-header">🔍 Player Search &amp; Profile</div>
+    <div class="card-body">
+      <input type="text" id="psearch" placeholder="Type a player name to view their stats…" style="width:100%;max-width:400px"
+        oninput="renderPSearch(this.value)" />
+      <div id="psearch-results" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <!-- Assign boxes -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-header" style="background:${esc(S.teams.t1.color)}">
+        ${esc(S.teams.t1.name)} <span style="opacity:.7;font-size:.8em">(${t1p.length} players)</span>
+      </div>
+      <div class="card-body">
+        <div class="chip-pool">
+          ${t1p.length ? t1p.map(p=>`<span class="chip t1" onclick="unassign('${jsq(p.name)}')" title="Click to unassign">${esc(p.name)} ✕</span>`).join('') : '<span style="color:#999;font-style:italic">No players assigned yet</span>'}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" style="background:${esc(S.teams.t2.color)}">
+        ${esc(S.teams.t2.name)} <span style="opacity:.7;font-size:.8em">(${t2p.length} players)</span>
+      </div>
+      <div class="card-body">
+        <div class="chip-pool">
+          ${t2p.length ? t2p.map(p=>`<span class="chip t2" onclick="unassign('${jsq(p.name)}')" title="Click to unassign">${esc(p.name)} ✕</span>`).join('') : '<span style="color:#999;font-style:italic">No players assigned yet</span>'}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">⬆️ Unassigned Players (${unp.length})</div>
+    <div class="card-body">
+      <div class="chip-pool" id="unassigned-pool">
+        ${unp.length
+          ? unp.map(p => `<span class="chip" style="cursor:default">
+              ${esc(p.name)}
+              <button class="btn btn-xs btn-green" onclick="assign('${jsq(p.name)}','t1');save();renderRoster()">${esc(S.teams.t1.name.split(' ').slice(0,2).join(' '))}</button>
+              <button class="btn btn-xs" style="background:${esc(S.teams.t2.color)};color:white" onclick="assign('${jsq(p.name)}','t2');save();renderRoster()">${esc(S.teams.t2.name.split(' ').slice(0,2).join(' '))}</button>
+            </span>`).join('')
+          : '<span style="color:var(--green);font-style:italic">✓ All players assigned!</span>'}
+      </div>
+    </div>
+  </div>
+
+  <!-- Full roster table -->
+  <div class="card">
+    <div class="card-header">📋 Full Roster (20 Players)</div>
+    <div class="card-body">
+      <table>
+        <thead><tr><th>#</th><th>Player</th><th>Team Assignment</th><th class="c">Total Pts</th><th class="c">Total $</th></tr></thead>
+        <tbody>
+          ${S.roster.map((p,i) => {
+            const st = playerStats(p.name);
+            return `<tr>
+              <td>${i+1}</td>
+              <td><strong>${esc(p.name)}</strong></td>
+              <td>
+                <select onchange="assign('${jsq(p.name)}',this.value);save();renderRoster()">
+                  <option value="">— Unassigned —</option>
+                  <option value="t1" ${p.team==='t1'?'selected':''}>${esc(S.teams.t1.name)}</option>
+                  <option value="t2" ${p.team==='t2'?'selected':''}>${esc(S.teams.t2.name)}</option>
+                </select>
+              </td>
+              <td class="c pts">${fmt(st.total)}</td>
+              <td class="c money">${fmtM(st.money)}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+
+  el.innerHTML = html;
+}
+
+function assign(name, team) {
+  const p = S.roster.find(r => r.name === name);
+  if (p) p.team = team || null;
+}
+function unassign(name) { assign(name, null); save(); renderRoster(); }
+
+function renderPSearch(q) {
+  const el = document.getElementById('psearch-results');
+  if (!q.trim()) { el.innerHTML=''; return; }
+  const hits = S.roster.filter(p => p.name.toLowerCase().includes(q.toLowerCase()));
+  if (!hits.length) { el.innerHTML='<p style="color:#888">No matching players.</p>'; return; }
+  el.innerHTML = hits.map(p => {
+    const st = playerStats(p.name);
+    const tc = p.team ? S.teams[p.team].color : '#888';
+    return `<div class="player-result-card">
+      <div class="player-result-head" style="background:${tc}">
+        <span>${esc(p.name)}</span>
+        ${tBadge(p.team)}
+      </div>
+      <div class="player-result-body">
+        <div class="stat-grid">
+          <div class="stat-box"><div class="slabel">Total Points</div><div class="sval">${fmt(st.total)}</div></div>
+          <div class="stat-box"><div class="slabel">Total Winnings</div><div class="sval money">${fmtM(st.money)}</div></div>
+          <div class="stat-box"><div class="slabel">Day 1 Points</div><div class="sval">${fmt(st.d1.total)}</div><div class="ssub">${fmtM(st.d1.money)} earned</div></div>
+          <div class="stat-box"><div class="slabel">Day 2 Points</div><div class="sval">${fmt(st.d2.total)}</div><div class="ssub">${fmtM(st.d2.money)} earned</div></div>
+        </div>
+        <table style="font-size:.82em">
+          <thead><tr><th></th><th class="c">4-Man</th><th class="c">2v2 Win</th><th class="c">2v2 Rank</th><th class="c">Payouts</th><th class="c">Total</th><th class="c">$</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Day 1</strong></td><td class="c">${fmt(st.d1.fourMan)}</td><td class="c">${fmt(st.d1.matchWin)}</td><td class="c">${fmt(st.d1.matchRank)}</td><td class="c">${fmt(st.d1.payout)}</td><td class="c pts">${fmt(st.d1.total)}</td><td class="c money">${fmtM(st.d1.money)}</td></tr>
+            <tr><td><strong>Day 2</strong></td><td class="c">${fmt(st.d2.fourMan)}</td><td class="c">${fmt(st.d2.matchWin)}</td><td class="c">${fmt(st.d2.matchRank)}</td><td class="c">${fmt(st.d2.payout)}</td><td class="c pts">${fmt(st.d2.total)}</td><td class="c money">${fmtM(st.d2.money)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   DAY SCORECARD
+═══════════════════════════════════════════════════════ */
+function renderDay(day) {
+  const el = document.getElementById('pane-'+day);
+  const label = day==='day1' ? 'Day 1' : 'Day 2';
+  const sc = SC[day];
+  const fmPts = fourManPoints(day);
+  const mrs = matchResults(day);
+  const tt = teamTotals();
+  const td = day==='day1' ? {t1:tt.t1.d1,t2:tt.t2.d1} : {t1:tt.t1.d2,t2:tt.t2.d2};
+
+  // Team day total header
+  let html = `
+  <div class="alert alert-gold"><strong>${label} Scoring</strong> — Enter group scores for the 4-Man Scramble, then pair scores for the 2v2 Head-to-Head. Points calculate automatically.</div>
+
+  <div class="card">
+    <div class="card-header">📊 ${label} Team Totals</div>
+    <div class="card-body">
+      <div class="matchup">
+        <div class="team-block${td.t1>td.t2?' leading':''}">
+          <div class="t-name">${esc(S.teams.t1.name)}</div>
+          <div class="t-pts">${fmt(td.t1)}</div>
+        </div>
+        <div class="vs-mid">VS</div>
+        <div class="team-block${td.t2>td.t1?' leading':''}">
+          <div class="t-name">${esc(S.teams.t2.name)}</div>
+          <div class="t-pts">${fmt(td.t2)}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-head"><h3>⛳ 4-Man Scramble — ${label}</h3></div>
+  <div class="alert alert-info">Five groups of 4 players. Enter each group's score vs par (e.g. <strong>-5</strong>). Points: 1st=${sc.fourMan[0]}, 2nd=${sc.fourMan[1]}, 3rd=${sc.fourMan[2]}, 4th=${sc.fourMan[3]}, 5th=${sc.fourMan[4]}. Ties average the tied positions.</div>`;
+
+  // 4-Man groups — build set of all already-chosen players for this day
+  const usedInDay = new Set(S[day].groups.flatMap(g => g.players.filter(p => p !== '')));
+
+  S[day].groups.forEach((g,gi) => {
+    const pts = fmPts[gi];
+
+    // Build one player slot: filters out players already used in other slots
+    const makeGSlot = pi => {
+      const cur = g.players[pi];
+      const opts = PLAYERS.map(n => {
+        if (usedInDay.has(n) && n !== cur) return '';
+        return `<option value="${esc(n)}" ${n===cur?'selected':''}>${esc(n)}</option>`;
+      }).join('');
+      const t = cur ? teamOf(cur) : null;
+      const badge = t
+        ? `<span class="tb" style="background:${esc(S.teams[t].color)};display:inline-block;margin-top:4px">${esc(S.teams[t].name)}</span>`
+        : `<span style="display:inline-block;height:22px;margin-top:4px"></span>`;
+      return `<div class="form-group">
+          <label>Player ${pi+1}</label>
+          <select onchange="S.${day}.groups[${gi}].players[${pi}]=this.value;save();renderDay('${day}')">
+            <option value="">— Select —</option>${opts}
+          </select>
+          ${badge}
+        </div>`;
+    };
+
+    html += `
+  <div class="gpanel">
+    <div class="gpanel-head">
+      <span>Group ${g.id}</span>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:.82em;color:#666">Tee time:
+          <input type="text" value="${esc(g.teeTime)}" placeholder="e.g. 9:00a" style="width:72px;font-size:.88em"
+            onchange="S.${day}.groups[${gi}].teeTime=this.value;save()" />
+        </span>
+        ${pts!==null ? `<span class="hi">Score ${g.score} → ${pts} pts/player</span>` : ''}
+      </div>
+    </div>
+    <div class="gpanel-body">
+      <div class="form-row">
+        ${[0,1,2,3].map(makeGSlot).join('')}
+      </div>
+      <div class="form-row" style="max-width:240px">
+        <div class="form-group">
+          <label>Group Score (vs par)</label>
+          <input type="number" class="score-in" value="${esc(g.score)}" placeholder="e.g. -5"
+            onchange="S.${day}.groups[${gi}].score=this.value;save();renderDay('${day}')" />
+        </div>
+      </div>
+    </div>
+  </div>`;
+  });
+
+  html += `
+  <div class="sec-head"><h3>🏌️ 2v2 Head-to-Head — ${label}</h3></div>
+  <div class="alert alert-info">Five matches: one pair from each team. Win = +${sc.matchWin} pts, Tie = +${sc.matchTie} pts per player. Plus rank points among all 10 pairs (lower score ranks higher).</div>`;
+
+  // 2v2 matches — teams locked from roster, no duplicate picks across all 5 matches
+  const usedInMatches = new Set(
+    S[day].matches.flatMap(m => [m.p1a, m.p1b, m.p2a, m.p2b].filter(p => p !== ''))
+  );
+  const matchT1Pool = S.roster.filter(p => p.team === 't1').map(p => p.name);
+  const matchT2Pool = S.roster.filter(p => p.team === 't2').map(p => p.name);
+
+  if (matchT1Pool.length === 0 || matchT2Pool.length === 0) {
+    html += `<div class="alert alert-red">⚠️ Teams are not fully assigned. Go to <strong>Roster &amp; Teams</strong> and assign all players before setting up matches.</div>`;
+  }
+
+  S[day].matches.forEach((m,mi) => {
+    const r = mrs[mi];
+    const s1 = m.score1 !== '' && m.score1 !== null ? parseFloat(m.score1) : null;
+    const s2 = m.score2 !== '' && m.score2 !== null ? parseFloat(m.score2) : null;
+    let winLabel = '';
+    if (s1!==null && s2!==null && !isNaN(s1) && !isNaN(s2)) {
+      if (s1 < s2) winLabel = `<span class="hi">✓ ${esc(S.teams.t1.name)} wins</span>`;
+      else if (s2 < s1) winLabel = `<span class="hi">✓ ${esc(S.teams.t2.name)} wins</span>`;
+      else winLabel = `<span class="hi">Tied</span>`;
+    }
+
+    // Builds a team-filtered, dedup-safe select for one player slot
+    const makeMSlot = (field, cur, pool) => {
+      const opts = pool.map(n => {
+        if (usedInMatches.has(n) && n !== cur) return '';
+        return `<option value="${esc(n)}" ${n===cur?'selected':''}>${esc(n)}</option>`;
+      }).join('');
+      return `<select onchange="S.${day}.matches[${mi}].${field}=this.value;save();renderDay('${day}')">
+              <option value="">— Select —</option>${opts}
+            </select>`;
+    };
+
+    html += `
+  <div class="gpanel">
+    <div class="gpanel-head">
+      <span>Match ${m.id}</span>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:.82em;color:#666">Tee time:
+          <input type="text" value="${esc(m.teeTime)}" placeholder="e.g. 2:31p" style="width:72px;font-size:.88em"
+            onchange="S.${day}.matches[${mi}].teeTime=this.value;save()" />
+        </span>
+        ${winLabel}
+      </div>
+    </div>
+    <div class="gpanel-body">
+      <div class="match-sides">
+        <div class="side-t1">
+          <div class="side-label" style="color:${esc(S.teams.t1.color)}">${esc(S.teams.t1.name)}</div>
+          <div class="form-group" style="margin-bottom:8px">
+            <label>Player 1</label>
+            ${makeMSlot('p1a', m.p1a, matchT1Pool)}
+          </div>
+          <div class="form-group" style="margin-bottom:8px">
+            <label>Player 2</label>
+            ${makeMSlot('p1b', m.p1b, matchT1Pool)}
+          </div>
+          <div class="form-group">
+            <label>Score (vs par)</label>
+            <input type="number" class="score-in" value="${esc(m.score1)}" placeholder="—"
+              onchange="S.${day}.matches[${mi}].score1=this.value;save();renderDay('${day}')" />
+          </div>
+          ${r.p1.total ? `<div style="margin-top:8px;font-size:.82em;color:var(--green)"><strong>${fmt(r.p1.total)} pts</strong> <span style="color:#888">(win ${fmt(r.p1.win)} + rank ${fmt(r.p1.rankPts)})</span></div>` : ''}
+        </div>
+        <div class="vs-center">vs</div>
+        <div class="side-t2">
+          <div class="side-label" style="color:${esc(S.teams.t2.color)}">${esc(S.teams.t2.name)}</div>
+          <div class="form-group" style="margin-bottom:8px">
+            <label>Player 1</label>
+            ${makeMSlot('p2a', m.p2a, matchT2Pool)}
+          </div>
+          <div class="form-group" style="margin-bottom:8px">
+            <label>Player 2</label>
+            ${makeMSlot('p2b', m.p2b, matchT2Pool)}
+          </div>
+          <div class="form-group">
+            <label>Score (vs par)</label>
+            <input type="number" class="score-in" value="${esc(m.score2)}" placeholder="—"
+              onchange="S.${day}.matches[${mi}].score2=this.value;save();renderDay('${day}')" />
+          </div>
+          ${r.p2.total ? `<div style="margin-top:8px;font-size:.82em;color:var(--green)"><strong>${fmt(r.p2.total)} pts</strong> <span style="color:#888">(win ${fmt(r.p2.win)} + rank ${fmt(r.p2.rankPts)})</span></div>` : ''}
+        </div>
+      </div>
+    </div>
+  </div>`;
+  });
+
+  // Day results table
+  html += `
+  <div class="sec-head"><h3>📋 ${label} Player Results</h3></div>
+  <div class="card"><div class="card-body">${renderDayTable(day)}</div></div>`;
+
+  el.innerHTML = html;
+}
+
+function renderDayTable(day) {
+  const dk = day==='day1'?'d1':'d2';
+  const rows = allPlayerStats().map(p=>({...p, dp:p[dk]})).sort((a,b)=>b.dp.total-a.dp.total||a.name.localeCompare(b.name));
+  if (rows.every(r=>r.dp.total===0)) return `<div class="empty">No scores entered yet for this day.</div>`;
+  let html = `<table><thead><tr>
+    <th>Rank</th><th>Player</th><th>Team</th>
+    <th class="c">4-Man</th><th class="c">2v2 Win</th><th class="c">2v2 Rank</th><th class="c">Payouts</th>
+    <th class="c">Total Pts</th><th class="c">Payout $</th>
+  </tr></thead><tbody>`;
+  let rk=1,prev=null;
+  rows.forEach((p,i)=>{
+    if (p.dp.total!==prev) rk=i+1;
+    html+=`<tr${rk<=3?' class="winner"':''}>
+      <td><span class="rank${rk<=3?' gold':''}">${rk}</span></td>
+      <td><strong>${esc(p.name)}</strong></td><td>${tBadge(p.team)}</td>
+      <td class="c">${fmt(p.dp.fourMan)}</td>
+      <td class="c">${fmt(p.dp.matchWin)}</td>
+      <td class="c">${fmt(p.dp.matchRank)}</td>
+      <td class="c">${fmt(p.dp.payout)}</td>
+      <td class="c"><strong class="pts">${fmt(p.dp.total)}</strong></td>
+      <td class="c money">${fmtM(p.dp.money)}</td>
+    </tr>`;
+    prev=p.dp.total;
+  });
+  return html+'</tbody></table>';
+}
+
+/* ═══════════════════════════════════════════════════════
+   HOLE PAYOUTS
+═══════════════════════════════════════════════════════ */
+function renderPayouts() {
+  const el = document.getElementById('pane-payouts');
+
+  // Calc totals per player
+  const totals = {};
+  PLAYERS.forEach(n => { totals[n] = { wins:0, pts:0, money:0 }; });
+  ['day1','day2'].forEach(day => {
+    S[day].payouts.forEach(p => {
+      if (p.cat!=='NP' && p.winner && totals[p.winner]) {
+        totals[p.winner].wins++;
+        totals[p.winner].pts += SC.payoutPts;
+        totals[p.winner].money += SC.payoutMoney;
+      }
+    });
+  });
+
+  const d1won = S.day1.payouts.filter(p=>p.cat!=='NP'&&p.winner).length;
+  const d2won = S.day2.payouts.filter(p=>p.cat!=='NP'&&p.winner).length;
+
+  function holeTable(day, label) {
+    const won = day==='day1'?d1won:d2won;
+    let t = `<div class="card">
+      <div class="card-header">${label}
+        <span class="badge-gold" style="font-size:.82em">${won}/20 assigned &nbsp;|&nbsp; $${won*20} of $400</span>
+      </div>
+      <div class="card-body">
+      <table><thead><tr><th>Hole</th><th>Category</th><th>Winner</th><th class="c">Pts</th><th class="c">$</th></tr></thead><tbody>`;
+    S[day].payouts.forEach((p,i) => {
+      if (p.cat==='NP') {
+        t += `<tr style="opacity:.55"><td>${p.hole}</td><td><span class="cat cat-NP">No Prize</span></td><td colspan="3" style="font-style:italic;color:#aaa">No payout this hole</td></tr>`;
+      } else {
+        const catLabel = p.cat==='LD'?'Long Drive':p.cat==='C2P'?'Closest to Pin':'Longest Putt';
+        t += `<tr>
+          <td><strong>Hole ${p.hole}</strong></td>
+          <td><span class="cat cat-${p.cat}">${catLabel}</span></td>
+          <td>
+            <select onchange="S.${day}.payouts[${i}].winner=this.value;save();renderPayouts()">
+              <option value="">— No winner —</option>${playerOpts(p.winner)}
+            </select>
+          </td>
+          <td class="c">${p.winner?'<span class="pts">2</span>':'—'}</td>
+          <td class="c">${p.winner?'<span class="money">$20</span>':'—'}</td>
+        </tr>`;
+      }
+    });
+    t += `</tbody></table></div></div>`;
+    return t;
+  }
+
+  const leaderRows = Object.entries(totals).filter(([n,s])=>s.wins>0).sort((a,b)=>b[1].money-a[1].money);
+
+  let html = `
+  <div class="alert alert-gold"><strong>Hole Payouts</strong> — $20 per hole, 40 total payout holes (20 per day). Total hole payout pot: <strong>$800</strong>. Categories: Long Drive (LD), Closest to Pin (C2P), Longest Putt (LP).</div>
+
+  <div class="two-col">
+    ${holeTable('day1','📅 Day 1 Hole Payouts')}
+    ${holeTable('day2','📅 Day 2 Hole Payouts')}
+  </div>
+
+  <div class="card">
+    <div class="card-header">💰 Hole Payout Leaderboard</div>
+    <div class="card-body">`;
+
+  if (!leaderRows.length) {
+    html += `<div class="empty"><div class="eicon">💰</div>No hole winners assigned yet.</div>`;
+  } else {
+    html += `<table><thead><tr><th>Rank</th><th>Player</th><th>Team</th><th class="c">Holes Won</th><th class="c">Payout Pts</th><th class="c">Payout $</th></tr></thead><tbody>`;
+    leaderRows.forEach(([name,s],i) => {
+      html += `<tr${i<3?' class="winner"':''}>
+        <td><span class="rank${i<3?' gold':''}">${i+1}</span></td>
+        <td><strong>${esc(name)}</strong></td>
+        <td>${tBadge(teamOf(name))}</td>
+        <td class="c">${s.wins}</td>
+        <td class="c pts">${s.pts}</td>
+        <td class="c money">$${s.money}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  }
+  html += `</div></div>`;
+  el.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FORMAT & RULES
+═══════════════════════════════════════════════════════ */
+function renderFormat() {
+  document.getElementById('pane-format').innerHTML = `
+  <div class="card">
+    <div class="card-header">📋 GBI 2026 Tournament Format</div>
+    <div class="card-body">
+      <div class="alert alert-gold">
+        <strong>Total Pot: $2,000</strong> &nbsp;|&nbsp; Buy-in: $100/player &nbsp;|&nbsp; 20 Players &nbsp;|&nbsp; 2 Teams of 10
+      </div>
+
+      <div class="two-col">
+        <div>
+          <div class="sec-head"><h3>🏌️ Playing Format</h3></div>
+          <p style="line-height:1.8;margin-bottom:12px">Both days follow the same two-game format:</p>
+          <ul style="padding-left:20px;line-height:2.1">
+            <li><strong>4-Man Scramble</strong> — 5 groups of 4. Each player earns points equal to their group's finish among the 5 groups.</li>
+            <li><strong>2v2 Head-to-Head</strong> — 5 matches of 2 Team A players vs 2 Team B players. Points for win/tie AND overall score rank among all 10 pairs.</li>
+            <li><strong>Hole Payouts</strong> — 20 designated holes per day ($20 each). Long Drive, Closest to Pin, Longest Putt.</li>
+          </ul>
+          <p style="margin-top:10px;font-size:.88em;color:#555">All individual points aggregate to team totals for the Team Championship.</p>
+        </div>
+        <div>
+          <div class="sec-head"><h3>💵 Prize Breakdown</h3></div>
+          <table class="fmt-table">
+            <thead><tr><th>Category</th><th>Prize</th></tr></thead>
+            <tbody>
+              <tr><td>🥇 Player 1st Place</td><td class="money">$400</td></tr>
+              <tr><td>🥈 Player 2nd Place</td><td class="money">$200</td></tr>
+              <tr><td>🥉 Player 3rd Place</td><td class="money">$100</td></tr>
+              <tr><td>Team Champions ($50 × 10)</td><td class="money">$500</td></tr>
+              <tr><td>Hole Payouts (40 holes × $20)</td><td class="money">$800</td></tr>
+              <tr style="font-weight:bold"><td>Total</td><td class="money">$2,000</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="three-col" style="margin-top:22px">
+        <div>
+          <div class="sec-head"><h3>⛳ 4-Man Scramble Points</h3></div>
+          <table class="fmt-table">
+            <thead><tr><th>Place</th><th>Day 1</th><th>Day 2</th></tr></thead>
+            <tbody>
+              <tr><td>🥇 1st</td><td>8</td><td>10.5</td></tr>
+              <tr><td>🥈 2nd</td><td>6</td><td>8.5</td></tr>
+              <tr><td>🥉 3rd</td><td>4</td><td>6.5</td></tr>
+              <tr><td>4th</td><td>2</td><td>4.5</td></tr>
+              <tr><td>5th</td><td>1</td><td>2</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="sec-head"><h3>🏌️ 2v2 Match Points</h3></div>
+          <table class="fmt-table">
+            <thead><tr><th>H2H Result</th><th>Day 1</th><th>Day 2</th></tr></thead>
+            <tbody>
+              <tr><td>Win</td><td>+3</td><td>+5</td></tr>
+              <tr><td>Tie</td><td>+1</td><td>+2.5</td></tr>
+              <tr><td>Loss</td><td>0</td><td>0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="sec-head"><h3>📊 2v2 Rank Points</h3></div>
+          <table class="fmt-table">
+            <thead><tr><th>Rank (of 10)</th><th>Day 1</th><th>Day 2</th></tr></thead>
+            <tbody>
+              <tr><td>1st</td><td>10</td><td>15</td></tr>
+              <tr><td>2nd</td><td>9</td><td>12</td></tr>
+              <tr><td>3rd</td><td>8</td><td>10</td></tr>
+              <tr><td>4th</td><td>7</td><td>9</td></tr>
+              <tr><td>5th</td><td>6</td><td>8</td></tr>
+              <tr><td>6th</td><td>5</td><td>7</td></tr>
+              <tr><td>7th</td><td>4</td><td>6</td></tr>
+              <tr><td>8th</td><td>3</td><td>5</td></tr>
+              <tr><td>9th</td><td>2</td><td>4</td></tr>
+              <tr><td>10th</td><td>1</td><td>3</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="sec-head" style="margin-top:22px"><h3>📌 Key Rules</h3></div>
+      <ul style="padding-left:20px;line-height:2.1;font-size:.9em;color:#333">
+        <li>All points are awarded <strong>per player</strong> and roll up to that player's team total.</li>
+        <li>Ties in 4-Man Scramble or 2v2 ranks receive the <strong>average</strong> of the tied positions' points.</li>
+        <li>Hole payout points (2 pts per win) count toward both the player total and the team total.</li>
+        <li>Day 2 has higher point values — standings can shift significantly on the second day.</li>
+        <li>The Team Championship is the sum of all individual player points on each team.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="background:#1a3a6a">🔥 Live Sync Setup (Firebase)</div>
+    <div class="card-body">
+      <div class="alert alert-info" style="margin-bottom:14px">
+        Complete these steps once to enable real-time sync across all phones and laptops.
+        Everyone who opens the link will see the same live scores — no refresh needed.
+      </div>
+      <ol style="padding-left:20px;line-height:2.4;font-size:.92em">
+        <li>Go to <strong>console.firebase.google.com</strong> and sign in with a Google account.</li>
+        <li>Click <strong>Add project</strong>, name it (e.g. <em>gbi-2026</em>), skip Analytics, click <strong>Create project</strong>.</li>
+        <li>In the left sidebar click <strong>Build → Realtime Database</strong>, then <strong>Create Database</strong>.</li>
+        <li>Choose <em>United States</em> location, select <strong>Start in test mode</strong>, click <strong>Enable</strong>.</li>
+        <li>In the left sidebar click <strong>Project settings</strong> (gear icon), scroll to <em>Your apps</em>, click the <strong>&lt;/&gt;</strong> Web icon.</li>
+        <li>Register the app (any nickname), <strong>skip</strong> Firebase Hosting, click <strong>Continue to console</strong>.</li>
+        <li>You'll see a <code>firebaseConfig</code> snippet. Copy the values into the <code>const FB = { … }</code> block near the top of <strong>gbi_2026.html</strong> (open it in Notepad or VS Code).</li>
+        <li>Save the file and re-open it in your browser. The header should show <span style="color:var(--green);font-weight:bold">● Live</span>.</li>
+        <li>Host the file on <strong>Netlify Drop</strong> (drag &amp; drop at <em>netlify.com/drop</em>) or <strong>GitHub Pages</strong> to share a link. Anyone who opens it will sync in real time.</li>
+      </ol>
+      <div class="alert alert-gold" style="margin-top:12px">
+        <strong>Note:</strong> Test mode rules expire after 30 days. Before tournament day go to
+        <em>Realtime Database → Rules</em> and set both <code>".read"</code> and <code>".write"</code> to <code>true</code> to keep access open.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="background:#7a2a2a">⚠️ Admin: Reset All Tournament Data</div>
+    <div class="card-body">
+      <p style="margin-bottom:12px;color:#666;font-size:.9em">Clears all scores, team assignments, and payout winners. This <strong>cannot be undone</strong>.</p>
+      <button class="btn btn-red" onclick="if(confirm('Reset ALL 2026 GBI tournament data?\\nThis cannot be undone.')){S=defaultState();save();tab('scoreboard')}">
+        🗑️ Reset All Data
+      </button>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════════ */
+boot();
+</script>
+</body>
+</html>
