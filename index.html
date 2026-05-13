@@ -478,6 +478,15 @@ function save() {
 /* ═══════════════════════════════════════════════════════
    BOOT  (replaces the old synchronous init)
 ═══════════════════════════════════════════════════════ */
+// Always rebuild roster from the current PLAYERS array so renames take effect
+// immediately, while preserving any existing team assignments by matching names.
+function applyRoster(loaded) {
+  const teamMap = {};
+  (loaded.roster || []).forEach(p => { if (p.name) teamMap[p.name] = p.team; });
+  loaded.roster = PLAYERS.map(n => ({ name: n, team: teamMap[n] || null }));
+  return loaded;
+}
+
 async function boot() {
   initFB();
 
@@ -491,7 +500,7 @@ async function boot() {
     try {
       const snap = await _ref.once('value');
       if (snap.exists()) {
-        S = { ...defaultState(), ...snap.val() };
+        S = applyRoster({ ...defaultState(), ...snap.val() });
       } else {
         await _ref.set(S);   // first run — push defaults up
       }
@@ -501,7 +510,7 @@ async function boot() {
         if (!snap.exists()) return;
         const d = snap.val();
         if (d._cid === CLIENT_ID) return;   // ignore our own write echoes
-        S = { ...defaultState(), ...d };
+        S = applyRoster({ ...defaultState(), ...d });
         render(_cur);
       });
 
