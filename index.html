@@ -4,6 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Garland Bend Invitational 2026</title>
+
+<!-- Favicon -->
+<link rel="icon" type="image/jpeg" href="gbi-logo.jpg">
+<link rel="apple-touch-icon" href="gbi-logo.jpg">
+
+<!-- Open Graph — controls preview image when link is shared -->
+<meta property="og:title" content="Garland Bend Invitational 2026">
+<meta property="og:description" content="Live scoring, team standings, and hole payouts for GBI 2026.">
+<meta property="og:image" content="https://nelsonmartini.github.io/gbi_2026/gbi-logo.jpg">
+<meta property="og:url" content="https://nelsonmartini.github.io/gbi_2026/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nelsonmartini.github.io/gbi_2026/gbi-logo.jpg">
 <style>
 :root {
   --green: #006747;
@@ -53,6 +66,21 @@ body {
   position: absolute; top: 20px; left: 20px;
   font-size: .78em; color: rgba(255,255,255,.5);
   letter-spacing: .5px;
+}
+.site-logo-wrap {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 3px solid var(--gold);
+  box-shadow: 0 3px 12px rgba(0,0,0,.35);
+  overflow: hidden;
+  margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.site-logo-wrap img {
+  width: 88%; height: 88%;
+  object-fit: contain;
+  display: block;
 }
 .site-header h1 {
   font-size: 2em; letter-spacing: 3px;
@@ -369,6 +397,9 @@ tr.winner { background: #fffce8 !important; }
 <!-- PIN GATE — hidden once correct PIN is entered -->
 <div id="pin-gate">
   <div class="pin-box">
+    <div style="width:90px;height:90px;border-radius:50%;background:white;border:3px solid var(--gold);overflow:hidden;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.2)">
+      <img src="gbi-logo.jpg" alt="GBI Logo" style="width:85%;height:85%;object-fit:contain">
+    </div>
     <div class="pin-logo">G · B · I</div>
     <div class="pin-title">Garland Bend Invitational 2026</div>
     <div class="pin-sub">Enter your access PIN to continue</div>
@@ -382,6 +413,9 @@ tr.winner { background: #fffce8 !important; }
 <header class="site-header">
   <div class="year-tag">GBI 2026</div>
   <div class="conn-status" id="conn-status">○ Offline</div>
+  <div class="site-logo-wrap">
+    <img src="gbi-logo.jpg" alt="Garland Bend Invitational Logo">
+  </div>
   <h1>GARLAND BEND INVITATIONAL</h1>
   <div class="subtitle">The Masters of the Midwest</div>
   <div class="gbi-abbr">G · B · I</div>
