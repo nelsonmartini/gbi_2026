@@ -1164,14 +1164,11 @@ function renderDay(day) {
     html += `
   <div class="gpanel">
     <div class="gpanel-head">
-      <span>Group ${g.id}</span>
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-        <span style="font-size:.82em;color:#666">Tee time:
-          <input type="text" value="${esc(g.teeTime)}" placeholder="e.g. 9:00a" style="width:72px;font-size:.88em"
-            onchange="S.${day}.groups[${gi}].teeTime=this.value;save()" />
-        </span>
-        ${pts!==null ? `<span class="hi">${ordinal(fmRanks[gi])} Place &nbsp;·&nbsp; Score ${g.score} &nbsp;·&nbsp; ${fmt(pts)} pts/player</span>` : ''}
-      </div>
+      <span>Group ${g.id}${pts!==null ? `&nbsp;&nbsp;<span class="hi" style="font-weight:normal">${ordinal(fmRanks[gi])} Place &nbsp;·&nbsp; Score ${g.score} &nbsp;·&nbsp; ${fmt(pts)} pts/player</span>` : ''}</span>
+      <span style="font-size:.82em;color:#666;font-weight:normal;white-space:nowrap">
+        <input type="text" value="${esc(g.teeTime)}" placeholder="Tee time" style="width:76px;font-size:.88em"
+          onchange="S.${day}.groups[${gi}].teeTime=this.value;save()" />
+      </span>
     </div>
     <div class="gpanel-body">
       <div class="form-row">
