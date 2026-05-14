@@ -775,6 +775,10 @@ function teamOf(name) {
    HELPERS
 ═══════════════════════════════════════════════════════ */
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function flag(name) {
+  const f = name === 'Trevor' ? '🇮🇷' : '🇺🇸';
+  return `<span style="font-size:.65em;vertical-align:middle">${f}</span>`;
+}
 function jsq(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 function fmt(n) {
   if (n === null || n === undefined || n === '') return '—';
@@ -904,7 +908,7 @@ function renderScoreboard() {
       const parClass = par === null ? '' : par < 0 ? ' style="color:var(--green);font-weight:bold"' : par > 0 ? ' style="color:#b03030;font-weight:bold"' : ' style="font-weight:bold"';
       html += `<tr${rk<=3?' class="winner"':''}>
         <td><span class="rank${rk<=3?' gold':''}">${rk}</span></td>
-        <td><strong>🇺🇸 ${esc(p.name)}</strong></td>
+        <td><strong>${flag(p.name)} ${esc(p.name)}</strong></td>
         <td class="hide-mobile">${tBadge(p.team)}</td>
         <td class="c"><strong class="pts">${fmt(p.total)}</strong></td>
         <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
@@ -932,7 +936,7 @@ function renderScoreboard() {
       let rk=1, prev=null;
       sorted.forEach((p,i) => {
         if (p.dp !== prev) rk = i+1;
-        html += `<tr${rk<=3?' class="winner"':''}><td><span class="rank${rk<=3?' gold':''}">${rk}</span></td><td><strong>🇺🇸 ${esc(p.name)}</strong></td><td class="hide-mobile">${tBadge(p.team)}</td><td class="c pts">${fmt(p.dp)}</td><td class="c money">${fmtM(p.dm)}</td></tr>`;
+        html += `<tr${rk<=3?' class="winner"':''}><td><span class="rank${rk<=3?' gold':''}">${rk}</span></td><td><strong>${flag(p.name)} ${esc(p.name)}</strong></td><td class="hide-mobile">${tBadge(p.team)}</td><td class="c pts">${fmt(p.dp)}</td><td class="c money">${fmtM(p.dm)}</td></tr>`;
         prev = p.dp;
       });
       html += `</tbody></table>`;
