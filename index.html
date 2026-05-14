@@ -451,8 +451,8 @@ tr.winner { background: #fffce8 !important; }
    CONSTANTS
 ═══════════════════════════════════════════════════════ */
 const PLAYERS = [
-  "Basham","Bode","Bryce","Braden","Chris O'Boyle",
-  "Evan","Grant","Jake Benjamin","Moose","Nail",
+  "Basham","Bode","Bryce","Braden","Chris O",
+  "Evan","Grant","Jake B","Moose","Nail",
   "NateDawg","Neebs","Ponzi","Rusty","Shawn",
   "Tanner","Tom","Trevor","Ty","Zach M."
 ];
@@ -883,7 +883,7 @@ function renderScoreboard() {
       <th>Rank</th><th>Player</th>
       <th class="hide-mobile">Team</th>
       <th class="c">Total Pts</th>
-      <th class="c hide-mobile">Score to Par</th>
+      <th class="c">Score to Par</th>
       <th class="c">Money</th>
     </tr></thead><tbody>`;
     let rk=1, prev=null;
@@ -896,7 +896,7 @@ function renderScoreboard() {
         <td><strong>🇺🇸 ${esc(p.name)}</strong></td>
         <td class="hide-mobile">${tBadge(p.team)}</td>
         <td class="c"><strong class="pts">${fmt(p.total)}</strong></td>
-        <td class="c hide-mobile"><span${parClass}>${fmtPar(par)}</span></td>
+        <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
         <td class="c"><strong class="money">${fmtM(p.money)}</strong></td>
       </tr>`;
       prev = p.total;
