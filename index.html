@@ -332,7 +332,10 @@ tr.winner { background: #fffce8 !important; }
   .match-sides { grid-template-columns: 1fr; }
   .vs-center { display: none; }
   .site-header h1 { font-size: 1.4em; }
-  .site-header .year-tag { position: static; margin-bottom: 6px; display: inline-block; }
+  /* year-tag stays absolute top-right — no override */
+  .hide-mobile { display: none !important; }
+  table { font-size: .82em; }
+  td, th { padding: 7px 8px; }
 }
 
 /* ─── SEARCH HIGHLIGHT ─── */
@@ -877,8 +880,11 @@ function renderScoreboard() {
     html += `<div class="empty"><div class="eicon">🏌️</div>No scores entered yet — head to Day 1 to get started!</div>`;
   } else {
     html += `<table><thead><tr>
-      <th>Rank</th><th>Player</th><th>Team</th>
-      <th class="c">Total Points</th><th class="c">Score to Par</th><th class="c">Money Earned</th>
+      <th>Rank</th><th>Player</th>
+      <th class="hide-mobile">Team</th>
+      <th class="c">Total Pts</th>
+      <th class="c hide-mobile">Score to Par</th>
+      <th class="c">Money</th>
     </tr></thead><tbody>`;
     let rk=1, prev=null;
     all.forEach((p,i) => {
@@ -887,10 +893,10 @@ function renderScoreboard() {
       const parClass = par === null ? '' : par < 0 ? ' style="color:var(--green);font-weight:bold"' : par > 0 ? ' style="color:#b03030;font-weight:bold"' : ' style="font-weight:bold"';
       html += `<tr${rk<=3?' class="winner"':''}>
         <td><span class="rank${rk<=3?' gold':''}">${rk}</span></td>
-        <td><strong>${esc(p.name)}</strong></td>
-        <td>${tBadge(p.team)}</td>
+        <td><strong>🇺🇸 ${esc(p.name)}</strong></td>
+        <td class="hide-mobile">${tBadge(p.team)}</td>
         <td class="c"><strong class="pts">${fmt(p.total)}</strong></td>
-        <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
+        <td class="c hide-mobile"><span${parClass}>${fmtPar(par)}</span></td>
         <td class="c"><strong class="money">${fmtM(p.money)}</strong></td>
       </tr>`;
       prev = p.total;
@@ -911,11 +917,11 @@ function renderScoreboard() {
     if (sorted.every(p=>p.dp===0)) {
       html += `<div class="empty"><div class="eicon">⛳</div>No scores yet</div>`;
     } else {
-      html += `<table><thead><tr><th>Rank</th><th>Player</th><th>Team</th><th class="c">Pts</th><th class="c">$</th></tr></thead><tbody>`;
+      html += `<table><thead><tr><th>Rank</th><th>Player</th><th class="hide-mobile">Team</th><th class="c">Pts</th><th class="c">$</th></tr></thead><tbody>`;
       let rk=1, prev=null;
       sorted.forEach((p,i) => {
         if (p.dp !== prev) rk = i+1;
-        html += `<tr${rk<=3?' class="winner"':''}><td><span class="rank${rk<=3?' gold':''}">${rk}</span></td><td><strong>${esc(p.name)}</strong></td><td>${tBadge(p.team)}</td><td class="c pts">${fmt(p.dp)}</td><td class="c money">${fmtM(p.dm)}</td></tr>`;
+        html += `<tr${rk<=3?' class="winner"':''}><td><span class="rank${rk<=3?' gold':''}">${rk}</span></td><td><strong>🇺🇸 ${esc(p.name)}</strong></td><td class="hide-mobile">${tBadge(p.team)}</td><td class="c pts">${fmt(p.dp)}</td><td class="c money">${fmtM(p.dm)}</td></tr>`;
         prev = p.dp;
       });
       html += `</tbody></table>`;
