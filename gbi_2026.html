@@ -654,32 +654,43 @@ async function boot() {
 /* ═══════════════════════════════════════════════════════
    CALCULATIONS
 ═══════════════════════════════════════════════════════ */
+// Returns 1-based rank per score (lower score = better). Tied scores share
+// the same rank (the top position of the tied block, e.g. two ties at 1st
+// both get rank 1, the next unique score gets rank 3).
 function rank(scores) {
-  // returns array of ranks (1-based, ties averaged)
-  return scores.map((s,_,arr) => {
+  return scores.map((s, _, arr) => {
     if (s === '' || s === null) return null;
     const v = parseFloat(s);
     if (isNaN(v)) return null;
-    const below = arr.filter(x => x !== '' && x !== null && !isNaN(parseFloat(x)) && parseFloat(x) < v).length;
-    const eq    = arr.filter(x => x !== '' && x !== null && !isNaN(parseFloat(x)) && parseFloat(x) === v).length;
-    return below + (eq + 1) / 2;  // average rank for ties
+    const better = arr.filter(x => x !== '' && x !== null && !isNaN(parseFloat(x)) && parseFloat(x) < v).length;
+    return better + 1;
   });
 }
 
-function avgPts(table, rankVal) {
-  if (rankVal === null) return 0;
-  // For a fractional rank (tie), average the corresponding table slots
-  const lo = Math.floor(rankVal - 0.5);
-  const hi = Math.ceil(rankVal - 0.5);
-  if (lo === hi) return table[lo] || 0;
-  return ((table[lo] || 0) + (table[hi] || 0)) / 2;
+// Points for myRank, averaging across all tied positions in the table.
+// e.g. two tied at rank 1 in a [8,6,4,2,1] table → (8+6)/2 = 7 each.
+function rankedPts(table, allRanks, myRank) {
+  if (myRank === null) return 0;
+  const tiedCount = allRanks.filter(r => r === myRank).length;
+  let total = 0;
+  for (let i = myRank - 1; i < myRank - 1 + tiedCount && i < table.length; i++) {
+    total += table[i];
+  }
+  return tiedCount > 0 ? total / tiedCount : 0;
+}
+
+// Ordinal suffix: 1 → "1st", 2 → "2nd", etc.
+function ordinal(n) {
+  if (n === null) return '—';
+  const s = ['th','st','nd','rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
 function fourManPoints(day) {
-  const groups = S[day].groups;
-  const scores = groups.map(g => g.score);
+  const scores = S[day].groups.map(g => g.score);
   const ranks  = rank(scores);
-  return ranks.map(r => r === null ? null : avgPts(SC[day].fourMan, r));
+  return ranks.map(r => r === null ? null : rankedPts(SC[day].fourMan, ranks, r));
 }
 
 function matchResults(day) {
@@ -699,11 +710,11 @@ function matchResults(day) {
       else if (v2 < v1) { w2 = sc.matchWin; }
       else              { w1 = sc.matchTie; w2 = sc.matchTie; }
     }
-    const rk1 = avgPts(sc.matchRank, r1);
-    const rk2 = avgPts(sc.matchRank, r2);
+    const rk1 = rankedPts(sc.matchRank, ranks, r1);
+    const rk2 = rankedPts(sc.matchRank, ranks, r2);
     return {
-      p1: { win: w1, rankPts: rk1, total: w1 + rk1 },
-      p2: { win: w2, rankPts: rk2, total: w2 + rk2 }
+      p1: { rank: r1, win: w1, rankPts: rk1, total: w1 + rk1 },
+      p2: { rank: r2, win: w2, rankPts: rk2, total: w2 + rk2 }
     };
   });
 }
@@ -1094,7 +1105,8 @@ function renderDay(day) {
   const el = document.getElementById('pane-'+day);
   const label = day==='day1' ? 'Day 1' : 'Day 2';
   const sc = SC[day];
-  const fmPts = fourManPoints(day);
+  const fmPts  = fourManPoints(day);
+  const fmRanks = rank(S[day].groups.map(g => g.score));
   const mrs = matchResults(day);
   const tt = teamTotals();
   const td = day==='day1' ? {t1:tt.t1.d1,t2:tt.t2.d1} : {t1:tt.t1.d2,t2:tt.t2.d2};
@@ -1158,7 +1170,7 @@ function renderDay(day) {
           <input type="text" value="${esc(g.teeTime)}" placeholder="e.g. 9:00a" style="width:72px;font-size:.88em"
             onchange="S.${day}.groups[${gi}].teeTime=this.value;save()" />
         </span>
-        ${pts!==null ? `<span class="hi">Score ${g.score} → ${pts} pts/player</span>` : ''}
+        ${pts!==null ? `<span class="hi">${ordinal(fmRanks[gi])} Place &nbsp;·&nbsp; Score ${g.score} &nbsp;·&nbsp; ${fmt(pts)} pts/player</span>` : ''}
       </div>
     </div>
     <div class="gpanel-body">
@@ -1197,9 +1209,14 @@ function renderDay(day) {
     const s2 = m.score2 !== '' && m.score2 !== null ? parseFloat(m.score2) : null;
     let winLabel = '';
     if (s1!==null && s2!==null && !isNaN(s1) && !isNaN(s2)) {
-      if (s1 < s2) winLabel = `<span class="hi">✓ ${esc(S.teams.t1.name)} wins</span>`;
-      else if (s2 < s1) winLabel = `<span class="hi">✓ ${esc(S.teams.t2.name)} wins</span>`;
-      else winLabel = `<span class="hi">Tied</span>`;
+      const winner = s1 < s2 ? esc(S.teams.t1.name) : s2 < s1 ? esc(S.teams.t2.name) : null;
+      const p1rank = r.p1.rank, p2rank = r.p2.rank;
+      const rankStr = (p1rank && p2rank)
+        ? `&nbsp;·&nbsp; ${esc(S.teams.t1.name)} ${ordinal(p1rank)} / ${esc(S.teams.t2.name)} ${ordinal(p2rank)} overall`
+        : '';
+      winLabel = winner
+        ? `<span class="hi">✓ ${winner} wins${rankStr}</span>`
+        : `<span class="hi">Tied${rankStr}</span>`;
     }
 
     // Builds a team-filtered, dedup-safe select for one player slot
@@ -1242,7 +1259,7 @@ function renderDay(day) {
             <input type="number" class="score-in" value="${esc(m.score1)}" placeholder="—"
               onchange="S.${day}.matches[${mi}].score1=this.value;save();renderDay('${day}')" />
           </div>
-          ${r.p1.total ? `<div style="margin-top:8px;font-size:.82em;color:var(--green)"><strong>${fmt(r.p1.total)} pts</strong> <span style="color:#888">(win ${fmt(r.p1.win)} + rank ${fmt(r.p1.rankPts)})</span></div>` : ''}
+          ${r.p1.total ? `<div style="margin-top:8px;font-size:.82em;color:var(--green)"><strong>${fmt(r.p1.total)} pts</strong> <span style="color:#888">(${ordinal(r.p1.rank)} overall · win ${fmt(r.p1.win)} + rank ${fmt(r.p1.rankPts)})</span></div>` : ''}
         </div>
         <div class="vs-center">vs</div>
         <div class="side-t2">
@@ -1260,7 +1277,7 @@ function renderDay(day) {
             <input type="number" class="score-in" value="${esc(m.score2)}" placeholder="—"
               onchange="S.${day}.matches[${mi}].score2=this.value;save();renderDay('${day}')" />
           </div>
-          ${r.p2.total ? `<div style="margin-top:8px;font-size:.82em;color:var(--green)"><strong>${fmt(r.p2.total)} pts</strong> <span style="color:#888">(win ${fmt(r.p2.win)} + rank ${fmt(r.p2.rankPts)})</span></div>` : ''}
+          ${r.p2.total ? `<div style="margin-top:8px;font-size:.82em;color:var(--green)"><strong>${fmt(r.p2.total)} pts</strong> <span style="color:#888">(${ordinal(r.p2.rank)} overall · win ${fmt(r.p2.win)} + rank ${fmt(r.p2.rankPts)})</span></div>` : ''}
         </div>
       </div>
     </div>
