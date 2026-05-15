@@ -392,6 +392,7 @@ tr.winner { background: #fffce8 !important; }
 </style>
 <!-- Firebase SDK (loaded from CDN — internet required for live sync) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 </head>
 <body>
@@ -529,7 +530,7 @@ const CLIENT_ID = Math.random().toString(36).slice(2);  // unique per browser ta
 // ─── SITE PIN ─── change this to whatever PIN you want to share with players
 const SITE_PIN  = 'PETERputter26';
 
-let _db = null, _ref = null;
+let _db = null, _ref = null, _auth = null;
 let S = defaultState();
 
 function fbReady() { return _ref !== null; }
@@ -538,9 +539,16 @@ function initFB() {
   if (!FB.databaseURL) return;
   try {
     if (!firebase.apps.length) firebase.initializeApp(FB);
-    _db  = firebase.database();
-    _ref = _db.ref(FB_PATH);
+    _db   = firebase.database();
+    _ref  = _db.ref(FB_PATH);
+    _auth = firebase.auth();
   } catch(e) { console.warn('Firebase init error:', e); }
+}
+
+async function signInAnon() {
+  if (!_auth) return;
+  try { await _auth.signInAnonymously(); }
+  catch(e) { console.warn('Anonymous sign-in failed:', e); }
 }
 
 function setConnStatus(online) {
@@ -581,6 +589,7 @@ function submitPin() {
   if (val.toUpperCase() === SITE_PIN.toUpperCase()) {
     sessionStorage.setItem('gbi_auth', SITE_PIN);
     document.getElementById('pin-gate').style.display = 'none';
+    signInAnon();  // auth triggers data load via onAuthStateChanged
   } else {
     const err = document.getElementById('pin-error');
     err.textContent = 'Incorrect PIN — try again.';
@@ -611,44 +620,49 @@ async function boot() {
   initFB();
 
   if (fbReady()) {
-    // Show connecting spinner on scoreboard pane while we fetch
     document.getElementById('pane-scoreboard').innerHTML =
       '<div style="text-align:center;padding:80px 20px;color:#888">' +
       '<div style="font-size:2.4em;margin-bottom:14px">🔄</div>' +
       'Connecting to live scoreboard…</div>';
 
-    try {
-      const snap = await _ref.once('value');
-      if (snap.exists()) {
-        S = applyRoster({ ...defaultState(), ...snap.val() });
-      } else {
-        await _ref.set(S);   // first run — push defaults up
+    // If PIN is already verified this session, sign in immediately.
+    // Otherwise signInAnon() is called by submitPin() after PIN entry.
+    if (checkPin()) signInAnon();
+
+    // All data loading is gated on auth — no auth token = no data access.
+    _auth.onAuthStateChanged(async user => {
+      if (!user) return;   // wait until signed in
+      try {
+        const snap = await _ref.once('value');
+        if (snap.exists()) {
+          S = applyRoster({ ...defaultState(), ...snap.val() });
+        } else {
+          await _ref.set(S);
+        }
+
+        _ref.on('value', snap => {
+          if (!snap.exists()) return;
+          const d = snap.val();
+          if (d._cid === CLIENT_ID) return;
+          S = applyRoster({ ...defaultState(), ...d });
+          render(_cur);
+        });
+
+        firebase.database().ref('.info/connected').on('value', snap => setConnStatus(!!snap.val()));
+        render('scoreboard');
+      } catch(e) {
+        console.warn('Firebase load failed, falling back to localStorage:', e);
+        try { const r = localStorage.getItem('gbi2026v1'); if (r) S = JSON.parse(r); } catch(_) {}
+        setConnStatus(false);
+        render('scoreboard');
       }
-
-      // Real-time listener: update all clients when anyone saves
-      _ref.on('value', snap => {
-        if (!snap.exists()) return;
-        const d = snap.val();
-        if (d._cid === CLIENT_ID) return;   // ignore our own write echoes
-        S = applyRoster({ ...defaultState(), ...d });
-        render(_cur);
-      });
-
-      // Track Firebase connection state for the status indicator
-      firebase.database().ref('.info/connected').on('value', snap => setConnStatus(!!snap.val()));
-
-    } catch(e) {
-      console.warn('Firebase load failed, falling back to localStorage:', e);
-      try { const r = localStorage.getItem('gbi2026v1'); if (r) S = JSON.parse(r); } catch(_) {}
-      setConnStatus(false);
-    }
+    });
   } else {
-    // No Firebase config — use localStorage only
+    // No Firebase config — localStorage only
     try { const r = localStorage.getItem('gbi2026v1'); if (r) S = JSON.parse(r); } catch(_) {}
     setConnStatus(false);
+    render('scoreboard');
   }
-
-  render('scoreboard');
 }
 
 /* ═══════════════════════════════════════════════════════
