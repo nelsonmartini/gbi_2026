@@ -8,6 +8,8 @@
 <!-- Favicon -->
 <link rel="icon" type="image/jpeg" href="gbi-logo.jpg">
 <link rel="apple-touch-icon" href="gbi-logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
 
 <!-- Open Graph — controls preview image when link is shared -->
 <meta property="og:title" content="Garland Bend Invitational 2026">
@@ -352,6 +354,59 @@ tr.winner { background: #fffce8 !important; }
 .prog-bar { height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden; margin: 4px 0; }
 .prog-fill { height: 100%; border-radius: 3px; transition: width .4s; }
 
+/* ─── COMPACT TEAM BANNER ─── */
+.team-compact-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--green-dark); padding: 10px 18px;
+  border-radius: 8px; margin-bottom: 14px;
+  border: 2px solid var(--gold); gap: 8px; flex-wrap: wrap;
+}
+.tcb-side { font-weight: bold; color: white; font-size: .92em; white-space: nowrap; }
+.tcb-mid  { color: var(--gold); font-size: .82em; text-align: center; flex: 1; font-style: italic; }
+
+/* ─── BIG BOARD ─── */
+.big-board {
+  background: #0d2b1a; border: 3px solid var(--gold);
+  border-radius: 10px; overflow: hidden;
+  font-family: 'Cinzel', Georgia, serif;
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+}
+.bb-title-bar {
+  background: #061510; padding: 16px 20px; text-align: center;
+  border-bottom: 2px solid var(--gold);
+}
+.bb-tournament { color: var(--gold); font-size: 1em; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; }
+.bb-year       { color: rgba(255,255,255,.5); font-size: .78em; letter-spacing: 3px; margin-top: 3px; }
+.bb-cols {
+  display: grid; grid-template-columns: 52px 1fr 60px 90px 65px;
+  padding: 7px 20px; background: #041008;
+  border-bottom: 1px solid rgba(201,168,76,.3);
+  font-size: .68em; color: rgba(255,255,255,.4);
+  letter-spacing: 1.5px; text-transform: uppercase;
+}
+.bb-cols .c { text-align: center; }
+.bb-row {
+  display: grid; grid-template-columns: 52px 1fr 60px 90px 65px;
+  align-items: center; padding: 10px 20px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.bb-row.bb-top { background: rgba(201,168,76,.07); }
+.bb-pos  { font-size: .88em; color: rgba(255,255,255,.45); font-family: 'Cinzel', Georgia, serif; }
+.bb-pos.bb-gold { color: var(--gold); font-weight: 700; }
+.bb-name { font-size: .92em; font-weight: 600; color: white; letter-spacing: .3px; padding-left: 10px; border-left: 3px solid transparent; }
+.bb-thru { font-size: .75em; color: rgba(255,255,255,.35); text-align: center; }
+.bb-par  { font-size: 1.7em; font-weight: 900; text-align: center; line-height: 1; font-family: 'Cinzel', Georgia, serif; }
+.bb-par.under { color: #ff3333; }
+.bb-par.even  { color: white; }
+.bb-par.over  { color: rgba(255,255,255,.4); }
+.bb-par.none  { color: rgba(255,255,255,.2); font-size: .85em; font-weight: 400; }
+.bb-pts  { font-size: .8em; color: rgba(255,255,255,.5); text-align: center; }
+.bb-view-btn { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+@media(max-width:520px) {
+  .bb-cols, .bb-row { grid-template-columns: 40px 1fr 70px 50px; }
+  .bb-cols > *:nth-child(3), .bb-row > *:nth-child(3) { display: none; }
+}
+
 /* ─── ANALYTICS ─── */
 .highlight-card {
   background: var(--green); color: var(--white);
@@ -565,6 +620,7 @@ const FB = {
 };
 const FB_PATH   = 'gbi2026/state';
 const CLIENT_ID = Math.random().toString(36).slice(2);  // unique per browser tab
+let _bigBoard = false;
 
 // ─── SITE PIN ─── change this to whatever PIN you want to share with players
 const SITE_PIN  = 'PETERputter26';
@@ -916,87 +972,114 @@ function renderScoreboard() {
   let html = '';
 
   if (unassigned > 0) {
-    html += `<div class="alert alert-gold">⚠️ <strong>${unassigned} player${unassigned>1?'s':''} not yet assigned to a team.</strong> Visit the <strong>Roster &amp; Teams</strong> tab to assign all players before scoring begins.</div>`;
+    html += `<div class="alert alert-gold">&#9888;&#65039; <strong>${unassigned} player${unassigned>1?'s':''} not yet assigned to a team.</strong> Visit the <strong>Roster &amp; Teams</strong> tab to assign all players before scoring begins.</div>`;
   }
 
-  // 1 — Team matchup
-  const t1lead = tt.t1.total > tt.t2.total;
-  const t2lead = tt.t2.total > tt.t1.total;
+  // Compact team banner
+  const margin = Math.abs(tt.t1.total - tt.t2.total);
+  const leadName = tt.t1.total > tt.t2.total ? tt.t1.name : tt.t2.total > tt.t1.total ? tt.t2.name : null;
   html += `
-  <div class="card">
-    <div class="card-header">🏆 GBI Team Championship — Overall</div>
-    <div class="card-body">
-      <div class="matchup">
-        <div class="team-block${t1lead?' leading':''}">
-          <div class="t-name">${esc(tt.t1.name)}</div>
-          <div class="t-pts">${fmt(tt.t1.total)}</div>
-          <div class="t-sub">Day 1: ${fmt(tt.t1.d1)} &nbsp;|&nbsp; Day 2: ${fmt(tt.t1.d2)}</div>
-        </div>
-        <div class="vs-mid">VS</div>
-        <div class="team-block${t2lead?' leading':''}">
-          <div class="t-name">${esc(tt.t2.name)}</div>
-          <div class="t-pts">${fmt(tt.t2.total)}</div>
-          <div class="t-sub">Day 1: ${fmt(tt.t2.d1)} &nbsp;|&nbsp; Day 2: ${fmt(tt.t2.d2)}</div>
-        </div>
-      </div>
-    </div>
+  <div class="team-compact-banner">
+    <div class="tcb-side">${esc(tt.t1.name)} &nbsp;<strong>${fmt(tt.t1.total)}</strong></div>
+    <div class="tcb-mid">${leadName ? `${esc(leadName)} leads +${fmt(margin)}` : anyScores ? 'All Tied' : 'GBI 2026'}</div>
+    <div class="tcb-side"><strong>${fmt(tt.t2.total)}</strong>&nbsp; ${esc(tt.t2.name)}</div>
   </div>`;
 
-  // 2 — Overall player standings (simplified), directly below team card
-  html += `<div class="card"><div class="card-header">👑 Overall Player Championship Standings</div><div class="card-body">`;
-  if (!anyScores) {
-    html += `<div class="empty"><div class="eicon">🏌️</div>No scores entered yet — head to Day 1 to get started!</div>`;
-  } else {
-    html += `<table><thead><tr>
-      <th>Rank</th><th>Player</th>
-      <th class="hide-mobile">Team</th>
-      <th class="c">Total Pts</th>
-      <th class="c">Score to Par</th>
-      <th class="c">Money</th>
-    </tr></thead><tbody>`;
-    let rk=1, prev=null;
-    all.forEach((p,i) => {
-      if (p.total !== prev) rk = i+1;
-      const par = playerScoreToPar(p.name);
-      const parClass = par === null ? '' : par < 0 ? ' style="color:var(--green);font-weight:bold"' : par > 0 ? ' style="color:#b03030;font-weight:bold"' : ' style="font-weight:bold"';
-      html += `<tr${rk<=3?' class="winner"':''}>
-        <td><span class="rank${rk<=3?' gold':''}">${rk}</span></td>
-        <td><strong>${flag(p.name)} ${esc(p.name)}</strong></td>
-        <td class="hide-mobile">${tBadge(p.team)}</td>
-        <td class="c"><strong class="pts">${fmt(p.total)}</strong></td>
-        <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
-        <td class="c"><strong class="money">${fmtM(p.money)}</strong></td>
-      </tr>`;
-      prev = p.total;
-    });
-    html += `</tbody></table>`;
-  }
-  html += `</div></div>`;
+  // View toggle
+  html += `<div class="bb-view-btn">
+    <button class="btn btn-green btn-sm" onclick="_bigBoard=!_bigBoard;renderScoreboard()">
+      ${_bigBoard ? '&#128203; Table View' : '&#127942; Big Board'}
+    </button>
+  </div>`;
 
-  // 3 — Day 1 + Day 2 side by side at the bottom
-  html += `<div class="two-col">`;
-  ['day1','day2'].forEach((day,di) => {
-    const label = di === 0 ? 'Day 1' : 'Day 2';
-    const sorted = all.map(p => ({...p, dp: di===0?p.d1.total:p.d2.total, dm: di===0?p.d1.money:p.d2.money})).sort((a,b)=>b.dp-a.dp||a.name.localeCompare(b.name));
+  if (_bigBoard) {
+    // Augusta-style big board
     html += `
-    <div class="card">
-      <div class="card-header">📅 ${label} Standings</div>
-      <div class="card-body">`;
-    if (sorted.every(p=>p.dp===0)) {
-      html += `<div class="empty"><div class="eicon">⛳</div>No scores yet</div>`;
+    <div class="big-board">
+      <div class="bb-title-bar">
+        <div class="bb-tournament">Garland Bend Invitational</div>
+        <div class="bb-year">2026 &mdash; Official Leaderboard</div>
+      </div>
+      <div class="bb-cols">
+        <div>Pos</div><div>Player</div>
+        <div class="c">Thru</div><div class="c">Score</div><div class="c">Pts</div>
+      </div>`;
+    if (!anyScores) {
+      html += `<div style="text-align:center;padding:48px 20px;color:rgba(255,255,255,.3);font-family:Georgia,serif;font-style:italic">No scores entered yet</div>`;
     } else {
-      html += `<table><thead><tr><th>Rank</th><th>Player</th><th class="hide-mobile">Team</th><th class="c">Pts</th><th class="c">$</th></tr></thead><tbody>`;
+      let rk = 1, prev = null;
+      all.forEach((p, i) => {
+        if (p.total !== prev) rk = i + 1;
+        const par = playerScoreToPar(p.name);
+        const parStr = par === null ? '&mdash;' : fmtPar(par);
+        const parCls = par === null ? 'none' : par < 0 ? 'under' : par === 0 ? 'even' : 'over';
+        const tcol = p.team ? S.teams[p.team].color : '#555';
+        html += `<div class="bb-row${rk<=3?' bb-top':''}">
+          <div class="bb-pos${rk<=3?' bb-gold':''}">${ordinal(rk)}</div>
+          <div class="bb-name" style="border-left-color:${tcol}">${flag(p.name)} ${esc(p.name)}</div>
+          <div class="bb-thru">F</div>
+          <div class="bb-par ${parCls}">${parStr}</div>
+          <div class="bb-pts">${fmt(p.total)}</div>
+        </div>`;
+        prev = p.total;
+      });
+    }
+    html += `</div>`;
+
+  } else {
+    // Standard table view
+    html += `<div class="card"><div class="card-header">&#128081; Overall Player Championship Standings</div><div class="card-body">`;
+    if (!anyScores) {
+      html += `<div class="empty"><div class="eicon">&#127948;</div>No scores entered yet &mdash; head to Day 1 to get started!</div>`;
+    } else {
+      html += `<table><thead><tr>
+        <th>Rank</th><th>Player</th>
+        <th class="hide-mobile">Team</th>
+        <th class="c">Total Pts</th>
+        <th class="c">Score to Par</th>
+        <th class="c">Money</th>
+      </tr></thead><tbody>`;
       let rk=1, prev=null;
-      sorted.forEach((p,i) => {
-        if (p.dp !== prev) rk = i+1;
-        html += `<tr${rk<=3?' class="winner"':''}><td><span class="rank${rk<=3?' gold':''}">${rk}</span></td><td><strong>${flag(p.name)} ${esc(p.name)}</strong></td><td class="hide-mobile">${tBadge(p.team)}</td><td class="c pts">${fmt(p.dp)}</td><td class="c money">${fmtM(p.dm)}</td></tr>`;
-        prev = p.dp;
+      all.forEach((p,i) => {
+        if (p.total !== prev) rk = i+1;
+        const par = playerScoreToPar(p.name);
+        const parClass = par===null?'':par<0?' style="color:var(--green);font-weight:bold"':par>0?' style="color:#b03030;font-weight:bold"':' style="font-weight:bold"';
+        html += `<tr${rk<=3?' class="winner"':''}>
+          <td><span class="rank${rk<=3?' gold':''}">${rk}</span></td>
+          <td><strong>${flag(p.name)} ${esc(p.name)}</strong></td>
+          <td class="hide-mobile">${tBadge(p.team)}</td>
+          <td class="c"><strong class="pts">${fmt(p.total)}</strong></td>
+          <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
+          <td class="c"><strong class="money">${fmtM(p.money)}</strong></td>
+        </tr>`;
+        prev = p.total;
       });
       html += `</tbody></table>`;
     }
     html += `</div></div>`;
-  });
-  html += `</div>`;
+
+    // Day 1 + Day 2 side by side
+    html += `<div class="two-col">`;
+    ['day1','day2'].forEach((day,di) => {
+      const label = di===0?'Day 1':'Day 2';
+      const sorted = all.map(p=>({...p,dp:di===0?p.d1.total:p.d2.total,dm:di===0?p.d1.money:p.d2.money})).sort((a,b)=>b.dp-a.dp||a.name.localeCompare(b.name));
+      html += `<div class="card"><div class="card-header">&#128197; ${label} Standings</div><div class="card-body">`;
+      if (sorted.every(p=>p.dp===0)) {
+        html += `<div class="empty"><div class="eicon">&#9971;</div>No scores yet</div>`;
+      } else {
+        html += `<table><thead><tr><th>Rank</th><th>Player</th><th class="hide-mobile">Team</th><th class="c">Pts</th><th class="c">$</th></tr></thead><tbody>`;
+        let rk=1, prev=null;
+        sorted.forEach((p,i)=>{
+          if(p.dp!==prev) rk=i+1;
+          html+=`<tr${rk<=3?' class="winner"':''}><td><span class="rank${rk<=3?' gold':''}">${rk}</span></td><td><strong>${flag(p.name)} ${esc(p.name)}</strong></td><td class="hide-mobile">${tBadge(p.team)}</td><td class="c pts">${fmt(p.dp)}</td><td class="c money">${fmtM(p.dm)}</td></tr>`;
+          prev=p.dp;
+        });
+        html += `</tbody></table>`;
+      }
+      html += `</div></div>`;
+    });
+    html += `</div>`;
+  }
 
   el.innerHTML = html;
 }
@@ -1751,41 +1834,83 @@ function renderAnalytics() {
   }
   html += `</div></div>`;
 
-  /* ── SECTION 4: Full 2026 Stat Breakdown ── */
+  /* ── SECTION 4: Stacked bar chart ── */
   html += `
   <div class="card">
-    <div class="card-header">&#128203; 2026 Full Points Breakdown</div>
+    <div class="card-header">&#128202; 2026 Points Breakdown &mdash; Visual</div>
     <div class="card-body">`;
 
   if (!anyScores) {
     html += `<div class="empty"><div class="eicon">&#128202;</div>Waiting for scores&hellip;</div>`;
   } else {
     const sorted26 = [...all26].sort((a,b) => b.total - a.total || a.name.localeCompare(b.name));
-    let rk = 1, prevT = null;
-    html += `<table><thead><tr>
-      <th>Player</th>
-      <th class="c hide-mobile">Team</th>
-      <th class="c">4-Man</th>
-      <th class="c">Match W</th>
-      <th class="c">Rank Pts</th>
-      <th class="c">Payouts</th>
-      <th class="c">Total</th>
-    </tr></thead><tbody>`;
-    sorted26.forEach((p, i) => {
-      if (p.total !== prevT) rk = i + 1;
-      const f = p.d1.fourMan + p.d2.fourMan, m = p.d1.matchWin + p.d2.matchWin,
-            r = p.d1.matchRank + p.d2.matchRank, y = p.d1.payout + p.d2.payout;
-      const cell = v => v > 0 ? `<span class="pts">${v}</span>` : `<span style="color:#ddd">&mdash;</span>`;
-      html += `<tr${rk<=3?' class="winner"':''}>
-        <td><span class="rank${rk<=3?' gold':''}" style="margin-right:6px">${rk}</span><strong>${flag(p.name)} ${esc(p.name)}</strong></td>
-        <td class="c hide-mobile">${tBadge(p.team)}</td>
-        <td class="c">${cell(f)}</td><td class="c">${cell(m)}</td>
-        <td class="c">${cell(r)}</td><td class="c">${cell(y)}</td>
-        <td class="c"><strong class="pts">${fmt(p.total)}</strong></td>
-      </tr>`;
-      prevT = p.total;
+    const maxPts = Math.max(...sorted26.map(p => p.total), 1);
+    html += `<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;font-size:.78em;align-items:center">
+      <span><span style="display:inline-block;width:12px;height:12px;background:#16a34a;border-radius:2px;margin-right:4px;vertical-align:middle"></span>4-Man</span>
+      <span><span style="display:inline-block;width:12px;height:12px;background:#2563eb;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Match Win</span>
+      <span><span style="display:inline-block;width:12px;height:12px;background:var(--gold);border-radius:2px;margin-right:4px;vertical-align:middle"></span>Rank Pts</span>
+      <span><span style="display:inline-block;width:12px;height:12px;background:#e05555;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Payouts</span>
+    </div>`;
+    sorted26.forEach(p => {
+      const f = p.d1.fourMan+p.d2.fourMan, m = p.d1.matchWin+p.d2.matchWin,
+            r = p.d1.matchRank+p.d2.matchRank, y = p.d1.payout+p.d2.payout;
+      const fp=f/maxPts*100, mp=m/maxPts*100, rp=r/maxPts*100, yp=y/maxPts*100;
+      html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
+        <div style="min-width:82px;font-size:.83em;font-weight:bold;white-space:nowrap;text-align:right">${flag(p.name)} ${esc(p.name)}</div>
+        <div style="flex:1;height:22px;border-radius:4px;overflow:hidden;background:#f0f0f0;display:flex">
+          ${f>0?`<div style="width:${fp.toFixed(1)}%;background:#16a34a;height:100%" title="4-Man: ${f}"></div>`:''}
+          ${m>0?`<div style="width:${mp.toFixed(1)}%;background:#2563eb;height:100%" title="Match Win: ${m}"></div>`:''}
+          ${r>0?`<div style="width:${rp.toFixed(1)}%;background:var(--gold);height:100%" title="Rank Pts: ${r}"></div>`:''}
+          ${y>0?`<div style="width:${yp.toFixed(1)}%;background:#e05555;height:100%" title="Payouts: ${y}"></div>`:''}
+        </div>
+        <div style="min-width:34px;text-align:right;font-size:.83em;font-weight:bold;color:var(--green)">${fmt(p.total)}</div>
+      </div>`;
     });
-    html += `</tbody></table>`;
+  }
+  html += `</div></div>`;
+
+  /* ── SECTION 4b: Day 1 → Day 2 Progression ── */
+  html += `
+  <div class="card">
+    <div class="card-header">&#128336; Day 1 &rarr; Day 2 Progression</div>
+    <div class="card-body">`;
+
+  if (!anyScores) {
+    html += `<div class="empty"><div class="eicon">&#9200;</div>Waiting for scores&hellip;</div>`;
+  } else {
+    const hasD2 = all26.some(p => p.d2.total > 0);
+    if (!hasD2) {
+      html += `<div class="alert alert-info" style="margin-bottom:12px">Day 2 scores not entered yet &mdash; this chart fills in after Day 2 is played.</div>`;
+    }
+    const sorted26d = [...all26].sort((a,b) => b.total - a.total);
+    const maxDay = Math.max(...sorted26d.map(p => Math.max(p.d1.total, p.d2.total)), 1);
+    html += `<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:.78em;align-items:center">
+      <span><span style="display:inline-block;width:20px;height:4px;background:var(--green);border-radius:2px;margin-right:4px;vertical-align:middle"></span>Day 1</span>
+      <span><span style="display:inline-block;width:20px;height:4px;background:var(--gold);border-radius:2px;margin-right:4px;vertical-align:middle"></span>Day 2</span>
+    </div>`;
+    sorted26d.forEach(p => {
+      const d1p = (p.d1.total/maxDay*100).toFixed(1);
+      const d2p = (p.d2.total/maxDay*100).toFixed(1);
+      const delta = p.d2.total - p.d1.total;
+      const dStr = !hasD2 ? '' : delta>0
+        ? `<span style="color:var(--green);font-size:.75em;font-weight:bold">+${fmt(delta)}</span>`
+        : delta<0
+          ? `<span style="color:#b03030;font-size:.75em;font-weight:bold">${fmt(delta)}</span>`
+          : `<span style="color:#aaa;font-size:.75em">&mdash;</span>`;
+      html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+        <div style="min-width:82px;font-size:.83em;font-weight:bold;white-space:nowrap;text-align:right">${flag(p.name)} ${esc(p.name)}</div>
+        <div style="flex:1">
+          <div style="height:9px;background:var(--green);border-radius:3px;width:${d1p}%;margin-bottom:2px;opacity:.85"></div>
+          <div style="height:9px;background:var(--gold);border-radius:3px;width:${d2p}%;opacity:.9"></div>
+        </div>
+        <div style="min-width:90px;font-size:.8em;display:flex;gap:5px;align-items:center">
+          <span style="color:var(--green)">${fmt(p.d1.total)}</span>
+          <span style="color:#ccc">|</span>
+          <span style="color:var(--gold-dark)">${fmt(p.d2.total)}</span>
+          ${dStr}
+        </div>
+      </div>`;
+    });
   }
   html += `</div></div>`;
 
