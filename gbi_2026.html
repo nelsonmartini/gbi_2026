@@ -254,7 +254,12 @@ input.score-in { width: 80px; text-align: center; }
   display: flex; justify-content: space-between; align-items: center;
   border-bottom: 1px solid var(--border); font-weight: bold; font-size: .93em;
 }
-.gpanel-body { padding: 13px; }
+.gpanel-body { padding: 8px; }
+/* compact player dropdowns inside group panels */
+.gpanel .form-row { grid-template-columns: repeat(auto-fit, minmax(110px,1fr)); gap: 7px; margin-bottom: 8px; }
+.gpanel .form-group { gap: 2px; }
+.gpanel select { font-size: .78em; padding: 4px 5px; }
+.gpanel label  { font-size: .72em; }
 .match-sides {
   display: grid; grid-template-columns: 1fr 44px 1fr;
   gap: 14px; align-items: start;
