@@ -250,9 +250,18 @@ input.score-in { width: 80px; text-align: center; }
   margin-bottom: 12px; overflow: hidden;
 }
 .gpanel-head {
-  background: #eef6f1; padding: 9px 13px;
-  display: flex; justify-content: space-between; align-items: center;
-  border-bottom: 1px solid var(--border); font-weight: bold; font-size: .93em;
+  background: #eef6f1; padding: 7px 11px;
+  display: grid; grid-template-columns: auto 1fr auto;
+  align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--border); font-weight: bold; font-size: .88em;
+}
+.gpanel-head-mid {
+  text-align: center; font-size: .8em; color: var(--gray);
+  font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.gpanel-head-right {
+  display: flex; align-items: center; font-size: .8em;
+  color: #666; font-weight: normal; white-space: nowrap;
 }
 .gpanel-body { padding: 8px; }
 .gpanel select { font-size: .78em; padding: 4px 5px; }
@@ -1363,9 +1372,10 @@ function renderDay(day) {
     html += `
   <div class="gpanel">
     <div class="gpanel-head">
-      <span>Group ${g.id}${pts!==null ? `&nbsp;&nbsp;<span class="hi" style="font-weight:normal">${ordinal(fmRanks[gi])} Place &nbsp;·&nbsp; Score ${g.score} &nbsp;·&nbsp; ${fmt(pts)} pts/player</span>` : ''}</span>
-      <span style="font-size:.82em;color:#666;font-weight:normal;white-space:nowrap">
-        <input type="text" value="${esc(g.teeTime)}" placeholder="Tee time" style="width:76px;font-size:.88em"
+      <span>Group ${g.id}</span>
+      <span class="gpanel-head-mid">${pts!==null ? `${ordinal(fmRanks[gi])} Place &nbsp;&middot;&nbsp; Score ${g.score} &nbsp;&middot;&nbsp; <strong>${fmt(pts)} pts</strong>/player` : ''}</span>
+      <span class="gpanel-head-right">
+        <input type="text" value="${esc(g.teeTime)}" placeholder="Tee time" style="width:66px;font-size:.85em"
           onchange="S.${day}.groups[${gi}].teeTime=this.value;save()" />
       </span>
     </div>
@@ -1412,13 +1422,9 @@ function renderDay(day) {
     let winLabel = '';
     if (s1!==null && s2!==null && !isNaN(s1) && !isNaN(s2)) {
       const winner = s1 < s2 ? esc(S.teams.t1.name) : s2 < s1 ? esc(S.teams.t2.name) : null;
-      const p1rank = r.p1.rank, p2rank = r.p2.rank;
-      const rankStr = (p1rank && p2rank)
-        ? `&nbsp;·&nbsp; ${esc(S.teams.t1.name)} ${ordinal(p1rank)} / ${esc(S.teams.t2.name)} ${ordinal(p2rank)} overall`
-        : '';
       winLabel = winner
-        ? `<span class="hi">✓ ${winner} wins${rankStr}</span>`
-        : `<span class="hi">Tied${rankStr}</span>`;
+        ? `<span class="hi">&#10003; ${winner} wins</span>`
+        : `<span class="hi">Tied</span>`;
     }
 
     // Builds a team-filtered, dedup-safe select for one player slot
@@ -1442,13 +1448,11 @@ function renderDay(day) {
   <div class="gpanel">
     <div class="gpanel-head">
       <span>Match ${m.id}</span>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <span style="font-size:.82em;color:#666">
-          <input type="text" value="${esc(m.teeTime)}" placeholder="Tee time" style="width:72px;font-size:.88em"
-            onchange="S.${day}.matches[${mi}].teeTime=this.value;save()" />
-        </span>
-        ${winLabel}
-      </div>
+      <span class="gpanel-head-mid">${winLabel}</span>
+      <span class="gpanel-head-right">
+        <input type="text" value="${esc(m.teeTime)}" placeholder="Tee time" style="width:66px;font-size:.85em"
+          onchange="S.${day}.matches[${mi}].teeTime=this.value;save()" />
+      </span>
     </div>
     <div class="match-arena">
       <div class="match-side${win1?' match-winner':''}">
