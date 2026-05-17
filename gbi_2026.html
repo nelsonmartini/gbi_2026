@@ -371,45 +371,73 @@ tr.winner { background: #fffce8 !important; }
 
 /* ─── BIG BOARD ─── */
 .big-board {
-  background: #0d2b1a; border: 3px solid var(--gold);
-  border-radius: 10px; overflow: hidden;
+  background: #f7f4ec; border: 3px solid #1a3a1a;
+  border-radius: 4px; overflow: hidden;
   font-family: 'Cinzel', Georgia, serif;
-  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  box-shadow: 0 4px 20px rgba(0,0,0,.25);
 }
 .bb-title-bar {
-  background: #061510; padding: 16px 20px; text-align: center;
-  border-bottom: 2px solid var(--gold);
+  background: var(--gold); padding: 13px 20px; text-align: center;
+  border-bottom: 3px solid #1a3a1a;
 }
-.bb-tournament { color: var(--gold); font-size: 1em; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; }
-.bb-year       { color: rgba(255,255,255,.5); font-size: .78em; letter-spacing: 3px; margin-top: 3px; }
+.bb-tournament { color: #1a3a1a; font-size: 1.1em; font-weight: 900; letter-spacing: 5px; text-transform: uppercase; }
+.bb-year       { color: rgba(0,0,0,.45); font-size: .72em; letter-spacing: 3px; margin-top: 3px; }
 .bb-cols {
-  display: grid; grid-template-columns: 52px 1fr 60px 90px 65px;
-  padding: 7px 20px; background: #041008;
-  border-bottom: 1px solid rgba(201,168,76,.3);
-  font-size: .68em; color: rgba(255,255,255,.4);
+  display: grid; grid-template-columns: 52px 1fr 72px 72px;
+  padding: 7px 16px; background: var(--green);
+  border-bottom: 2px solid #1a3a1a;
+  font-size: .68em; color: rgba(255,255,255,.85);
   letter-spacing: 1.5px; text-transform: uppercase;
 }
 .bb-cols .c { text-align: center; }
 .bb-row {
-  display: grid; grid-template-columns: 52px 1fr 60px 90px 65px;
-  align-items: center; padding: 10px 20px;
-  border-bottom: 1px solid rgba(255,255,255,.06);
+  display: grid; grid-template-columns: 52px 1fr 72px 72px;
+  align-items: center; padding: 10px 16px;
+  border-bottom: 1px solid #d4c9a8;
 }
-.bb-row.bb-top { background: rgba(201,168,76,.07); }
-.bb-pos  { font-size: .88em; color: rgba(255,255,255,.45); font-family: 'Cinzel', Georgia, serif; }
-.bb-pos.bb-gold { color: var(--gold); font-weight: 700; }
-.bb-name { font-size: .92em; font-weight: 600; color: white; letter-spacing: .3px; padding-left: 10px; border-left: 3px solid transparent; }
-.bb-thru { font-size: .75em; color: rgba(255,255,255,.35); text-align: center; }
-.bb-par  { font-size: 1.7em; font-weight: 900; text-align: center; line-height: 1; font-family: 'Cinzel', Georgia, serif; }
-.bb-par.under { color: #ff3333; }
-.bb-par.even  { color: white; }
-.bb-par.over  { color: rgba(255,255,255,.4); }
-.bb-par.none  { color: rgba(255,255,255,.2); font-size: .85em; font-weight: 400; }
-.bb-pts  { font-size: .8em; color: rgba(255,255,255,.5); text-align: center; }
+.bb-row:nth-child(even) { background: #f0ece0; }
+.bb-row.bb-top { background: #fdf8e8 !important; border-left: 4px solid var(--gold); }
+.bb-pos      { font-size: .85em; color: #666; }
+.bb-pos.bb-gold { color: var(--gold-dark); font-weight: 700; }
+.bb-name     { font-size: .9em; font-weight: 600; color: #111; padding-left: 10px; border-left: 4px solid transparent; }
+.bb-pts      { font-size: 1.5em; font-weight: 900; text-align: center; color: #111; font-family: 'Cinzel', Georgia, serif; line-height: 1; }
+.bb-par      { font-size: .8em; text-align: center; line-height: 1.3; }
+.bb-par.under { color: #cc0000; font-weight: 700; }
+.bb-par.even  { color: #222; font-weight: 600; }
+.bb-par.over  { color: #888; }
+.bb-par.none  { color: #ccc; }
 .bb-view-btn { display: flex; justify-content: flex-end; margin-bottom: 12px; }
 @media(max-width:520px) {
-  .bb-cols, .bb-row { grid-template-columns: 40px 1fr 70px 50px; }
-  .bb-cols > *:nth-child(3), .bb-row > *:nth-child(3) { display: none; }
+  .bb-cols, .bb-row { grid-template-columns: 38px 1fr 60px 60px; padding-left: 10px; padding-right: 10px; }
+}
+
+/* ─── MATCH ARENA (2v2 redesign) ─── */
+.match-arena {
+  display: grid; grid-template-columns: 1fr 48px 1fr;
+}
+.match-side { padding: 12px; display: flex; flex-direction: column; gap: 7px; }
+.match-side.match-winner { background: linear-gradient(135deg,#f0faf3,#e4f5e8); }
+.ms-header {
+  color: white; padding: 5px 10px; border-radius: 5px;
+  font-size: .82em; font-weight: bold; text-align: center; letter-spacing: .3px;
+}
+.ms-pts {
+  font-size: .82em; color: var(--green); font-weight: bold; margin-top: 2px;
+}
+.match-divider {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 5px;
+  background: #f2ede3; border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+  font-size: .88em; font-weight: bold; color: var(--green-dark);
+}
+@media(max-width:620px) {
+  .match-arena { grid-template-columns: 1fr; }
+  .match-divider {
+    flex-direction: row; padding: 7px 12px;
+    border-left: none; border-right: none;
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    justify-content: center; gap: 10px;
+  }
 }
 
 /* ─── ANALYTICS ─── */
@@ -626,6 +654,8 @@ const FB = {
 const FB_PATH   = 'gbi2026/state';
 const CLIENT_ID = Math.random().toString(36).slice(2);  // unique per browser tab
 let _bigBoard = false;
+let _collapsed = {};
+function toggleCollapse(key, day) { _collapsed[key] = !_collapsed[key]; renderDay(day); }
 
 // ─── SITE PIN ─── change this to whatever PIN you want to share with players
 const SITE_PIN  = 'PETERputter26';
@@ -1018,10 +1048,10 @@ function renderScoreboard() {
       </div>
       <div class="bb-cols">
         <div>Pos</div><div>Player</div>
-        <div class="c">Thru</div><div class="c">Score</div><div class="c">Pts</div>
+        <div class="c">Pts</div><div class="c">Score</div>
       </div>`;
     if (!anyScores) {
-      html += `<div style="text-align:center;padding:48px 20px;color:rgba(255,255,255,.3);font-family:Georgia,serif;font-style:italic">No scores entered yet</div>`;
+      html += `<div style="text-align:center;padding:48px 20px;color:#aaa;font-family:Georgia,serif;font-style:italic">No scores entered yet</div>`;
     } else {
       let rk = 1, prev = null;
       all.forEach((p, i) => {
@@ -1029,13 +1059,12 @@ function renderScoreboard() {
         const par = playerScoreToPar(p.name);
         const parStr = par === null ? '&mdash;' : fmtPar(par);
         const parCls = par === null ? 'none' : par < 0 ? 'under' : par === 0 ? 'even' : 'over';
-        const tcol = p.team ? S.teams[p.team].color : '#555';
+        const tcol = p.team ? S.teams[p.team].color : '#aaa';
         html += `<div class="bb-row${rk<=3?' bb-top':''}">
           <div class="bb-pos${rk<=3?' bb-gold':''}">${ordinal(rk)}</div>
           <div class="bb-name" style="border-left-color:${tcol}">${flag(p.name)} ${esc(p.name)}</div>
-          <div class="bb-thru">F</div>
-          <div class="bb-par ${parCls}">${parStr}</div>
           <div class="bb-pts">${fmt(p.total)}</div>
+          <div class="bb-par ${parCls}">${parStr}</div>
         </div>`;
         prev = p.total;
       });
@@ -1288,8 +1317,12 @@ function renderDay(day) {
     </div>
   </div>
 
-  <div class="sec-head"><h3>⛳ 4-Man Scramble — ${label}</h3></div>
-  <div class="alert alert-info">Five groups of 4 players. Enter each group's score vs par (e.g. <strong>-5</strong>). Points: 1st=${sc.fourMan[0]}, 2nd=${sc.fourMan[1]}, 3rd=${sc.fourMan[2]}, 4th=${sc.fourMan[3]}, 5th=${sc.fourMan[4]}. Ties average the tied positions.</div>`;
+  <div class="sec-head" style="cursor:pointer;justify-content:space-between" onclick="toggleCollapse('${day}_four','${day}')">
+    <h3>&#9971; 4-Man Scramble &mdash; ${label}</h3>
+    <span style="font-size:.82em;color:var(--green)">${_collapsed[day+'_four']?'&#9660; Show':'&#9650; Hide'}</span>
+  </div>`;
+  if (!_collapsed[day+'_four']) {
+  html += `<div class="alert alert-info">Five groups of 4 players. Enter each group&rsquo;s score vs par (e.g. <strong>-5</strong>). Points: 1st=${sc.fourMan[0]}, 2nd=${sc.fourMan[1]}, 3rd=${sc.fourMan[2]}, 4th=${sc.fourMan[3]}, 5th=${sc.fourMan[4]}. Ties average the tied positions.</div>`;
 
   // 4-Man groups — build set of all already-chosen players for this day
   const usedInDay = new Set(S[day].groups.flatMap(g => g.players.filter(p => p !== '')));
@@ -1341,9 +1374,15 @@ function renderDay(day) {
   </div>`;
   });
 
+  } // end 4-man collapse
+
   html += `
-  <div class="sec-head"><h3>🏌️ 2v2 Head-to-Head — ${label}</h3></div>
-  <div class="alert alert-info">Five matches: one pair from each team. Win = +${sc.matchWin} pts, Tie = +${sc.matchTie} pts per player. Plus rank points among all 10 pairs (lower score ranks higher).</div>`;
+  <div class="sec-head" style="cursor:pointer;justify-content:space-between" onclick="toggleCollapse('${day}_match','${day}')">
+    <h3>&#127948; 2v2 Head-to-Head &mdash; ${label}</h3>
+    <span style="font-size:.82em;color:var(--green)">${_collapsed[day+'_match']?'&#9660; Show':'&#9650; Hide'}</span>
+  </div>`;
+  if (!_collapsed[day+'_match']) {
+  html += `<div class="alert alert-info">Five matches: one pair from each team. Win = +${sc.matchWin} pts, Tie = +${sc.matchTie} pts per player. Plus rank points among all 10 pairs (lower score ranks higher).</div>`;
 
   // 2v2 matches — teams locked from roster, no duplicate picks across all 5 matches
   const usedInMatches = new Set(
@@ -1383,59 +1422,63 @@ function renderDay(day) {
             </select>`;
     };
 
+    const win1 = s1!==null && s2!==null && s1 < s2;
+    const win2 = s1!==null && s2!==null && s2 < s1;
+    const tied = s1!==null && s2!==null && s1 === s2;
+    const dividerIcon = win1 ? '&#9668;' : win2 ? '&#9658;' : tied ? '&#61;' : 'VS';
+    const dividerSub  = win1 ? esc(S.teams.t1.name) : win2 ? esc(S.teams.t2.name) : tied ? 'Tied' : '';
+
     html += `
   <div class="gpanel">
     <div class="gpanel-head">
       <span>Match ${m.id}</span>
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-        <span style="font-size:.82em;color:#666">Tee time:
-          <input type="text" value="${esc(m.teeTime)}" placeholder="e.g. 2:31p" style="width:72px;font-size:.88em"
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:.82em;color:#666">
+          <input type="text" value="${esc(m.teeTime)}" placeholder="Tee time" style="width:72px;font-size:.88em"
             onchange="S.${day}.matches[${mi}].teeTime=this.value;save()" />
         </span>
         ${winLabel}
       </div>
     </div>
-    <div class="gpanel-body">
-      <div class="match-sides">
-        <div class="side-t1">
-          <div class="side-label" style="color:${esc(S.teams.t1.color)}">${esc(S.teams.t1.name)}</div>
-          <div class="form-group" style="margin-bottom:8px">
-            <label>Player 1</label>
-            ${makeMSlot('p1a', m.p1a, matchT1Pool)}
-          </div>
-          <div class="form-group" style="margin-bottom:8px">
-            <label>Player 2</label>
-            ${makeMSlot('p1b', m.p1b, matchT1Pool)}
-          </div>
-          <div class="form-group">
-            <label>Score (vs par)</label>
-            <input type="number" class="score-in" value="${esc(m.score1)}" placeholder="—"
-              onchange="S.${day}.matches[${mi}].score1=this.value;save();renderDay('${day}')" />
-          </div>
-          ${r.p1.total ? `<div style="margin-top:8px;font-size:.82em;color:var(--green)"><strong>${fmt(r.p1.total)} pts</strong> <span style="color:#888">(${ordinal(r.p1.rank)} overall · win ${fmt(r.p1.win)} + rank ${fmt(r.p1.rankPts)})</span></div>` : ''}
+    <div class="match-arena">
+      <div class="match-side${win1?' match-winner':''}">
+        <div class="ms-header" style="background:${esc(S.teams.t1.color)}">${esc(S.teams.t1.name)}</div>
+        <div class="form-group">
+          <label>Player 1</label>${makeMSlot('p1a', m.p1a, matchT1Pool)}
         </div>
-        <div class="vs-center">vs</div>
-        <div class="side-t2">
-          <div class="side-label" style="color:${esc(S.teams.t2.color)}">${esc(S.teams.t2.name)}</div>
-          <div class="form-group" style="margin-bottom:8px">
-            <label>Player 1</label>
-            ${makeMSlot('p2a', m.p2a, matchT2Pool)}
-          </div>
-          <div class="form-group" style="margin-bottom:8px">
-            <label>Player 2</label>
-            ${makeMSlot('p2b', m.p2b, matchT2Pool)}
-          </div>
-          <div class="form-group">
-            <label>Score (vs par)</label>
-            <input type="number" class="score-in" value="${esc(m.score2)}" placeholder="—"
-              onchange="S.${day}.matches[${mi}].score2=this.value;save();renderDay('${day}')" />
-          </div>
-          ${r.p2.total ? `<div style="margin-top:8px;font-size:.82em;color:var(--green)"><strong>${fmt(r.p2.total)} pts</strong> <span style="color:#888">(${ordinal(r.p2.rank)} overall · win ${fmt(r.p2.win)} + rank ${fmt(r.p2.rankPts)})</span></div>` : ''}
+        <div class="form-group">
+          <label>Player 2</label>${makeMSlot('p1b', m.p1b, matchT1Pool)}
         </div>
+        <div class="form-group">
+          <label>Score (vs par)</label>
+          <input type="number" class="score-in" value="${esc(m.score1)}" placeholder="&mdash;"
+            onchange="S.${day}.matches[${mi}].score1=this.value;save();renderDay('${day}')" />
+        </div>
+        ${r.p1.total ? `<div class="ms-pts"><strong>${fmt(r.p1.total)} pts</strong> &nbsp;<span style="color:#888;font-size:.9em">${ordinal(r.p1.rank)} overall &middot; +${fmt(r.p1.win)} win +${fmt(r.p1.rankPts)} rank</span></div>` : ''}
+      </div>
+      <div class="match-divider">
+        <div style="font-size:1.3em">${dividerIcon}</div>
+        <div style="font-size:.68em;color:#888;text-align:center;letter-spacing:.3px">${dividerSub}</div>
+      </div>
+      <div class="match-side${win2?' match-winner':''}">
+        <div class="ms-header" style="background:${esc(S.teams.t2.color)}">${esc(S.teams.t2.name)}</div>
+        <div class="form-group">
+          <label>Player 1</label>${makeMSlot('p2a', m.p2a, matchT2Pool)}
+        </div>
+        <div class="form-group">
+          <label>Player 2</label>${makeMSlot('p2b', m.p2b, matchT2Pool)}
+        </div>
+        <div class="form-group">
+          <label>Score (vs par)</label>
+          <input type="number" class="score-in" value="${esc(m.score2)}" placeholder="&mdash;"
+            onchange="S.${day}.matches[${mi}].score2=this.value;save();renderDay('${day}')" />
+        </div>
+        ${r.p2.total ? `<div class="ms-pts"><strong>${fmt(r.p2.total)} pts</strong> &nbsp;<span style="color:#888;font-size:.9em">${ordinal(r.p2.rank)} overall &middot; +${fmt(r.p2.win)} win +${fmt(r.p2.rankPts)} rank</span></div>` : ''}
       </div>
     </div>
   </div>`;
   });
+  } // end 2v2 collapse
 
   // Day results table
   html += `
