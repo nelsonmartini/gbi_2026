@@ -255,11 +255,23 @@ input.score-in { width: 80px; text-align: center; }
   border-bottom: 1px solid var(--border); font-weight: bold; font-size: .93em;
 }
 .gpanel-body { padding: 8px; }
-/* compact player dropdowns inside group panels */
-.gpanel .form-row { grid-template-columns: repeat(auto-fit, minmax(110px,1fr)); gap: 7px; margin-bottom: 8px; }
-.gpanel .form-group { gap: 2px; }
 .gpanel select { font-size: .78em; padding: 4px 5px; }
 .gpanel label  { font-size: .72em; }
+/* 4-man 2×2 + score box layout */
+.group-layout {
+  display: grid; grid-template-columns: 1fr 1fr 88px;
+  gap: 8px; align-items: stretch;
+}
+.group-col { display: flex; flex-direction: column; gap: 6px; }
+.group-col .form-group { gap: 2px; }
+.group-score-box {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 5px;
+  background: #f2ede3; border-radius: 6px;
+  border: 2px solid var(--border); padding: 8px; text-align: center;
+}
+.group-score-box label { font-size: .72em; color: var(--gray); font-weight: bold; margin: 0; letter-spacing: .3px; }
+.group-score-box input { width: 62px; font-size: 1.15em; text-align: center; }
 .match-sides {
   display: grid; grid-template-columns: 1fr 44px 1fr;
   gap: 14px; align-items: start;
@@ -1358,14 +1370,14 @@ function renderDay(day) {
       </span>
     </div>
     <div class="gpanel-body">
-      <div class="form-row">
-        ${[0,1,2,3].map(makeGSlot).join('')}
-      </div>
-      <div class="form-row" style="max-width:240px">
-        <div class="form-group">
-          <label>Group Score (vs par)</label>
-          <input type="number" class="score-in" value="${esc(g.score)}" placeholder="e.g. -5"
+      <div class="group-layout">
+        <div class="group-col">${makeGSlot(0)}${makeGSlot(1)}</div>
+        <div class="group-col">${makeGSlot(2)}${makeGSlot(3)}</div>
+        <div class="group-score-box">
+          <label>Score<br>vs par</label>
+          <input type="number" value="${esc(g.score)}" placeholder="—"
             onchange="S.${day}.groups[${gi}].score=this.value;save();renderDay('${day}')" />
+          ${pts!==null?`<div style="font-size:.75em;color:var(--green);font-weight:bold">${fmt(pts)} pts</div>`:''}
         </div>
       </div>
     </div>
