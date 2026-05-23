@@ -1295,31 +1295,7 @@ function renderRoster() {
   const unp = S.roster.filter(p=>!p.team);
 
   let html = `
-  <div class="alert alert-gold">Assign all 20 players to teams, and set each team's name. Team assignments drive all scoring calculations.</div>
-
-  <div class="card">
-    <div class="card-header">⚙️ Team Names &amp; Colors</div>
-    <div class="card-body">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Team 1 Name</label>
-          <input type="text" value="${esc(S.teams.t1.name)}" onchange="S.teams.t1.name=this.value;save();renderRoster()" placeholder="e.g. Team Bode" />
-        </div>
-        <div class="form-group">
-          <label>Team 1 Color</label>
-          <input type="color" value="${esc(S.teams.t1.color)}" onchange="S.teams.t1.color=this.value;save();renderRoster()" style="height:36px;cursor:pointer;border-radius:5px" />
-        </div>
-        <div class="form-group">
-          <label>Team 2 Name</label>
-          <input type="text" value="${esc(S.teams.t2.name)}" onchange="S.teams.t2.name=this.value;save();renderRoster()" placeholder="e.g. Team O'Hara" />
-        </div>
-        <div class="form-group">
-          <label>Team 2 Color</label>
-          <input type="color" value="${esc(S.teams.t2.color)}" onchange="S.teams.t2.color=this.value;save();renderRoster()" style="height:36px;cursor:pointer;border-radius:5px" />
-        </div>
-      </div>
-    </div>
-  </div>
+  <div class="alert alert-gold">Assign all 20 players to teams. Team assignments drive all scoring calculations.</div>
 
   <!-- Search -->
   <div class="card">
@@ -1395,6 +1371,30 @@ function renderRoster() {
           }).join('')}
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">⚙️ Team Names &amp; Colors</div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Team 1 Name</label>
+          <input type="text" value="${esc(S.teams.t1.name)}" onchange="S.teams.t1.name=this.value;save();renderRoster()" placeholder="e.g. Team Bode" />
+        </div>
+        <div class="form-group">
+          <label>Team 1 Color</label>
+          <input type="color" value="${esc(S.teams.t1.color)}" onchange="S.teams.t1.color=this.value;save();renderRoster()" style="height:36px;cursor:pointer;border-radius:5px" />
+        </div>
+        <div class="form-group">
+          <label>Team 2 Name</label>
+          <input type="text" value="${esc(S.teams.t2.name)}" onchange="S.teams.t2.name=this.value;save();renderRoster()" placeholder="e.g. Team O'Hara" />
+        </div>
+        <div class="form-group">
+          <label>Team 2 Color</label>
+          <input type="color" value="${esc(S.teams.t2.color)}" onchange="S.teams.t2.color=this.value;save();renderRoster()" style="height:36px;cursor:pointer;border-radius:5px" />
+        </div>
+      </div>
     </div>
   </div>`;
 
@@ -1888,11 +1888,34 @@ function renderMonies() {
   let html = '';
 
   // ── Grand Total Banner ──
+  const potRows = [
+    { label: '📅 Day 1 Hole Payouts', pot: 400,  claimed: holeDays.day1.claimed, color: 'var(--green)' },
+    { label: '📅 Day 2 Hole Payouts', pot: 400,  claimed: holeDays.day2.claimed, color: 'var(--green)' },
+    { label: '🎖️ Individual Prizes',  pot: 700,  claimed: finishClaimed,          color: '#c8a800'      },
+    { label: '🏆 Team Championship',  pot: 500,  claimed: teamClaimed,            color: '#1a4a8a'      },
+  ];
   html += `<div class="card" style="margin-bottom:10px">
     <div class="card-header">💰 Total Prize Pool — $${GRAND_TOTAL}</div>
     <div class="card-body" style="padding:12px 16px">
       ${pctBar(totalDistributed, GRAND_TOTAL, 'var(--green)')}
-      <div style="font-size:.85em;color:#888;margin-top:4px">$${GRAND_TOTAL - totalDistributed} still in play</div>
+      <div style="font-size:.82em;color:#888;margin-top:2px;margin-bottom:14px">$${totalDistributed} distributed &nbsp;&middot;&nbsp; $${GRAND_TOTAL - totalDistributed} still in play</div>
+      <table style="width:100%;border-collapse:collapse">
+        ${potRows.map(r => {
+          const slicePct = Math.round((r.pot / GRAND_TOTAL) * 100);
+          const claimPct = r.pot > 0 ? Math.round((r.claimed / r.pot) * 100) : 0;
+          return `<tr style="border-top:1px solid var(--border)">
+            <td style="padding:7px 6px 7px 0;font-size:.88em;white-space:nowrap">${r.label}</td>
+            <td style="padding:7px 4px;text-align:right;white-space:nowrap;font-size:.88em"><strong class="money">$${r.pot}</strong></td>
+            <td style="padding:7px 4px;text-align:right;white-space:nowrap;font-size:.82em;color:#888">${slicePct}% of pot</td>
+            <td style="padding:7px 0 7px 8px;width:120px">
+              <div style="background:#e0e0e0;border-radius:4px;overflow:hidden;height:8px">
+                <div style="background:${r.color};height:100%;width:${claimPct}%;transition:width .4s"></div>
+              </div>
+              <div style="font-size:.72em;color:#888;margin-top:2px">$${r.claimed} / $${r.pot} (${claimPct}%)</div>
+            </td>
+          </tr>`;
+        }).join('')}
+      </table>
     </div>
   </div>`;
 
