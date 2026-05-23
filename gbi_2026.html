@@ -729,6 +729,7 @@ function initFB() {
   try {
     if (!firebase.apps.length) firebase.initializeApp(FB);
     _db   = firebase.database();
+    _db.enablePersistence().catch(() => {}); // offline cache — keeps working if signal drops
     _ref  = _db.ref(FB_PATH);
     _auth = firebase.auth();
   } catch(e) { console.warn('Firebase init error:', e); }
@@ -1912,24 +1913,27 @@ function renderMonies() {
     <div class="card-header">💰 Total Prize Pool — $${GRAND_TOTAL}</div>
     <div class="card-body" style="padding:12px 16px">
       ${pctBar(totalDistributed, GRAND_TOTAL, 'var(--green)')}
-      <div style="font-size:.82em;color:#888;margin-top:2px;margin-bottom:14px">$${totalDistributed} distributed &nbsp;&middot;&nbsp; $${GRAND_TOTAL - totalDistributed} still in play</div>
-      <table style="width:100%;border-collapse:collapse">
-        ${potRows.map(r => {
-          const slicePct = Math.round((r.pot / GRAND_TOTAL) * 100);
-          const claimPct = r.pot > 0 ? Math.round((r.claimed / r.pot) * 100) : 0;
-          return `<tr style="border-top:1px solid var(--border)">
-            <td style="padding:7px 6px 7px 0;font-size:.88em;white-space:nowrap">${r.label}</td>
-            <td style="padding:7px 4px;text-align:right;white-space:nowrap;font-size:.88em"><strong class="money">$${r.pot}</strong></td>
-            <td style="padding:7px 4px;text-align:right;white-space:nowrap;font-size:.82em;color:#888">${slicePct}% of pot</td>
-            <td style="padding:7px 0 7px 8px;width:120px">
-              <div style="background:#e0e0e0;border-radius:4px;overflow:hidden;height:8px">
-                <div style="background:${r.color};height:100%;width:${claimPct}%;transition:width .4s"></div>
-              </div>
-              <div style="font-size:.72em;color:#888;margin-top:2px">$${r.claimed} / $${r.pot} (${claimPct}%)</div>
-            </td>
-          </tr>`;
-        }).join('')}
-      </table>
+      <div style="font-size:.82em;color:#888;margin-top:2px">$${totalDistributed} distributed &nbsp;&middot;&nbsp; $${GRAND_TOTAL - totalDistributed} still in play</div>
+      <details style="margin-top:6px">
+        <summary style="font-size:.8em;color:var(--green);cursor:pointer;list-style:none;display:inline-block;padding:2px 8px;border:1px solid var(--green);border-radius:10px">Breakdown</summary>
+        <table style="width:100%;border-collapse:collapse;margin-top:8px">
+          ${potRows.map(r => {
+            const slicePct = Math.round((r.pot / GRAND_TOTAL) * 100);
+            const claimPct = r.pot > 0 ? Math.min(100, Math.round((r.claimed / r.pot) * 100)) : 0;
+            return `<tr style="border-top:1px solid var(--border)">
+              <td style="padding:7px 6px 7px 0;font-size:.88em;white-space:nowrap">${r.label}</td>
+              <td style="padding:7px 4px;text-align:right;white-space:nowrap;font-size:.88em"><strong class="money">$${r.pot}</strong></td>
+              <td style="padding:7px 4px;text-align:right;white-space:nowrap;font-size:.82em;color:#888">${slicePct}% of pot</td>
+              <td style="padding:7px 0 7px 8px;width:120px">
+                <div style="background:#e0e0e0;border-radius:4px;overflow:hidden;height:8px">
+                  <div style="background:${r.color};height:100%;width:${claimPct}%;transition:width .4s"></div>
+                </div>
+                <div style="font-size:.72em;color:#888;margin-top:2px">$${r.claimed} / $${r.pot} (${claimPct}%)</div>
+              </td>
+            </tr>`;
+          }).join('')}
+        </table>
+      </details>
     </div>
   </div>`;
 
