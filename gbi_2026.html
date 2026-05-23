@@ -366,10 +366,14 @@ tr.winner { background: #fffce8 !important; }
   .match-sides { grid-template-columns: 1fr; }
   .vs-center { display: none; }
   .site-header h1 { font-size: 1.4em; }
-  /* year-tag stays absolute top-right — no override */
   .hide-mobile { display: none !important; }
-  table { font-size: .82em; }
-  td, th { padding: 7px 8px; }
+  /* tighter tables on mobile */
+  table { font-size: .78em; }
+  td, th { padding: 5px 5px; }
+  thead th { font-size: .72em; letter-spacing: 0; }
+  /* hide day-results breakdown cols on mobile — total tells the story */
+  .hide-phone { display: none !important; }
+  .tab-pane { padding: 12px 10px; }
 }
 
 /* ─── SEARCH HIGHLIGHT ─── */
@@ -1615,20 +1619,20 @@ function renderDayTable(day) {
   if (rows.every(r=>r.dp.total===0)) return `<div class="empty">No scores entered yet for this day.</div>`;
   const pp = ppPlayers();
   let html = `<table><thead><tr>
-    <th>Rank</th><th>Player</th><th>Team</th>
-    <th class="c">4-Man</th><th class="c">2v2 Win</th><th class="c">2v2 Rank</th><th class="c">Payouts</th>
-    <th class="c">Total Pts</th><th class="c">Payout $</th>
+    <th>Rank</th><th>Player</th><th class="hide-phone">Team</th>
+    <th class="c hide-phone">4-Man</th><th class="c hide-phone">Match W</th><th class="c hide-phone">Rank</th><th class="c hide-phone">Payouts</th>
+    <th class="c">Total</th><th class="c">$</th>
   </tr></thead><tbody>`;
   let rk=1,prev=null;
   rows.forEach((p,i)=>{
     if (p.dp.total!==prev) rk=i+1;
     html+=`<tr${rk<=3?' class="winner"':''}>
       <td><span class="rank${rk<=3?' gold':''}">${rk}</span></td>
-      <td><strong>${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</strong></td><td>${tBadge(p.team)}</td>
-      <td class="c">${fmt(p.dp.fourMan)}</td>
-      <td class="c">${fmt(p.dp.matchWin)}</td>
-      <td class="c">${fmt(p.dp.matchRank)}</td>
-      <td class="c">${fmt(p.dp.payout)}</td>
+      <td><strong>${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</strong></td><td class="hide-phone">${tBadge(p.team)}</td>
+      <td class="c hide-phone">${fmt(p.dp.fourMan)}</td>
+      <td class="c hide-phone">${fmt(p.dp.matchWin)}</td>
+      <td class="c hide-phone">${fmt(p.dp.matchRank)}</td>
+      <td class="c hide-phone">${fmt(p.dp.payout)}</td>
       <td class="c">${ppPts(p.name,pp,p.dp.total)}</td>
       <td class="c money">${fmtM(p.dp.money)}</td>
     </tr>`;
