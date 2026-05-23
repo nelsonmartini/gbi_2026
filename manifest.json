@@ -1,0 +1,13 @@
+{
+  "name": "Garland Bend Invitational 2026",
+  "short_name": "GBI 2026",
+  "description": "Live scoring for the Garland Bend Invitational 2026",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f0e8",
+  "theme_color": "#006747",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "gbi-logo.jpg", "sizes": "512x512", "type": "image/jpeg", "purpose": "any maskable" }
+  ]
+}

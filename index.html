@@ -5,9 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Garland Bend Invitational 2026</title>
 
-<!-- Favicon -->
+<!-- Favicon & PWA -->
 <link rel="icon" type="image/jpeg" href="gbi-logo.jpg">
 <link rel="apple-touch-icon" href="gbi-logo.jpg">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#006747">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GBI 2026">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
 
@@ -2484,6 +2489,10 @@ function renderAnalytics() {
 ═══════════════════════════════════════════════════════ */
 boot();
 setInterval(() => { if (_cur === 'scoreboard' && TOURNEY_DATE - new Date() > 0) renderScoreboard(); }, 1000);
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
 </script>
 </body>
 </html>
