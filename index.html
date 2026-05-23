@@ -734,7 +734,6 @@ function initFB() {
   try {
     if (!firebase.apps.length) firebase.initializeApp(FB);
     _db   = firebase.database();
-    _db.enablePersistence().catch(() => {}); // offline cache — keeps working if signal drops
     _ref  = _db.ref(FB_PATH);
     _auth = firebase.auth();
   } catch(e) { console.warn('Firebase init error:', e); }
