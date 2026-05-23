@@ -1860,7 +1860,8 @@ function renderMonies() {
   function teamPrize(name) {
     if (!anyScores || !leadTeamKey) return 0;
     const p = S.roster.find(r => r.name === name);
-    return (p && p.team === leadTeamKey) ? 50 : 0;
+    const perPlayer = Math.round((500 + totalRollover) / 10);
+    return (p && p.team === leadTeamKey) ? perPlayer : 0;
   }
 
   // Hole payouts — split by day
