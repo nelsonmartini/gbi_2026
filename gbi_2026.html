@@ -1178,11 +1178,11 @@ function renderScoreboard() {
     if (!anyScores) {
       html += `<div class="empty"><div class="eicon">&#127948;</div>No scores entered yet &mdash; head to Day 1 to get started!</div>`;
     } else {
-      html += `<table><thead><tr>
-        <th class="c" style="width:36px"></th><th>Player</th>
+      html += `<table style="font-size:.84em"><thead><tr>
+        <th class="c" style="width:32px"></th><th>Player</th>
         <th class="hide-mobile">Team</th>
         <th class="c">Pts</th>
-        <th class="c">To Par</th>
+        <th class="c hide-phone">Par</th>
         <th class="c">$</th>
       </tr></thead><tbody>`;
       let rk=1, prev=null;
@@ -1190,13 +1190,16 @@ function renderScoreboard() {
         if (p.total !== prev) rk = i+1;
         const par = playerScoreToPar(p.name);
         const parClass = par===null?'':par<0?' style="color:var(--green);font-weight:bold"':par>0?' style="color:#b03030;font-weight:bold"':' style="font-weight:bold"';
+        const rkCell = rk<=3
+          ? `<td class="c" style="font-size:1.15em;padding:4px 2px">${medal(rk)}</td>`
+          : `<td class="c" style="color:var(--gray-light);font-size:.78em;font-weight:bold;padding:4px 2px">${rk}</td>`;
         html += `<tr${rk<=3?' class="winner"':''}>
-          <td class="c" style="font-size:1.2em">${medal(rk)}</td>
-          <td><strong>${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</strong></td>
-          <td class="hide-mobile">${tBadge(p.team)}</td>
-          <td class="c">${ppPts(p.name,pp,p.total)}</td>
-          <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
-          <td class="c"><strong class="money">${fmtM(p.money)}</strong></td>
+          ${rkCell}
+          <td style="padding:5px 6px"><strong>${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</strong></td>
+          <td class="hide-mobile" style="padding:5px 6px">${tBadge(p.team)}</td>
+          <td class="c" style="padding:5px 4px">${ppPts(p.name,pp,p.total)}</td>
+          <td class="c hide-phone" style="padding:5px 4px;font-size:.8em;color:var(--gray)"><span${parClass}>${fmtPar(par)}</span></td>
+          <td class="c" style="padding:5px 4px;font-size:.8em;color:var(--gray-light)">${fmtM(p.money)}</td>
         </tr>`;
         prev = p.total;
       });
