@@ -1161,7 +1161,7 @@ function renderScoreboard() {
         const parCls = par === null ? 'none' : par < 0 ? 'under' : par === 0 ? 'even' : 'over';
         const tcol = p.team ? S.teams[p.team].color : '#aaa';
         html += `<div class="bb-row${rk<=3?' bb-top':''}">
-          <div class="bb-pos${rk<=3?' bb-gold':''}">${rk===1?'&#129351;':rk===2?'&#129352;':rk===3?'&#129353;':ordinal(rk)}</div>
+          <div class="bb-pos${rk<=3?' bb-gold':''}">${rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':ordinal(rk)}</div>
           <div class="bb-name" style="border-left-color:${tcol}">${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</div>
           <div class="bb-pts">${fmt(p.total)}</div>
           <div class="bb-par ${parCls}">${parStr}</div>
@@ -1173,7 +1173,7 @@ function renderScoreboard() {
 
   } else {
     // Standard table view — main standings
-    const medal = rk => rk===1?'&#129351;':rk===2?'&#129352;':rk===3?'&#129353;':`<span class="rank">${rk}</span>`;
+    const medal = rk => rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':`<span class="rank">${rk}</span>`;
     html += `<div class="card"><div class="card-header">&#128081; Championship Standings</div><div class="card-body">`;
     if (!anyScores) {
       html += `<div class="empty"><div class="eicon">&#127948;</div>No scores entered yet &mdash; head to Day 1 to get started!</div>`;
@@ -1239,7 +1239,7 @@ function renderScoreboard() {
   }
 
   // Day 1 + Day 2 mini-tables — below PP Zone, start collapsed
-  const medal = rk => rk===1?'&#129351;':rk===2?'&#129352;':rk===3?'&#129353;':`<span class="rank">${rk}</span>`;
+  const medal = rk => rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':`<span class="rank">${rk}</span>`;
   html += `<div class="two-col" style="margin-top:8px">`;
   ['day1','day2'].forEach((day,di) => {
     const label = di===0?'Day 1':'Day 2';
