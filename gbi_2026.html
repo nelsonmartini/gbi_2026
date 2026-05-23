@@ -1427,26 +1427,34 @@ function renderDay(day) {
   const td = day==='day1' ? {t1:tt.t1.d1,t2:tt.t2.d1} : {t1:tt.t1.d2,t2:tt.t2.d2};
 
   // Team day total header
+  const dayMargin = Math.abs(td.t1 - td.t2);
+  const dayLeadName = td.t1 > td.t2 ? S.teams.t1.name : td.t2 > td.t1 ? S.teams.t2.name : null;
+  const dayMid = dayLeadName ? `${esc(dayLeadName)} +${fmt(dayMargin)}` : (td.t1+td.t2>0?'Tied':'&mdash;');
   let html = `
-  <div class="alert alert-gold"><strong>${label} Scoring</strong> — Enter group scores for the 4-Man Scramble, then pair scores for the 2v2 Head-to-Head. Points calculate automatically.</div>
-
-  <div class="card">
-    <div class="card-header">📊 ${label} Team Totals</div>
-    <div class="card-body">
-      <div class="matchup">
-        <div class="team-block${td.t1>td.t2?' leading':''}">
-          <div class="t-name">${esc(S.teams.t1.name)}</div>
-          <div class="t-pts">${fmt(td.t1)}</div>
-        </div>
-        <div class="vs-mid">VS</div>
-        <div class="team-block${td.t2>td.t1?' leading':''}">
-          <div class="t-name">${esc(S.teams.t2.name)}</div>
-          <div class="t-pts">${fmt(td.t2)}</div>
-        </div>
-      </div>
+  <div class="team-compact-banner" style="margin-bottom:10px">
+    <div class="tcb-side" style="background:${esc(S.teams.t1.color)}">
+      <div class="tcb-name">${esc(S.teams.t1.name)}</div>
+      <div class="tcb-score">${fmt(td.t1)}</div>
+    </div>
+    <div class="tcb-mid">
+      <div class="tcb-vs">${label}</div>
+      <div class="tcb-margin">${dayMid}</div>
+    </div>
+    <div class="tcb-side" style="background:${esc(S.teams.t2.color)}">
+      <div class="tcb-name">${esc(S.teams.t2.name)}</div>
+      <div class="tcb-score">${fmt(td.t2)}</div>
     </div>
   </div>
-
+  <details style="margin-bottom:10px">
+    <summary style="font-size:.8em;color:var(--gray);cursor:pointer;padding:4px 8px;list-style:none;display:flex;align-items:center;gap:6px">
+      <span style="border:1px solid var(--border);border-radius:10px;padding:2px 10px;font-size:.95em">&#9432; Scoring guide</span>
+    </summary>
+    <div class="alert alert-gold" style="margin-top:6px;font-size:.83em">
+      Enter group scores for the 4-Man Scramble, then pair scores for the 2v2. Points calculate automatically.
+      1st=${sc.fourMan[0]}, 2nd=${sc.fourMan[1]}, 3rd=${sc.fourMan[2]}, 4th=${sc.fourMan[3]}, 5th=${sc.fourMan[4]} pts &nbsp;&middot;&nbsp; Match win +${sc.matchWin}, tie +${sc.matchTie}
+    </div>
+  </details>`;
+  html += `
   <div class="sec-head" style="cursor:pointer;justify-content:space-between;user-select:none" onclick="toggleCollapse('${day}_four','${day}')">
     <h3>&#9971; 4-Man Scramble &mdash; ${label}</h3>
     <span style="font-size:.8em;color:var(--green);border:1px solid var(--green);padding:2px 10px;border-radius:12px">${_collapsed[day+'_four']===false?'&#9650; Hide':'&#9660; Show'}</span>
@@ -1916,20 +1924,23 @@ function renderAnalytics() {
   if (!anyScores) {
     html += `<div class="empty"><div class="eicon">&#128202;</div>Waiting for scores&hellip;</div>`;
   } else {
-    const t1lead = tt.t1.total > tt.t2.total;
-    const t2lead = tt.t2.total > tt.t1.total;
+    const aMargin = Math.abs(tt.t1.total - tt.t2.total);
+    const aLead   = tt.t1.total > tt.t2.total ? tt.t1.name : tt.t2.total > tt.t1.total ? tt.t2.name : null;
     html += `
-    <div class="matchup" style="margin-bottom:22px">
-      <div class="team-block${t1lead?' leading':''}">
-        <div class="t-name">${t1name}</div>
-        <div class="t-pts">${fmt(tt.t1.total)}</div>
-        <div class="t-sub">D1: ${fmt(tt.t1.d1)} &nbsp;|&nbsp; D2: ${fmt(tt.t1.d2)}</div>
+    <div class="team-compact-banner" style="margin-bottom:18px">
+      <div class="tcb-side" style="background:${t1col}">
+        <div class="tcb-name">${t1name}</div>
+        <div class="tcb-score">${fmt(tt.t1.total)}</div>
+        <div style="font-size:.7em;opacity:.7;margin-top:2px">D1: ${fmt(tt.t1.d1)} &middot; D2: ${fmt(tt.t1.d2)}</div>
       </div>
-      <div class="vs-mid">VS</div>
-      <div class="team-block${t2lead?' leading':''}">
-        <div class="t-name">${t2name}</div>
-        <div class="t-pts">${fmt(tt.t2.total)}</div>
-        <div class="t-sub">D1: ${fmt(tt.t2.d1)} &nbsp;|&nbsp; D2: ${fmt(tt.t2.d2)}</div>
+      <div class="tcb-mid">
+        <div class="tcb-vs">VS</div>
+        <div class="tcb-margin">${aLead ? `${esc(aLead)} +${fmt(aMargin)}` : 'Tied'}</div>
+      </div>
+      <div class="tcb-side" style="background:${t2col}">
+        <div class="tcb-name">${t2name}</div>
+        <div class="tcb-score">${fmt(tt.t2.total)}</div>
+        <div style="font-size:.7em;opacity:.7;margin-top:2px">D1: ${fmt(tt.t2.d1)} &middot; D2: ${fmt(tt.t2.d2)}</div>
       </div>
     </div>`;
 
