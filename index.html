@@ -1764,7 +1764,7 @@ function renderMonies() {
   const tt = teamTotals();
   const mdl = rk => rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':`<span class="rank">${rk}</span>`;
 
-  // --- Ranked standings for finish prizes ---
+  // Ranked standings (same logic as scoreboard)
   let rkc = 1, prevTot = null;
   const ranked = [];
   all.forEach((p, i) => {
@@ -1780,7 +1780,7 @@ function renderMonies() {
     for (let pos = 1; pos <= 3; pos++) {
       const tied = ranked.filter(p => p.rk === pos);
       if (!tied.find(p => p.name === name)) continue;
-      if (tied.length === 1) return PRIZE_AMOUNTS[pos-1];
+      if (tied.length === 1) return PRIZE_AMOUNTS[pos - 1];
       let pool = 0;
       for (let i = 0; i < tied.length && (pos + i - 1) < 3; i++) pool += PRIZE_AMOUNTS[pos + i - 1];
       return Math.round(pool / tied.length);
@@ -1788,7 +1788,7 @@ function renderMonies() {
     return 0;
   }
 
-  // --- Team champ ---
+  // Team champ
   const leadTeamKey = tt.t1.total > tt.t2.total ? 't1' : tt.t2.total > tt.t1.total ? 't2' : null;
   const leadTeamName = leadTeamKey ? tt[leadTeamKey].name : null;
 
@@ -1798,7 +1798,7 @@ function renderMonies() {
     return (p && p.team === leadTeamKey) ? 50 : 0;
   }
 
-  // --- Hole payouts ---
+  // Hole payouts
   let claimedHole = 0, unclaimedHole = 0;
   ['day1','day2'].forEach(day => {
     S[day].payouts.forEach(p => {
@@ -1806,19 +1806,15 @@ function renderMonies() {
       if (p.winner) claimedHole += 20; else unclaimedHole += 20;
     });
   });
-  const totalHolePot = claimedHole + unclaimedHole;
+  const totalHolePot = claimedHole + unclaimedHole || 800;
 
-  // --- Finish prize totals for tracker ---
-  const finishClaimed = anyScores ? ranked.filter(p => p.rk <= 3).reduce((sum, p) => {
-    const tied = ranked.filter(q => q.rk === p.rk);
-    if (tied.length === 1) return sum + PRIZE_AMOUNTS[p.rk - 1];
-    let pool = 0;
-    for (let i = 0; i < tied.length && (p.rk + i - 1) < 3; i++) pool += PRIZE_AMOUNTS[p.rk + i - 1];
-    return sum + Math.round(pool / tied.length);
+  // Pot totals for tracker bars
+  const finishClaimed = anyScores ? PRIZE_AMOUNTS.reduce((sum, amt, i) => {
+    const pos = i + 1;
+    const tied = ranked.filter(p => p.rk === pos);
+    return tied.length ? sum + amt : sum;
   }, 0) : 0;
   const teamClaimed = (anyScores && leadTeamKey) ? 500 : 0;
-
-  // --- Total distributed ---
   const totalDistributed = claimedHole + finishClaimed + teamClaimed;
   const GRAND_TOTAL = 2000;
 
@@ -1826,7 +1822,15 @@ function renderMonies() {
     const pct = total > 0 ? Math.round((claimed / total) * 100) : 0;
     return `<div style="background:#e0e0e0;border-radius:5px;overflow:hidden;height:12px;margin:5px 0 3px">
       <div style="background:${color};height:100%;width:${pct}%;transition:width .4s"></div>
-    </div><div style="font-size:.78em;color:#666">${pct}% distributed &nbsp;·&nbsp; <strong class="money">$${claimed}</strong> of $${total}</div>`;
+    </div><div style="font-size:.78em;color:#666">${pct}% &nbsp;&middot;&nbsp; <strong class="money">$${claimed}</strong> of $${total}</div>`;
+  }
+
+  // Names at each finish position (handles ties correctly with filter)
+  function posNames(pos) {
+    const tied = ranked.filter(p => p.rk === pos);
+    if (!anyScores || !tied.length) return `<span style="color:#aaa;font-style:italic">TBD</span>`;
+    const names = tied.map(p => `<strong>${flag(p.name)} ${esc(p.name)}</strong>`).join(' &amp; ');
+    return tied.length > 1 ? `${names} <em style="color:#b07000;font-size:.85em">(tied — split)</em>` : names;
   }
 
   let html = '';
@@ -1846,27 +1850,23 @@ function renderMonies() {
     <div class="card-body">`;
 
   // Individual finish prizes
-  const f1 = ranked.find(p => p.rk === 1);
-  const f2 = ranked.find(p => p.rk === 2);
-  const f3 = ranked.find(p => p.rk === 3);
-  const tbd = `<span style="color:#aaa;font-style:italic">TBD</span>`;
-  const winner = (p) => p && anyScores ? `<strong>${flag(p.name)} ${esc(p.name)}</strong>` : tbd;
-
   html += `<div style="margin-bottom:18px">
     <div style="font-weight:bold;margin-bottom:4px">🎖️ Individual Finish Prizes &mdash; $700</div>
     ${pctBar(finishClaimed, 700, '#c8a800')}
-    <table style="width:100%;max-width:460px;margin-top:8px"><tbody>
-      <tr><td style="width:28px">🥇</td><td style="width:60px"><strong class="money">$400</strong></td><td>${winner(f1)}</td></tr>
-      <tr><td>🥈</td><td><strong class="money">$200</strong></td><td>${winner(f2)}</td></tr>
-      <tr><td>🥉</td><td><strong class="money">$100</strong></td><td>${winner(f3)}</td></tr>
+    <table style="width:100%;max-width:500px;margin-top:8px"><tbody>
+      <tr><td style="width:28px">🥇</td><td style="width:60px"><strong class="money">$400</strong></td><td>${posNames(1)}</td></tr>
+      <tr><td>🥈</td><td><strong class="money">$200</strong></td><td>${posNames(2)}</td></tr>
+      <tr><td>🥉</td><td><strong class="money">$100</strong></td><td>${posNames(3)}</td></tr>
     </tbody></table>
   </div>`;
 
   // Team champ
-  let teamWho = tbd;
+  let teamWho = `<span style="color:#aaa;font-style:italic">TBD</span>`;
   if (anyScores && leadTeamKey) {
     const tColor = S.teams[leadTeamKey].color;
-    teamWho = `<span class="tb" style="background:${esc(tColor)}">${esc(leadTeamName)}</span> <span style="color:#666;font-size:.85em">($50 × 10 players)</span>`;
+    const teamPlayers = S.roster.filter(p => p.team === leadTeamKey).map(p => esc(p.name)).join(', ');
+    teamWho = `<span class="tb" style="background:${esc(tColor)}">${esc(leadTeamName)}</span>
+      <div style="color:#666;font-size:.82em;margin-top:4px">$50 each → ${teamPlayers}</div>`;
   }
   html += `<div style="margin-bottom:18px">
     <div style="font-weight:bold;margin-bottom:4px">🏆 Team Championship &mdash; $500</div>
@@ -1875,48 +1875,47 @@ function renderMonies() {
   </div>`;
 
   // Hole payouts
-  const holeTeamNote = unclaimedHole > 0
-    ? `<span style="color:#b07000"> · $${unclaimedHole} unclaimed &rarr; winning team pool</span>`
-    : '';
   html += `<div>
-    <div style="font-weight:bold;margin-bottom:4px">⛳ Hole Payouts &mdash; $${totalHolePot || 800}</div>
-    ${pctBar(claimedHole, totalHolePot || 800, 'var(--green)')}
-    <div style="margin-top:4px;font-size:.85em"><span class="money">$${claimedHole}</span> claimed${holeTeamNote}</div>
+    <div style="font-weight:bold;margin-bottom:4px">⛳ Hole Payouts &mdash; $${totalHolePot}</div>
+    ${pctBar(claimedHole, totalHolePot, 'var(--green)')}
+    <div style="margin-top:4px;font-size:.85em">
+      <span class="money">$${claimedHole}</span> paid out to players
+      ${unclaimedHole > 0 ? `&nbsp;&middot;&nbsp; <span style="color:#b07000">$${unclaimedHole} unclaimed &rarr; winning team pool</span>` : ''}
+    </div>
   </div>`;
 
-  html += `</div></div>`; // close card
+  html += `</div></div>`;
 
-  // ── All Players Table ──
-  const moneyRows = all.map(p => {
-    const hm = p.money;
-    const fm = finishPrize(p.name);
-    const tm = teamPrize(p.name);
-    return { ...p, hm, fm, tm, totalM: hm + fm + tm };
-  }).sort((a,b) => b.totalM - a.totalM || a.name.localeCompare(b.name));
-
+  // ── Player Winnings Table (copy of scoreboard, ranked by pts, + winnings column) ──
   html += `<div class="card">
     <div class="card-header">💵 Player Winnings</div>
     <div class="card-body" style="padding:0">
       <table class="sb-table" style="width:100%"><thead><tr>
         <th class="c" style="width:36px"></th>
         <th>Player</th>
-        <th class="c">Hole $$</th>
-        <th class="c">Finish</th>
-        <th class="c hide-mobile">Team</th>
-        <th class="c">Total Won</th>
+        <th class="hide-mobile">Team</th>
+        <th class="c">Pts</th>
+        <th class="c">To Par</th>
+        <th class="c">💰 Won</th>
       </tr></thead><tbody>`;
 
-  let mrk = 1;
-  moneyRows.forEach((p, i) => {
-    if (i > 0 && p.totalM < moneyRows[i-1].totalM) mrk = i + 1;
-    const cell = v => v ? `<strong class="money">$${v}</strong>` : `<span style="color:#ccc">—</span>`;
-    html += `<tr${mrk <= 3 && p.totalM > 0 ? ' class="winner"' : ''}>
-      <td class="c" style="font-size:1.1em">${p.totalM > 0 ? mdl(mrk) : '<span style="color:#ddd">—</span>'}</td>
-      <td style="font-size:1.1em"><strong>${flag(p.name)} ${esc(p.name)}</strong></td>
-      <td class="c">${cell(p.hm)}</td>
-      <td class="c">${cell(p.fm)}</td>
-      <td class="c hide-mobile">${cell(p.tm)}</td>
-      <td class="c">${p.totalM ? `<strong class="money" style="font-size:1.05em">$${p.totalM}</strong>` : '<span style="color:#ccc">$0</span>'}</td>
+  let prevRk = null, dispRk = 1;
+  ranked.forEach((p, i) => {
+    if (p.total !== prevRk) dispRk = i + 1;
+    prevRk = p.total;
+    const par = playerScoreToPar(p.name);
+    const parClass = par === null ? '' : par < 0 ? ' style="color:var(--green);font-weight:bold"' : par > 0 ? ' style="color:#b03030;font-weight:bold"' : ' style="font-weight:bold"';
+    const fm = finishPrize(p.name);
+    const tm = teamPrize(p.name);
+    const totalWon = p.money + fm + tm;
+    const wonStr = totalWon ? `<strong class="money">$${totalWon}</strong>` : `<span style="color:#ccc">$0</span>`;
+    html += `<tr${dispRk <= 3 ? ' class="winner"' : ''}>
+      <td class="c" style="font-size:1.2em">${mdl(dispRk)}</td>
+      <td style="font-size:1.2em"><strong>${flag(p.name)} ${esc(p.name)}</strong></td>
+      <td class="hide-mobile">${tBadge(p.team)}</td>
+      <td class="c"><strong class="pts">${fmt(p.total)}</strong></td>
+      <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
+      <td class="c">${wonStr}</td>
     </tr>`;
   });
 
