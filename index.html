@@ -465,6 +465,24 @@ tr.winner { background: #fffce8 !important; }
 .match-arena label  { font-size: .72em; }
 .match-arena input.score-in { width: 60px; font-size: .85em; padding: 5px; }
 
+/* ─── COUNTDOWN ─── */
+.cd-wrap { display:flex; justify-content:center; gap:12px; margin-bottom:10px; }
+.cd-unit { text-align:center; }
+.cd-num  { font-family:'DM Mono',monospace; font-size:2.2em; font-weight:700; color:var(--gold); line-height:1; }
+.cd-label{ font-size:.68em; color:var(--gray-light); letter-spacing:1.5px; text-transform:uppercase; margin-top:3px; }
+.cd-sep  { font-size:2em; font-weight:bold; color:var(--gold-dark); align-self:flex-start; padding-top:4px; }
+.cd-sub  { text-align:center; font-size:.78em; color:var(--gray-light); margin-top:4px; font-style:italic; }
+.cd-live { text-align:center; font-size:1.3em; font-weight:bold; color:var(--green); padding:12px 0; }
+
+/* ─── PP ZONE ─── */
+.pp-zone-header { background:#8b1a1a !important; }
+.pp-row { display:flex; align-items:center; gap:10px; padding:9px 14px; border-bottom:1px solid #f5c6c6; }
+.pp-row:last-child { border-bottom:none; }
+.pp-rank { font-size:1.3em; min-width:28px; }
+.pp-name { flex:1; font-weight:bold; font-size:.9em; }
+.pp-pts  { font-family:'DM Mono',monospace; font-size:.88em; color:#8b1a1a; font-weight:bold; }
+.pp-msg  { font-size:.72em; color:#999; font-style:italic; }
+
 /* ─── ANALYTICS ─── */
 .highlight-card {
   background: var(--green); color: var(--white);
@@ -575,6 +593,8 @@ tr.winner { background: #fffce8 !important; }
 /* ═══════════════════════════════════════════════════════
    CONSTANTS
 ═══════════════════════════════════════════════════════ */
+const TOURNEY_DATE = new Date(2026, 8, 11, 8, 30, 0); // Sept 11 2026 8:30 AM local
+
 const PLAYERS = [
   "Basham","Bode","Bryce","Braden","Chris O",
   "Evan","Grant","Jake B","Moose","Nail",
@@ -1035,6 +1055,34 @@ function renderScoreboard() {
     html += `<div class="alert alert-gold">&#9888;&#65039; <strong>${unassigned} player${unassigned>1?'s':''} not yet assigned to a team.</strong> Visit the <strong>Roster &amp; Teams</strong> tab to assign all players before scoring begins.</div>`;
   }
 
+  // Countdown
+  const now = new Date(), diff = TOURNEY_DATE - now;
+  if (diff > 0) {
+    const d = Math.floor(diff/864e5);
+    const h = Math.floor((diff%864e5)/36e5);
+    const m = Math.floor((diff%36e5)/6e4);
+    const s = Math.floor((diff%6e4)/1e3);
+    const pad = n => String(n).padStart(2,'0');
+    html += `
+    <div class="card">
+      <div class="card-header">&#9971; GBI 2026 &mdash; Day 1 Countdown</div>
+      <div class="card-body" style="padding:18px 16px">
+        <div class="cd-wrap">
+          <div class="cd-unit"><div class="cd-num">${d}</div><div class="cd-label">Days</div></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-unit"><div class="cd-num">${pad(h)}</div><div class="cd-label">Hours</div></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-unit"><div class="cd-num">${pad(m)}</div><div class="cd-label">Mins</div></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-unit"><div class="cd-num">${pad(s)}</div><div class="cd-label">Secs</div></div>
+        </div>
+        <div class="cd-sub">Friday, September 11, 2026 &nbsp;&middot;&nbsp; 8:30 AM &nbsp;&middot;&nbsp; General Burnside Island GC, Somerset KY</div>
+      </div>
+    </div>`;
+  } else if (diff > -172800000) {
+    html += `<div class="card"><div class="card-body"><div class="cd-live">&#127948; GBI 2026 is LIVE &mdash; let&rsquo;s play!</div></div></div>`;
+  }
+
   // Compact team banner
   const t1col = S.teams.t1.color, t2col = S.teams.t2.color;
   const margin = Math.abs(tt.t1.total - tt.t2.total);
@@ -1149,6 +1197,38 @@ function renderScoreboard() {
       html += `</div></div>`;
     });
     html += `</div>`;
+  }
+
+  // PP Zone — bottom 5 when scores exist
+  if (anyScores) {
+    const msgs = [
+      'Seeking professional help.',
+      'Called their caddie. Caddie quit.',
+      'The course is winning.',
+      'Checking flights home early.',
+      'Has not told family yet.',
+    ];
+    const bottom5 = [...all].sort((a,b) => a.total - b.total).slice(0,5);
+    html += `
+    <div class="card" style="margin-top:8px">
+      <div class="card-header pp-zone-header">&#128680; The PP Zone &mdash; Pray for These Players</div>
+      <div class="card-body" style="padding:0">
+        <div class="alert alert-red" style="margin:12px 12px 0;border-radius:5px">
+          Bottom 5 on the leaderboard. Last place earns a punishment. You know who you are.
+        </div>
+        <div style="margin-top:8px">`;
+    bottom5.forEach((p, i) => {
+      const pos = all.length - 4 + i;
+      html += `<div class="pp-row">
+        <div class="pp-rank">${i===0?'&#128169;':'&#9888;&#65039;'}</div>
+        <div class="pp-name">${flag(p.name)} ${esc(p.name)} ${tBadge(p.team)}</div>
+        <div style="text-align:right">
+          <div class="pp-pts">${fmt(p.total)} pts</div>
+          <div class="pp-msg">${msgs[i]}</div>
+        </div>
+      </div>`;
+    });
+    html += `</div></div></div>`;
   }
 
   el.innerHTML = html;
@@ -2067,6 +2147,7 @@ function renderAnalytics() {
    BOOT
 ═══════════════════════════════════════════════════════ */
 boot();
+setInterval(() => { if (_cur === 'scoreboard' && TOURNEY_DATE - new Date() > 0) renderScoreboard(); }, 1000);
 </script>
 </body>
 </html>
