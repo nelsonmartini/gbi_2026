@@ -151,6 +151,8 @@ tbody tr:nth-child(even) { background: #f8f5f0; }
 tbody tr:hover { background: #edf5f0; }
 td { padding: 8px 11px; border-bottom: 1px solid var(--border); vertical-align: middle; }
 tbody tr:last-child td { border-bottom: none; }
+.sb-table td { padding: 8px 6px; }
+.sb-table th { padding-left: 6px; padding-right: 6px; }
 
 /* ─── RANK BADGES ─── */
 .rank {
@@ -575,6 +577,7 @@ tr.winner { background: #fffce8 !important; }
   <button class="tab-btn" onclick="tab('day1')">⛳ Day 1</button>
   <button class="tab-btn" onclick="tab('day2')">⛳ Day 2</button>
   <button class="tab-btn" onclick="tab('payouts')">💰 Hole Payouts</button>
+  <button class="tab-btn" onclick="tab('monies')">💵 Monies</button>
   <button class="tab-btn" onclick="tab('roster')">👥 Roster &amp; Teams</button>
   <button class="tab-btn" onclick="tab('analytics')">📈 Analytics</button>
   <button class="tab-btn" onclick="tab('format')">📋 Format &amp; Rules</button>
@@ -587,6 +590,7 @@ tr.winner { background: #fffce8 !important; }
   <div id="pane-day1"       class="tab-pane"></div>
   <div id="pane-day2"       class="tab-pane"></div>
   <div id="pane-payouts"    class="tab-pane"></div>
+  <div id="pane-monies"     class="tab-pane"></div>
   <div id="pane-analytics"  class="tab-pane"></div>
   <div id="pane-format"     class="tab-pane"></div>
 </main>
@@ -1033,7 +1037,7 @@ function tab(id) {
 }
 
 function render(id) {
-  const map = { scoreboard: renderScoreboard, roster: renderRoster, day1: ()=>renderDay('day1'), day2: ()=>renderDay('day2'), payouts: renderPayouts, analytics: renderAnalytics, format: renderFormat };
+  const map = { scoreboard: renderScoreboard, roster: renderRoster, day1: ()=>renderDay('day1'), day2: ()=>renderDay('day2'), payouts: renderPayouts, monies: renderMonies, analytics: renderAnalytics, format: renderFormat };
   if (map[id]) map[id]();
 }
 
@@ -1178,7 +1182,7 @@ function renderScoreboard() {
     if (!anyScores) {
       html += `<div class="empty"><div class="eicon">&#127948;</div>No scores entered yet &mdash; head to Day 1 to get started!</div>`;
     } else {
-      html += `<table><thead><tr>
+      html += `<table class="sb-table"><thead><tr>
         <th class="c" style="width:36px"></th><th>Player</th>
         <th class="hide-mobile">Team</th>
         <th class="c">Pts</th>
@@ -1192,7 +1196,7 @@ function renderScoreboard() {
         const parClass = par===null?'':par<0?' style="color:var(--green);font-weight:bold"':par>0?' style="color:#b03030;font-weight:bold"':' style="font-weight:bold"';
         html += `<tr${rk<=3?' class="winner"':''}>
           <td class="c" style="font-size:1.2em">${medal(rk)}</td>
-          <td><strong>${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</strong></td>
+          <td style="font-size:1.2em"><strong>${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</strong></td>
           <td class="hide-mobile">${tBadge(p.team)}</td>
           <td class="c">${ppPts(p.name,pp,p.total)}</td>
           <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
@@ -1747,6 +1751,168 @@ function renderPayouts() {
     html += `</tbody></table>`;
   }
   html += `</div></div>`;
+  el.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════════════
+   MONIES
+═══════════════════════════════════════════════════════ */
+function renderMonies() {
+  const el = document.getElementById('pane-monies');
+  const all = allPlayerStats();
+  const anyScores = all.some(p => p.total > 0);
+  const tt = teamTotals();
+
+  // --- Ranked standings for finish prizes ---
+  let rk = 1, prevTot = null;
+  const ranked = [];
+  all.forEach((p, i) => {
+    if (p.total !== prevTot) rk = i + 1;
+    ranked.push({ ...p, rk });
+    prevTot = p.total;
+  });
+
+  const PRIZE_AMOUNTS = [400, 200, 100];
+
+  function prizeForPos(pos) {
+    const tied = ranked.filter(p => p.rk === pos);
+    if (!anyScores || !tied.length) return { names: [], amount: PRIZE_AMOUNTS[pos-1], tied: false };
+    return { names: tied.map(p => p.name), amount: PRIZE_AMOUNTS[pos-1], tied: tied.length > 1 };
+  }
+
+  function finishPrize(name) {
+    if (!anyScores) return 0;
+    for (let pos = 1; pos <= 3; pos++) {
+      const tied = ranked.filter(p => p.rk === pos);
+      if (!tied.find(p => p.name === name)) continue;
+      if (tied.length === 1) return PRIZE_AMOUNTS[pos-1];
+      // split prizes across tied spots
+      let pool = 0;
+      for (let i = 0; i < tied.length && (pos + i - 1) < 3; i++) pool += PRIZE_AMOUNTS[pos + i - 1];
+      return Math.round(pool / tied.length);
+    }
+    return 0;
+  }
+
+  // --- Team champ ---
+  const leadTeamKey = tt.t1.total > tt.t2.total ? 't1' : tt.t2.total > tt.t1.total ? 't2' : null;
+  const leadTeamName = leadTeamKey ? tt[leadTeamKey].name : null;
+
+  function teamPrize(name) {
+    if (!anyScores || !leadTeamKey) return 0;
+    const p = S.roster.find(r => r.name === name);
+    return (p && p.team === leadTeamKey) ? 50 : 0;
+  }
+
+  // --- Hole payouts claimed vs unclaimed ---
+  let claimedHole = 0, unclaimedHole = 0;
+  ['day1','day2'].forEach(day => {
+    S[day].payouts.forEach(p => {
+      if (p.cat === 'NP') return;
+      if (p.winner) claimedHole += 20;
+      else unclaimedHole += 20;
+    });
+  });
+  const totalHolePot = claimedHole + unclaimedHole;
+  const holePct = totalHolePot > 0 ? Math.round((claimedHole / totalHolePot) * 100) : 0;
+
+  let html = '';
+
+  // ── Pot Tracker ──
+  html += `<div class="card" style="margin-bottom:10px">
+    <div class="card-header">🏆 Prize Pot Tracker</div>
+    <div class="card-body">`;
+
+  // Individual finish prizes
+  html += `<div class="sec-head"><h3>🎖️ Individual Finish Prizes &mdash; $700 total</h3></div>
+    <table style="width:100%;max-width:480px;margin-bottom:16px"><tbody>`;
+  const medalEmoji = ['🥇','🥈','🥉'];
+  [1,2,3].forEach(pos => {
+    const h = prizeForPos(pos);
+    let who;
+    if (!anyScores || !h.names.length) {
+      who = `<span style="color:#aaa;font-style:italic">TBD — no scores yet</span>`;
+    } else if (h.tied) {
+      who = `<span style="color:#b07000">${h.names.map(n => esc(n)).join(' &amp; ')} <em>(tied — prize split)</em></span>`;
+    } else {
+      who = `<strong>${flag(h.names[0])} ${esc(h.names[0])}</strong>`;
+    }
+    html += `<tr>
+      <td style="width:32px;font-size:1.3em">${medalEmoji[pos-1]}</td>
+      <td style="width:70px"><strong class="money">$${h.amount}</strong></td>
+      <td>${who}</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+
+  // Team champ
+  html += `<div class="sec-head"><h3>🏆 Team Championship &mdash; $500 total ($50 per player)</h3></div>
+    <div style="margin-bottom:16px">`;
+  if (!anyScores || !leadTeamKey) {
+    html += `<span style="color:#aaa;font-style:italic">TBD — no scores yet</span>`;
+  } else {
+    const tColor = S.teams[leadTeamKey].color;
+    const teamPlayers = S.roster.filter(p => p.team === leadTeamKey).map(p => esc(p.name));
+    html += `<div>Currently leading: <span class="tb" style="background:${esc(tColor)}">${esc(leadTeamName)}</span>
+      &nbsp;<span style="color:#666;font-size:.85em">$50 each → ${teamPlayers.join(', ')}</span></div>`;
+  }
+  html += `</div>`;
+
+  // Hole payout progress
+  html += `<div class="sec-head"><h3>⛳ Hole Payouts &mdash; $${totalHolePot} total pot</h3></div>
+    <div style="background:#e8e8e8;border-radius:6px;overflow:hidden;height:14px;margin-bottom:6px">
+      <div style="background:var(--green);height:100%;width:${holePct}%;transition:width .4s"></div>
+    </div>
+    <div style="display:flex;gap:20px;font-size:.9em;flex-wrap:wrap">
+      <span><strong class="money">$${claimedHole}</strong> claimed by players</span>
+      <span style="color:#b07000"><strong>$${unclaimedHole}</strong> unclaimed &rarr; winning team pool</span>
+    </div>`;
+
+  html += `</div></div>`; // close card-body + card
+
+  // Unclaimed pool callout
+  if (unclaimedHole > 0) {
+    const teamStr = (anyScores && leadTeamKey) ? ` Currently that's <strong>${esc(leadTeamName)}</strong>.` : ' Winning team TBD.';
+    html += `<div class="alert alert-gold" style="margin-bottom:10px">
+      💰 <strong>$${unclaimedHole}</strong> in unclaimed hole payouts will be added to the winning team's pot.${teamStr}
+    </div>`;
+  }
+
+  // ── Per Player Breakdown ──
+  const moneyRows = all.map(p => {
+    const hm = p.money;
+    const fm = finishPrize(p.name);
+    const tm = teamPrize(p.name);
+    return { ...p, hm, fm, tm, totalM: hm + fm + tm };
+  }).sort((a,b) => b.totalM - a.totalM || a.name.localeCompare(b.name));
+
+  html += `<div class="card">
+    <div class="card-header">💵 Per Player Breakdown</div>
+    <div class="card-body" style="padding:0">
+      <table class="sb-table" style="width:100%"><thead><tr>
+        <th class="c" style="width:36px"></th>
+        <th>Player</th>
+        <th class="c">Hole $$</th>
+        <th class="c">Finish</th>
+        <th class="c hide-mobile">Team</th>
+        <th class="c">Total</th>
+      </tr></thead><tbody>`;
+
+  let mrk = 1;
+  moneyRows.forEach((p, i) => {
+    if (i > 0 && p.totalM < moneyRows[i-1].totalM) mrk = i + 1;
+    const cell = (v) => v ? `<strong class="money">$${v}</strong>` : `<span style="color:#ccc">—</span>`;
+    html += `<tr${mrk <= 3 ? ' class="winner"' : ''}>
+      <td class="c" style="font-size:1.1em">${medal(mrk)}</td>
+      <td style="font-size:1.1em"><strong>${flag(p.name)} ${esc(p.name)}</strong></td>
+      <td class="c">${cell(p.hm)}</td>
+      <td class="c">${cell(p.fm)}</td>
+      <td class="c hide-mobile">${cell(p.tm)}</td>
+      <td class="c">${p.totalM ? `<strong class="money">$${p.totalM}</strong>` : '<span style="color:#ccc">$0</span>'}</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table></div></div>`;
   el.innerHTML = html;
 }
 
