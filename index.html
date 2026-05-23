@@ -964,6 +964,15 @@ function teamOf(name) {
    HELPERS
 ═══════════════════════════════════════════════════════ */
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// Returns Set of bottom-5 player names when scores exist, otherwise empty Set
+function ppPlayers() {
+  const all = allPlayerStats();
+  if (!all.some(p => p.total > 0)) return new Set();
+  return new Set([...all].sort((a,b) => a.total - b.total).slice(0,5).map(p => p.name));
+}
+// Poop badge for PP Zone players — call anywhere a player name is rendered
+function ppBadge(name, pp) { return pp && pp.has(name) ? ' <span title="PP Zone" style="font-size:.78em" aria-label="PP Zone">&#127814;</span>' : ''; }
 function flag(name) {
   const f = name === 'Trevor' ? '🇪🇬' : '🇺🇸';
   return `<span style="font-size:.65em;vertical-align:middle">${f}</span>`;
@@ -1047,6 +1056,7 @@ function renderScoreboard() {
   const tt = teamTotals();
   const all = allPlayerStats();
   const anyScores = all.some(p => p.total > 0);
+  const pp = ppPlayers();
   const unassigned = S.roster.filter(p => !p.team).length;
 
   let html = '';
@@ -1135,7 +1145,7 @@ function renderScoreboard() {
         const tcol = p.team ? S.teams[p.team].color : '#aaa';
         html += `<div class="bb-row${rk<=3?' bb-top':''}">
           <div class="bb-pos${rk<=3?' bb-gold':''}">${ordinal(rk)}</div>
-          <div class="bb-name" style="border-left-color:${tcol}">${flag(p.name)} ${esc(p.name)}</div>
+          <div class="bb-name" style="border-left-color:${tcol}">${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</div>
           <div class="bb-pts">${fmt(p.total)}</div>
           <div class="bb-par ${parCls}">${parStr}</div>
         </div>`;
@@ -1164,7 +1174,7 @@ function renderScoreboard() {
         const parClass = par===null?'':par<0?' style="color:var(--green);font-weight:bold"':par>0?' style="color:#b03030;font-weight:bold"':' style="font-weight:bold"';
         html += `<tr${rk<=3?' class="winner"':''}>
           <td><span class="rank${rk<=3?' gold':''}">${rk}</span></td>
-          <td><strong>${flag(p.name)} ${esc(p.name)}</strong></td>
+          <td><strong>${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</strong></td>
           <td class="hide-mobile">${tBadge(p.team)}</td>
           <td class="c"><strong class="pts">${fmt(p.total)}</strong></td>
           <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
@@ -1189,7 +1199,7 @@ function renderScoreboard() {
         let rk=1, prev=null;
         sorted.forEach((p,i)=>{
           if(p.dp!==prev) rk=i+1;
-          html+=`<tr${rk<=3?' class="winner"':''}><td><span class="rank${rk<=3?' gold':''}">${rk}</span></td><td><strong>${flag(p.name)} ${esc(p.name)}</strong></td><td class="hide-mobile">${tBadge(p.team)}</td><td class="c pts">${fmt(p.dp)}</td><td class="c money">${fmtM(p.dm)}</td></tr>`;
+          html+=`<tr${rk<=3?' class="winner"':''}><td><span class="rank${rk<=3?' gold':''}">${rk}</span></td><td><strong>${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</strong></td><td class="hide-mobile">${tBadge(p.team)}</td><td class="c pts">${fmt(p.dp)}</td><td class="c money">${fmtM(p.dm)}</td></tr>`;
           prev=p.dp;
         });
         html += `</tbody></table>`;
@@ -1220,7 +1230,7 @@ function renderScoreboard() {
     bottom5.forEach((p, i) => {
       const pos = all.length - 4 + i;
       html += `<div class="pp-row">
-        <div class="pp-rank">${i===0?'&#128169;':'&#9888;&#65039;'}</div>
+        <div class="pp-rank">${i===0?'&#127814;':'&#9888;&#65039;'}</div>
         <div class="pp-name">${flag(p.name)} ${esc(p.name)} ${tBadge(p.team)}</div>
         <div style="text-align:right">
           <div class="pp-pts">${fmt(p.total)} pts</div>
@@ -1592,6 +1602,7 @@ function renderDayTable(day) {
   const dk = day==='day1'?'d1':'d2';
   const rows = allPlayerStats().map(p=>({...p, dp:p[dk]})).sort((a,b)=>b.dp.total-a.dp.total||a.name.localeCompare(b.name));
   if (rows.every(r=>r.dp.total===0)) return `<div class="empty">No scores entered yet for this day.</div>`;
+  const pp = ppPlayers();
   let html = `<table><thead><tr>
     <th>Rank</th><th>Player</th><th>Team</th>
     <th class="c">4-Man</th><th class="c">2v2 Win</th><th class="c">2v2 Rank</th><th class="c">Payouts</th>
@@ -1602,7 +1613,7 @@ function renderDayTable(day) {
     if (p.dp.total!==prev) rk=i+1;
     html+=`<tr${rk<=3?' class="winner"':''}>
       <td><span class="rank${rk<=3?' gold':''}">${rk}</span></td>
-      <td><strong>${esc(p.name)}</strong></td><td>${tBadge(p.team)}</td>
+      <td><strong>${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</strong></td><td>${tBadge(p.team)}</td>
       <td class="c">${fmt(p.dp.fourMan)}</td>
       <td class="c">${fmt(p.dp.matchWin)}</td>
       <td class="c">${fmt(p.dp.matchRank)}</td>
