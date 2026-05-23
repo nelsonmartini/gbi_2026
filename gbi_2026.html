@@ -1798,14 +1798,16 @@ function renderMonies() {
     return (p && p.team === leadTeamKey) ? 50 : 0;
   }
 
-  // Hole payouts
-  let claimedHole = 0, unclaimedHole = 0;
+  // Hole payouts — split by day
+  const holeDays = { day1: { claimed: 0, unclaimed: 0 }, day2: { claimed: 0, unclaimed: 0 } };
   ['day1','day2'].forEach(day => {
     S[day].payouts.forEach(p => {
       if (p.cat === 'NP') return;
-      if (p.winner) claimedHole += 20; else unclaimedHole += 20;
+      if (p.winner) holeDays[day].claimed += 20; else holeDays[day].unclaimed += 20;
     });
   });
+  const claimedHole = holeDays.day1.claimed + holeDays.day2.claimed;
+  const unclaimedHole = holeDays.day1.unclaimed + holeDays.day2.unclaimed;
   const totalHolePot = claimedHole + unclaimedHole || 800;
 
   // Pot totals for tracker bars
@@ -1874,15 +1876,20 @@ function renderMonies() {
     <div style="margin-top:6px">${teamWho}</div>
   </div>`;
 
-  // Hole payouts
-  html += `<div>
-    <div style="font-weight:bold;margin-bottom:4px">⛳ Hole Payouts &mdash; $${totalHolePot}</div>
-    ${pctBar(claimedHole, totalHolePot, 'var(--green)')}
-    <div style="margin-top:4px;font-size:.85em">
-      <span class="money">$${claimedHole}</span> paid out to players
-      ${unclaimedHole > 0 ? `&nbsp;&middot;&nbsp; <span style="color:#b07000">$${unclaimedHole} unclaimed &rarr; winning team pool</span>` : ''}
-    </div>
-  </div>`;
+  // Hole payouts — Day 1 and Day 2 separately
+  ['day1','day2'].forEach(day => {
+    const hd = holeDays[day];
+    const dayPot = hd.claimed + hd.unclaimed || 400;
+    const label = day === 'day1' ? '📅 Day 1 Hole Payouts' : '📅 Day 2 Hole Payouts';
+    html += `<div${day === 'day1' ? ' style="margin-bottom:18px"' : ''}>
+      <div style="font-weight:bold;margin-bottom:4px">${label} &mdash; $${dayPot}</div>
+      ${pctBar(hd.claimed, dayPot, 'var(--green)')}
+      <div style="margin-top:4px;font-size:.85em">
+        <span class="money">$${hd.claimed}</span> paid out to players
+        ${hd.unclaimed > 0 ? `&nbsp;&middot;&nbsp; <span style="color:#b07000">$${hd.unclaimed} unclaimed &rarr; winning team pool</span>` : ''}
+      </div>
+    </div>`;
+  });
 
   html += `</div></div>`;
 
