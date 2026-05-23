@@ -9,7 +9,7 @@
 <link rel="icon" type="image/jpeg" href="gbi-logo.jpg">
 <link rel="apple-touch-icon" href="gbi-logo.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <!-- Open Graph — controls preview image when link is shared -->
 <meta property="og:title" content="Garland Bend Invitational 2026">
@@ -24,19 +24,19 @@
   --green: #006747;
   --green-dark: #004d35;
   --green-mid: #005a3d;
-  --green-light: #e8f4ef;
+  --green-light: #1a3028;
   --gold: #C9A84C;
   --gold-light: #f0d98a;
   --gold-dark: #9a7a2e;
-  --cream: #f7f3eb;
-  --cream-dark: #ede7d8;
-  --white: #ffffff;
-  --dark: #1a1a1a;
-  --gray: #666;
-  --gray-light: #999;
-  --border: #ddd;
-  --t1: #1a4a8a;
-  --t2: #7a1a1a;
+  --cream: #0c1a0f;
+  --cream-dark: #091309;
+  --white: #122118;
+  --dark: #ddeedd;
+  --gray: #7aaa84;
+  --gray-light: #4d7055;
+  --border: #263d2b;
+  --t1: #4a8fd4;
+  --t2: #d44a4a;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -505,6 +505,90 @@ tr.winner { background: #fffce8 !important; }
   color: #c0392b; font-size: .85em; margin-top: 10px;
   min-height: 20px; font-style: italic;
 }
+/* ═══════════════════════════════════════════════════════
+   DARK THEME + TYPOGRAPHY UPGRADE
+═══════════════════════════════════════════════════════ */
+
+/* ── Cinzel for all headings ── */
+.card-header, .sec-head h3, .site-header h1,
+.tab-btn, .gpanel-head { font-family: 'Cinzel', Georgia, serif; }
+.card-header { letter-spacing: .5px; }
+.tab-btn     { letter-spacing: .4px; font-size: .82em; }
+
+/* ── Monospace for all numbers ── */
+.pts, .money, .t-pts, .tcb-score, .sval,
+.bb-pts, .t-sub, input.score-in { font-family: 'DM Mono', monospace; }
+
+/* ── Inputs dark ── */
+input[type="text"], input[type="number"], select {
+  background: #091309; border-color: #263d2b; color: #ddeedd;
+}
+input[type="text"]::placeholder, input[type="number"]::placeholder { color: #3d5a42; }
+select option { background: #0c1a0f; }
+input[type="color"] { background: #091309; border-color: #263d2b; }
+
+/* ── Tables ── */
+tbody tr:nth-child(even) { background: #0e1a10; }
+tbody tr:hover           { background: #162b1a; }
+td { border-bottom-color: #263d2b; }
+tr.winner { background: #1a1a00 !important; }
+tr.winner td:first-child { border-left-color: var(--gold); }
+
+/* ── Cards ── */
+.card { border-top: 2px solid rgba(201,168,76,.2); box-shadow: 0 2px 12px rgba(0,0,0,.4); }
+
+/* ── Group / match panels ── */
+.gpanel      { border-color: #263d2b; }
+.gpanel-head { background: #162b1a; }
+.gpanel-body { background: #122118; }
+.group-score-box { background: #091309; border-color: #263d2b; }
+.group-score-box label { color: var(--gray); }
+.match-divider   { background: #162b1a; border-color: #263d2b; }
+.match-side      { background: #122118; }
+.match-side.match-winner { background: #0a1f0f !important; border-left: 2px solid var(--gold); }
+.side-t1 { background: #0d1620; border-color: rgba(74,143,212,.25); }
+.side-t2 { background: #200d0d; border-color: rgba(212,74,74,.25); }
+.vs-center { color: var(--gray); }
+
+/* ── Chips ── */
+.chip-pool { background: #091309; border-color: #263d2b; }
+.chip      { background: #162b1a; border-color: #263d2b; color: var(--dark); }
+.chip.t1   { background: #0d1a2e; border-color: var(--t1); color: var(--t1); }
+.chip.t2   { background: #2e0d0d; border-color: var(--t2); color: var(--t2); }
+
+/* ── Alerts ── */
+.alert-gold  { background: #1a1500; border-left-color: var(--gold);  color: var(--gold-light); }
+.alert-green { background: #091509; border-left-color: var(--green); color: #80cc94; }
+.alert-info  { background: #091020; border-left-color: #3a7fd4;     color: #7eb3ff; }
+.alert-red   { background: #200909; border-left-color: #c0392b;     color: #ff9090; }
+
+/* ── Stat boxes ── */
+.stat-box { background: #162b1a; border-color: #263d2b; }
+.stat-box .slabel { color: var(--gray); }
+.stat-box .ssub   { color: var(--gray-light); }
+
+/* ── Misc ── */
+.sec-head  { border-bottom-color: #263d2b; }
+.card-subheader { background: #162b1a; color: var(--gray); border-bottom-color: #263d2b; }
+.player-result-card { border-color: #263d2b; }
+.player-result-body { background: #162b1a; }
+.prog-bar  { background: #263d2b; }
+.fmt-table td { border-bottom-color: #263d2b; }
+.fmt-table tbody tr:nth-child(even) { background: #0e1a10; }
+.pin-box   { background: #122118; color: var(--dark); }
+.pin-box .pin-title { color: var(--gold-light); }
+.pin-box .pin-sub   { color: var(--gray); }
+.pin-box input[type="password"] { background: #091309; border-color: #263d2b; color: var(--dark); }
+.site-header .subtitle { color: rgba(221,238,221,.7); }
+.site-header .gbi-abbr { color: var(--gold-light); }
+.conn-status { color: rgba(221,238,221,.4); }
+.gpanel-head-mid  { color: var(--gray); }
+.gpanel-head-right input { color: var(--dark); }
+.ms-header { letter-spacing: .3px; }
+.tcb-mid   { color: var(--gold); }
+.rank      { background: var(--green-dark); }
+.team-block { background: #1a3525; }
+
 </style>
 <!-- Firebase SDK (loaded from CDN — internet required for live sync) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
