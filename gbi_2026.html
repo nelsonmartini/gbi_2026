@@ -1902,10 +1902,9 @@ function renderMonies() {
       <table class="sb-table" style="width:100%"><thead><tr>
         <th class="c" style="width:36px"></th>
         <th>Player</th>
-        <th class="c">D1 Holes</th>
-        <th class="c">D2 Holes</th>
-        <th class="c hide-mobile">Team Win</th>
-        <th class="c hide-mobile">Finish</th>
+        <th class="c">Holes</th>
+        <th class="c">Team</th>
+        <th class="c">Finish</th>
         <th class="c">💰 Total</th>
       </tr></thead><tbody>`;
 
@@ -1915,14 +1914,14 @@ function renderMonies() {
     prevRk = p.total;
     const fm = finishPrize(p.name);
     const tm = teamPrize(p.name);
-    const totalWon = p.d1.money + p.d2.money + fm + tm;
+    const holeMoney = p.d1.money + p.d2.money;
+    const totalWon = holeMoney + fm + tm;
     html += `<tr${dispRk <= 3 ? ' class="winner"' : ''}>
       <td class="c" style="font-size:1.2em">${mdl(dispRk)}</td>
       <td style="font-size:1.2em"><strong>${flag(p.name)} ${esc(p.name)}</strong></td>
-      <td class="c">${mc(p.d1.money)}</td>
-      <td class="c">${mc(p.d2.money)}</td>
-      <td class="c hide-mobile">${mc(tm)}</td>
-      <td class="c hide-mobile">${mc(fm)}</td>
+      <td class="c">${mc(holeMoney)}</td>
+      <td class="c">${mc(tm)}</td>
+      <td class="c">${mc(fm)}</td>
       <td class="c">${totalWon ? `<strong class="money" style="font-size:1.05em">$${totalWon}</strong>` : `<span style="color:#ccc">$0</span>`}</td>
     </tr>`;
   });
