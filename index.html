@@ -1944,13 +1944,22 @@ function renderMonies() {
   // ── Pot Tracker ──
   const detailsSummary = `<summary style="font-size:.8em;color:var(--green);cursor:pointer;list-style:none;display:inline-block;margin-top:5px;padding:2px 8px;border:1px solid var(--green);border-radius:10px">Details</summary>`;
 
-  let teamWho = `<span style="color:#aaa;font-style:italic">TBD</span>`;
+  // Team details breakdown
+  let teamWho = `<span style="color:#aaa;font-style:italic">TBD — no scores yet</span>`;
   if (anyScores && leadTeamKey) {
     const tColor = S.teams[leadTeamKey].color;
+    const perPlayer = Math.round((500 + totalRollover) / 10);
     const teamPlayers = S.roster.filter(p => p.team === leadTeamKey).map(p => esc(p.name)).join(', ');
-    const rolloverNote = totalRollover > 0 ? `<div style="color:#b07000;font-size:.82em;margin-top:4px">+ $${totalRollover} rolled over from locked day(s)</div>` : '';
+    const d1rollPct = d1rollover ? Math.round((d1rollover / 400) * 100) : 0;
+    const d2rollPct = d2rollover ? Math.round((d2rollover / 400) * 100) : 0;
     teamWho = `<span class="tb" style="background:${esc(tColor)}">${esc(leadTeamName)}</span>
-      <div style="color:#666;font-size:.82em;margin-top:4px">$50 each → ${teamPlayers}</div>${rolloverNote}`;
+      <table style="margin-top:10px;font-size:.85em;border-collapse:collapse;width:100%;max-width:380px">
+        <tr><td style="padding:3px 8px 3px 0;color:#666">🏆 Base prize</td><td class="money" style="text-align:right">$500</td><td style="color:#aaa;font-size:.85em;padding-left:8px">fixed</td></tr>
+        ${d1rollover > 0 ? `<tr><td style="padding:3px 8px 3px 0;color:#1a7a1a">⛳ D1 rollover &#128274;</td><td class="money" style="text-align:right">+$${d1rollover}</td><td style="color:#aaa;font-size:.85em;padding-left:8px">${d1rollPct}% of D1 pot</td></tr>` : ''}
+        ${d2rollover > 0 ? `<tr><td style="padding:3px 8px 3px 0;color:#1a7a1a">⛳ D2 rollover &#128274;</td><td class="money" style="text-align:right">+$${d2rollover}</td><td style="color:#aaa;font-size:.85em;padding-left:8px">${d2rollPct}% of D2 pot</td></tr>` : ''}
+        <tr style="border-top:1px solid var(--border);font-weight:bold"><td style="padding:5px 8px 3px 0">Total pot</td><td class="money" style="text-align:right">$${500 + totalRollover}</td><td style="color:#888;font-size:.85em;padding-left:8px">$${perPlayer}/player</td></tr>
+      </table>
+      <div style="color:#666;font-size:.8em;margin-top:6px">→ ${teamPlayers}</div>`;
   }
 
   html += `<div class="card" style="margin-bottom:10px">
@@ -1973,7 +1982,7 @@ function renderMonies() {
       <div style="font-weight:bold;margin-bottom:4px">🏆 Team Championship &mdash; $${500 + totalRollover}</div>
       ${pctBar(teamClaimed, 500 + totalRollover, '#1a4a8a')}
       <details style="margin-top:2px">${detailsSummary}
-        <div style="margin-top:8px">${teamWho}</div>
+        <div style="margin-top:6px">${teamWho}</div>
       </details>
     </div>
 
@@ -1983,18 +1992,23 @@ function renderMonies() {
       const dayLocked = !!(S.locks?.[day]);
       const dayLabel = day === 'day1' ? 'Day 1 Hole Payouts' : 'Day 2 Hole Payouts';
       const allocated = hd.claimed + roll;
-      const unclaimedNote = hd.unclaimed > 0
-        ? (dayLocked
-          ? `<span style="color:#1a7a1a">$${hd.unclaimed} rolled over → team pool &#128274;</span>`
-          : `<span style="color:#b07000">$${hd.unclaimed} unclaimed → winning team pool when locked</span>`)
-        : `<span style="color:var(--green)">All holes assigned ✓</span>`;
+      const claimedPct = Math.round((hd.claimed / 400) * 100);
+      const rollPct = Math.round((roll / 400) * 100);
+      const pendingPct = 100 - claimedPct - rollPct;
+      const detailRows = `
+        <table style="font-size:.85em;border-collapse:collapse;width:100%;max-width:380px;margin-top:6px">
+          <tr><td style="padding:3px 8px 3px 0;color:#666">💵 Paid to players</td><td class="money" style="text-align:right">$${hd.claimed}</td><td style="color:#aaa;font-size:.85em;padding-left:8px">${claimedPct}% of pot</td></tr>
+          ${roll > 0
+            ? `<tr><td style="padding:3px 8px 3px 0;color:#1a7a1a">🏆 Rolled → team &#128274;</td><td class="money" style="text-align:right">$${roll}</td><td style="color:#aaa;font-size:.85em;padding-left:8px">${rollPct}% of pot</td></tr>`
+            : hd.unclaimed > 0
+              ? `<tr><td style="padding:3px 8px 3px 0;color:#b07000">⏳ Pending (unclaimed)</td><td style="text-align:right;color:#b07000">$${hd.unclaimed}</td><td style="color:#aaa;font-size:.85em;padding-left:8px">${pendingPct}% of pot</td></tr>`
+              : ''}
+          <tr style="border-top:1px solid var(--border)"><td style="padding:5px 8px 3px 0;color:#666">Total accounted</td><td style="text-align:right"><strong>$${allocated}</strong></td><td style="color:#aaa;font-size:.85em;padding-left:8px">${claimedPct + rollPct}%</td></tr>
+        </table>`;
       return `<div${day === 'day1' ? ' style="margin-bottom:18px"' : ''}>
-        <div style="font-weight:bold;margin-bottom:4px">📅 ${dayLabel} &mdash; $400</div>
+        <div style="font-weight:bold;margin-bottom:4px">⛳ ${dayLabel} &mdash; $400</div>
         ${pctBar(allocated, 400, 'var(--green)')}
-        <details style="margin-top:2px">${detailsSummary}
-          <div style="font-size:.85em;margin-top:6px">
-            <span class="money">$${hd.claimed}</span> paid to players &nbsp;&middot;&nbsp; ${unclaimedNote}
-          </div>
+        <details style="margin-top:2px">${detailsSummary}${detailRows}
         </details>
       </div>`;
     }).join('')}
