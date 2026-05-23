@@ -670,7 +670,8 @@ function defaultState() {
     },
     roster: PLAYERS.map(n => ({ name: n, team: null })),
     day1: defaultDayState(),
-    day2: defaultDayState()
+    day2: defaultDayState(),
+    locks: { day1: false, day2: false }
   };
 }
 
@@ -715,6 +716,8 @@ function toggleCollapse(key, day) {
 
 // ─── SITE PIN ─── change this to whatever PIN you want to share with players
 const SITE_PIN  = 'PETERputter26';
+// ─── COMMISSIONER PIN ─── required to lock/unlock day scores
+const ADMIN_PIN = 'GBIcommish26';
 
 let _db = null, _ref = null, _auth = null;
 let S = defaultState();
@@ -832,15 +835,18 @@ async function boot() {
           if (d._cid === CLIENT_ID) return;
           S = applyRoster({ ...defaultState(), ...d });
           render(_cur);
+          updateTabLockBadges();
         });
 
         firebase.database().ref('.info/connected').on('value', snap => setConnStatus(!!snap.val()));
         render('scoreboard');
+        updateTabLockBadges();
       } catch(e) {
         console.warn('Firebase load failed, falling back to localStorage:', e);
         try { const r = localStorage.getItem('gbi2026v1'); if (r) S = JSON.parse(r); } catch(_) {}
         setConnStatus(false);
         render('scoreboard');
+        updateTabLockBadges();
       }
     });
   } else {
@@ -848,6 +854,7 @@ async function boot() {
     try { const r = localStorage.getItem('gbi2026v1'); if (r) S = JSON.parse(r); } catch(_) {}
     setConnStatus(false);
     render('scoreboard');
+    updateTabLockBadges();
   }
 }
 
@@ -1435,9 +1442,42 @@ function renderPSearch(q) {
 /* ═══════════════════════════════════════════════════════
    DAY SCORECARD
 ═══════════════════════════════════════════════════════ */
+function updateTabLockBadges() {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    const oc = btn.getAttribute('onclick');
+    if (oc === "tab('day1')") btn.innerHTML = '&#9971; Day 1' + (S.locks?.day1 ? ' &#128274;' : '');
+    if (oc === "tab('day2')") btn.innerHTML = '&#9971; Day 2' + (S.locks?.day2 ? ' &#128274;' : '');
+  });
+}
+
+function lockDay(day) {
+  const label = day === 'day1' ? 'Day 1' : 'Day 2';
+  const pin = prompt(`Enter commissioner PIN to lock ${label}:`);
+  if (pin === null) return;
+  if (pin.trim().toUpperCase() !== ADMIN_PIN.toUpperCase()) { alert('Incorrect PIN.'); return; }
+  if (!S.locks) S.locks = {};
+  S.locks[day] = true;
+  save();
+  renderDay(day);
+  updateTabLockBadges();
+}
+
+function unlockDay(day) {
+  const label = day === 'day1' ? 'Day 1' : 'Day 2';
+  const pin = prompt(`Enter commissioner PIN to unlock ${label}:`);
+  if (pin === null) return;
+  if (pin.trim().toUpperCase() !== ADMIN_PIN.toUpperCase()) { alert('Incorrect PIN.'); return; }
+  if (!S.locks) S.locks = {};
+  S.locks[day] = false;
+  save();
+  renderDay(day);
+  updateTabLockBadges();
+}
+
 function renderDay(day) {
   const el = document.getElementById('pane-'+day);
   const label = day==='day1' ? 'Day 1' : 'Day 2';
+  const locked = !!(S.locks && S.locks[day]);
   const sc = SC[day];
   const fmPts  = fourManPoints(day);
   const fmRanks = rank(S[day].groups.map(g => g.score));
@@ -1464,6 +1504,15 @@ function renderDay(day) {
       <div class="tcb-score">${fmt(td.t2)}</div>
     </div>
   </div>
+  ${locked
+    ? `<div style="display:flex;align-items:center;justify-content:space-between;background:#fff3cd;border:1px solid #e6c84a;border-radius:7px;padding:8px 14px;margin-bottom:10px">
+        <span style="font-weight:bold;color:#7a5a00">&#128274; ${label} is locked — scores are final</span>
+        <button class="btn btn-sm" style="background:#7a1a1a;color:white;font-size:.8em" onclick="unlockDay('${day}')">Unlock</button>
+       </div>`
+    : `<div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:8px">
+        <button class="btn btn-sm" style="background:var(--green);color:white;font-size:.8em" onclick="lockDay('${day}')">&#128274; Lock ${label}</button>
+       </div>`
+  }
   <details style="margin-bottom:10px">
     <summary style="font-size:.8em;color:var(--gray);cursor:pointer;padding:4px 8px;list-style:none;display:flex;align-items:center;gap:6px">
       <span style="border:1px solid var(--border);border-radius:10px;padding:2px 10px;font-size:.95em">&#9432; Scoring guide</span>
@@ -1500,7 +1549,7 @@ function renderDay(day) {
         : `<span style="display:inline-block;height:22px;margin-top:4px"></span>`;
       return `<div class="form-group">
           <label>Player ${pi+1}</label>
-          <select onchange="S.${day}.groups[${gi}].players[${pi}]=this.value;save();renderDay('${day}')">
+          <select ${locked ? 'disabled' : `onchange="S.${day}.groups[${gi}].players[${pi}]=this.value;save();renderDay('${day}')"`}>
             <option value="">— Select —</option>${opts}
           </select>
           ${badge}
@@ -1514,7 +1563,7 @@ function renderDay(day) {
       <span class="gpanel-head-mid">${pts!==null ? `${ordinal(fmRanks[gi])} Place &nbsp;&middot;&nbsp; Score ${g.score} &nbsp;&middot;&nbsp; <strong>${fmt(pts)} pts</strong>/player` : ''}</span>
       <span class="gpanel-head-right">
         <input type="text" value="${esc(g.teeTime)}" placeholder="Tee time" style="width:66px;font-size:.85em"
-          onchange="S.${day}.groups[${gi}].teeTime=this.value;save()" />
+          ${locked ? 'disabled' : `onchange="S.${day}.groups[${gi}].teeTime=this.value;save()"`} />
       </span>
     </div>
     <div class="gpanel-body">
@@ -1524,7 +1573,7 @@ function renderDay(day) {
         <div class="group-score-box">
           <label>Score<br>vs par</label>
           <input type="number" value="${esc(g.score)}" placeholder="—"
-            onchange="S.${day}.groups[${gi}].score=this.value;save();renderDay('${day}')" />
+            ${locked ? 'disabled' : `onchange="S.${day}.groups[${gi}].score=this.value;save();renderDay('${day}')"`} />
           ${pts!==null?`<div style="font-size:.75em;color:var(--green);font-weight:bold">${fmt(pts)} pts</div>`:''}
         </div>
       </div>
@@ -1571,7 +1620,7 @@ function renderDay(day) {
         if (usedInMatches.has(n) && n !== cur) return '';
         return `<option value="${esc(n)}" ${n===cur?'selected':''}>${esc(n)}</option>`;
       }).join('');
-      return `<select onchange="S.${day}.matches[${mi}].${field}=this.value;save();renderDay('${day}')">
+      return `<select ${locked ? 'disabled' : `onchange="S.${day}.matches[${mi}].${field}=this.value;save();renderDay('${day}')"`}>
               <option value="">— Select —</option>${opts}
             </select>`;
     };
@@ -1589,7 +1638,7 @@ function renderDay(day) {
       <span class="gpanel-head-mid">${winLabel}</span>
       <span class="gpanel-head-right">
         <input type="text" value="${esc(m.teeTime)}" placeholder="Tee time" style="width:66px;font-size:.85em"
-          onchange="S.${day}.matches[${mi}].teeTime=this.value;save()" />
+          ${locked ? 'disabled' : `onchange="S.${day}.matches[${mi}].teeTime=this.value;save()"`} />
       </span>
     </div>
     <div class="match-arena">
@@ -1604,7 +1653,7 @@ function renderDay(day) {
         <div class="form-group">
           <label>Score (vs par)</label>
           <input type="number" class="score-in" value="${esc(m.score1)}" placeholder="&mdash;"
-            onchange="S.${day}.matches[${mi}].score1=this.value;save();renderDay('${day}')" />
+            ${locked ? 'disabled' : `onchange="S.${day}.matches[${mi}].score1=this.value;save();renderDay('${day}')"`} />
         </div>
         ${r.p1.total ? `<div class="ms-pts"><strong>${fmt(r.p1.total)} pts</strong> &nbsp;<span style="color:#888;font-size:.9em">${ordinal(r.p1.rank)} overall &middot; +${fmt(r.p1.win)} win +${fmt(r.p1.rankPts)} rank</span></div>` : ''}
       </div>
@@ -1623,7 +1672,7 @@ function renderDay(day) {
         <div class="form-group">
           <label>Score (vs par)</label>
           <input type="number" class="score-in" value="${esc(m.score2)}" placeholder="&mdash;"
-            onchange="S.${day}.matches[${mi}].score2=this.value;save();renderDay('${day}')" />
+            ${locked ? 'disabled' : `onchange="S.${day}.matches[${mi}].score2=this.value;save();renderDay('${day}')"`} />
         </div>
         ${r.p2.total ? `<div class="ms-pts"><strong>${fmt(r.p2.total)} pts</strong> &nbsp;<span style="color:#888;font-size:.9em">${ordinal(r.p2.rank)} overall &middot; +${fmt(r.p2.win)} win +${fmt(r.p2.rankPts)} rank</span></div>` : ''}
       </div>
@@ -1691,6 +1740,7 @@ function renderPayouts() {
   const d2won = S.day2.payouts.filter(p=>p.cat!=='NP'&&p.winner).length;
 
   function holeTable(day, label) {
+    const dayLocked = !!(S.locks && S.locks[day]);
     const won = day==='day1'?d1won:d2won;
     let t = `<div class="card">
       <div class="card-header">${label}
@@ -1707,7 +1757,7 @@ function renderPayouts() {
           <td><strong>Hole ${p.hole}</strong></td>
           <td><span class="cat cat-${p.cat}">${catLabel}</span></td>
           <td>
-            <select onchange="S.${day}.payouts[${i}].winner=this.value;save();renderPayouts()">
+            <select ${dayLocked ? 'disabled' : `onchange="S.${day}.payouts[${i}].winner=this.value;save();renderPayouts()"`}>
               <option value="">— No winner —</option>${playerOpts(p.winner)}
             </select>
           </td>
