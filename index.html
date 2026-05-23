@@ -965,14 +965,24 @@ function teamOf(name) {
 ═══════════════════════════════════════════════════════ */
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-// Returns Set of bottom-5 player names when scores exist, otherwise empty Set
+// Returns {set: bottom-5 names, last: dead-last name} when scores exist
 function ppPlayers() {
   const all = allPlayerStats();
-  if (!all.some(p => p.total > 0)) return new Set();
-  return new Set([...all].sort((a,b) => a.total - b.total).slice(0,5).map(p => p.name));
+  if (!all.some(p => p.total > 0)) return { set: new Set(), last: null };
+  const sorted = [...all].sort((a,b) => a.total - b.total);
+  return { set: new Set(sorted.slice(0,5).map(p => p.name)), last: sorted[0].name };
 }
-// Poop badge for PP Zone players — call anywhere a player name is rendered
-function ppBadge(name, pp) { return pp && pp.has(name) ? ' <span title="PP Zone" style="font-size:.78em" aria-label="PP Zone">&#127814;</span>' : ''; }
+// 🍆 for dead last, ⚠️ for the other bottom 4
+function ppBadge(name, pp) {
+  if (!pp || !pp.set.has(name)) return '';
+  return ` <span style="font-size:.78em">${name === pp.last ? '&#127814;' : '&#9888;&#65039;'}</span>`;
+}
+// Red DM Mono pts for PP Zone players, normal green otherwise
+function ppPts(name, pp, val) {
+  if (pp && pp.set.has(name))
+    return `<strong style="color:#8b1a1a;font-family:'DM Mono',monospace">${fmt(val)}</strong>`;
+  return `<strong class="pts">${fmt(val)}</strong>`;
+}
 function flag(name) {
   const f = name === 'Trevor' ? '🇪🇬' : '🇺🇸';
   return `<span style="font-size:.65em;vertical-align:middle">${f}</span>`;
@@ -1176,7 +1186,7 @@ function renderScoreboard() {
           <td><span class="rank${rk<=3?' gold':''}">${rk}</span></td>
           <td><strong>${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</strong></td>
           <td class="hide-mobile">${tBadge(p.team)}</td>
-          <td class="c"><strong class="pts">${fmt(p.total)}</strong></td>
+          <td class="c">${ppPts(p.name,pp,p.total)}</td>
           <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
           <td class="c"><strong class="money">${fmtM(p.money)}</strong></td>
         </tr>`;
@@ -1199,7 +1209,7 @@ function renderScoreboard() {
         let rk=1, prev=null;
         sorted.forEach((p,i)=>{
           if(p.dp!==prev) rk=i+1;
-          html+=`<tr${rk<=3?' class="winner"':''}><td><span class="rank${rk<=3?' gold':''}">${rk}</span></td><td><strong>${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</strong></td><td class="hide-mobile">${tBadge(p.team)}</td><td class="c pts">${fmt(p.dp)}</td><td class="c money">${fmtM(p.dm)}</td></tr>`;
+          html+=`<tr${rk<=3?' class="winner"':''}><td><span class="rank${rk<=3?' gold':''}">${rk}</span></td><td><strong>${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</strong></td><td class="hide-mobile">${tBadge(p.team)}</td><td class="c">${ppPts(p.name,pp,p.dp)}</td><td class="c money">${fmtM(p.dm)}</td></tr>`;
           prev=p.dp;
         });
         html += `</tbody></table>`;
@@ -1219,6 +1229,7 @@ function renderScoreboard() {
       'Has not told family yet.',
     ];
     const bottom5 = [...all].sort((a,b) => a.total - b.total).slice(0,5);
+    const ppLast = pp.last;
     html += `
     <div class="card" style="margin-top:8px">
       <div class="card-header pp-zone-header">&#128680; The PP Zone &mdash; Pray for These Players</div>
@@ -1230,7 +1241,7 @@ function renderScoreboard() {
     bottom5.forEach((p, i) => {
       const pos = all.length - 4 + i;
       html += `<div class="pp-row">
-        <div class="pp-rank">${i===0?'&#127814;':'&#9888;&#65039;'}</div>
+        <div class="pp-rank">${p.name===ppLast?'&#127814;':'&#9888;&#65039;'}</div>
         <div class="pp-name">${flag(p.name)} ${esc(p.name)} ${tBadge(p.team)}</div>
         <div style="text-align:right">
           <div class="pp-pts">${fmt(p.total)} pts</div>
@@ -1432,11 +1443,11 @@ function renderDay(day) {
     </div>
   </div>
 
-  <div class="sec-head" style="cursor:pointer;justify-content:space-between" onclick="toggleCollapse('${day}_four','${day}')">
+  <div class="sec-head" style="cursor:pointer;justify-content:space-between;user-select:none" onclick="toggleCollapse('${day}_four','${day}')">
     <h3>&#9971; 4-Man Scramble &mdash; ${label}</h3>
-    <span style="font-size:.82em;color:var(--green)">${_collapsed[day+'_four']?'&#9660; Show':'&#9650; Hide'}</span>
+    <span style="font-size:.8em;color:var(--green);border:1px solid var(--green);padding:2px 10px;border-radius:12px">${_collapsed[day+'_four']===false?'&#9650; Hide':'&#9660; Show'}</span>
   </div>`;
-  if (!_collapsed[day+'_four']) {
+  if (_collapsed[day+'_four'] === false) {
   html += `<div class="alert alert-info">Five groups of 4 players. Enter each group&rsquo;s score vs par (e.g. <strong>-5</strong>). Points: 1st=${sc.fourMan[0]}, 2nd=${sc.fourMan[1]}, 3rd=${sc.fourMan[2]}, 4th=${sc.fourMan[3]}, 5th=${sc.fourMan[4]}. Ties average the tied positions.</div>`;
 
   // 4-Man groups — build set of all already-chosen players for this day
@@ -1493,11 +1504,11 @@ function renderDay(day) {
   } // end 4-man collapse
 
   html += `
-  <div class="sec-head" style="cursor:pointer;justify-content:space-between" onclick="toggleCollapse('${day}_match','${day}')">
+  <div class="sec-head" style="cursor:pointer;justify-content:space-between;user-select:none" onclick="toggleCollapse('${day}_match','${day}')">
     <h3>&#127948; 2v2 Head-to-Head &mdash; ${label}</h3>
-    <span style="font-size:.82em;color:var(--green)">${_collapsed[day+'_match']?'&#9660; Show':'&#9650; Hide'}</span>
+    <span style="font-size:.8em;color:var(--green);border:1px solid var(--green);padding:2px 10px;border-radius:12px">${_collapsed[day+'_match']===false?'&#9650; Hide':'&#9660; Show'}</span>
   </div>`;
-  if (!_collapsed[day+'_match']) {
+  if (_collapsed[day+'_match'] === false) {
   html += `<div class="alert alert-info">Five matches: one pair from each team. Win = +${sc.matchWin} pts, Tie = +${sc.matchTie} pts per player. Plus rank points among all 10 pairs (lower score ranks higher).</div>`;
 
   // 2v2 matches — teams locked from roster, no duplicate picks across all 5 matches
@@ -1618,7 +1629,7 @@ function renderDayTable(day) {
       <td class="c">${fmt(p.dp.matchWin)}</td>
       <td class="c">${fmt(p.dp.matchRank)}</td>
       <td class="c">${fmt(p.dp.payout)}</td>
-      <td class="c"><strong class="pts">${fmt(p.dp.total)}</strong></td>
+      <td class="c">${ppPts(p.name,pp,p.dp.total)}</td>
       <td class="c money">${fmtM(p.dp.money)}</td>
     </tr>`;
     prev=p.dp.total;
