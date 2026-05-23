@@ -1893,36 +1893,37 @@ function renderMonies() {
 
   html += `</div></div>`;
 
-  // ── Player Winnings Table (copy of scoreboard, ranked by pts, + winnings column) ──
+  // ── Player Winnings Table — scoreboard order, money columns only ──
+  const mc = v => v ? `<strong class="money">$${v}</strong>` : `<span style="color:#ddd">—</span>`;
+
   html += `<div class="card">
     <div class="card-header">💵 Player Winnings</div>
     <div class="card-body" style="padding:0">
       <table class="sb-table" style="width:100%"><thead><tr>
         <th class="c" style="width:36px"></th>
         <th>Player</th>
-        <th class="hide-mobile">Team</th>
-        <th class="c">Pts</th>
-        <th class="c">To Par</th>
-        <th class="c">💰 Won</th>
+        <th class="c">D1 Holes</th>
+        <th class="c">D2 Holes</th>
+        <th class="c hide-mobile">Team Win</th>
+        <th class="c hide-mobile">Finish</th>
+        <th class="c">💰 Total</th>
       </tr></thead><tbody>`;
 
   let prevRk = null, dispRk = 1;
   ranked.forEach((p, i) => {
     if (p.total !== prevRk) dispRk = i + 1;
     prevRk = p.total;
-    const par = playerScoreToPar(p.name);
-    const parClass = par === null ? '' : par < 0 ? ' style="color:var(--green);font-weight:bold"' : par > 0 ? ' style="color:#b03030;font-weight:bold"' : ' style="font-weight:bold"';
     const fm = finishPrize(p.name);
     const tm = teamPrize(p.name);
-    const totalWon = p.money + fm + tm;
-    const wonStr = totalWon ? `<strong class="money">$${totalWon}</strong>` : `<span style="color:#ccc">$0</span>`;
+    const totalWon = p.d1.money + p.d2.money + fm + tm;
     html += `<tr${dispRk <= 3 ? ' class="winner"' : ''}>
       <td class="c" style="font-size:1.2em">${mdl(dispRk)}</td>
       <td style="font-size:1.2em"><strong>${flag(p.name)} ${esc(p.name)}</strong></td>
-      <td class="hide-mobile">${tBadge(p.team)}</td>
-      <td class="c"><strong class="pts">${fmt(p.total)}</strong></td>
-      <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
-      <td class="c">${wonStr}</td>
+      <td class="c">${mc(p.d1.money)}</td>
+      <td class="c">${mc(p.d2.money)}</td>
+      <td class="c hide-mobile">${mc(tm)}</td>
+      <td class="c hide-mobile">${mc(fm)}</td>
+      <td class="c">${totalWon ? `<strong class="money" style="font-size:1.05em">$${totalWon}</strong>` : `<span style="color:#ccc">$0</span>`}</td>
     </tr>`;
   });
 
