@@ -1,4 +1,4 @@
-const CACHE = 'gbi2026-v1';
+const CACHE = 'gbi2026-v2';
 const ASSETS = ['/', '/index.html', '/gbi-logo.jpg', '/manifest.json'];
 
 self.addEventListener('install', e => {
