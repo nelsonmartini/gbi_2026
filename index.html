@@ -250,18 +250,24 @@ input.score-in { width: 80px; text-align: center; }
   margin-bottom: 12px; overflow: hidden;
 }
 .gpanel-head {
-  background: #eef6f1; padding: 7px 11px;
+  background: var(--green); color: var(--white);
+  padding: 8px 12px;
   display: grid; grid-template-columns: auto 1fr auto;
   align-items: center; gap: 8px;
-  border-bottom: 1px solid var(--border); font-weight: bold; font-size: .88em;
+  border-bottom: 2px solid var(--green-dark); font-weight: bold; font-size: .88em;
+  font-family: 'Cinzel', Georgia, serif; letter-spacing: .3px;
 }
 .gpanel-head-mid {
-  text-align: center; font-size: .8em; color: var(--gray);
+  text-align: center; font-size: .8em; color: var(--gold-light);
   font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .gpanel-head-right {
   display: flex; align-items: center; font-size: .8em;
-  color: #666; font-weight: normal; white-space: nowrap;
+  color: rgba(255,255,255,.65); font-weight: normal; white-space: nowrap;
+}
+.gpanel-head-right input {
+  background: rgba(0,0,0,.2); border-color: rgba(255,255,255,.2);
+  color: rgba(255,255,255,.85);
 }
 .gpanel-body { padding: 8px; }
 .gpanel select { font-size: .78em; padding: 4px 5px; }
