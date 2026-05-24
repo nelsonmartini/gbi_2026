@@ -540,6 +540,40 @@ tr.winner { background: #fffce8 !important; }
   color: #c0392b; font-size: .85em; margin-top: 10px;
   min-height: 20px; font-style: italic;
 }
+
+/* ── Player Profile Modal ── */
+#profile-modal {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,.55); align-items: center; justify-content: center; padding: 16px;
+}
+#profile-modal.open { display: flex; }
+.pm-backdrop { position: absolute; inset: 0; }
+.pm-card {
+  position: relative; background: white; border-radius: 16px;
+  max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(0,0,0,.45); z-index: 1;
+}
+.pm-header { padding: 20px 20px 16px; color: white; border-radius: 16px 16px 0 0; position: relative; }
+.pm-close {
+  position: absolute; top: 14px; right: 14px;
+  background: rgba(255,255,255,.25); border: none; color: white;
+  font-size: 1em; width: 30px; height: 30px; border-radius: 50%;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;
+}
+.pm-close:hover { background: rgba(255,255,255,.4); }
+.pm-name { font-size: 1.55em; font-weight: bold; font-family: 'Cinzel', serif; }
+.pm-sub  { font-size: .85em; opacity: .9; margin-top: 3px; }
+.pm-body { padding: 16px 18px 20px; }
+.pm-section { margin-bottom: 16px; }
+.pm-section:last-child { margin-bottom: 0; }
+.pm-sec-title { font-size: .7em; text-transform: uppercase; letter-spacing: .08em; color: #999; font-weight: bold; margin-bottom: 7px; }
+.pm-stat-row { display: flex; gap: 8px; }
+.pm-stat { background: #f5f5f4; border-radius: 10px; padding: 9px 12px; flex: 1; min-width: 0; }
+.pm-stat-val { font-size: 1.25em; font-weight: bold; line-height: 1.1; }
+.pm-stat-lbl { font-size: .68em; color: #888; margin-top: 2px; }
+.pm-day-row { font-size: .82em; color: #444; line-height: 1.9; margin-top: 8px; }
+.plink { cursor: pointer; border-bottom: 1px dotted rgba(0,0,0,.25); }
+.plink:hover { opacity: .7; }
 </style>
 <!-- Firebase SDK (loaded from CDN — internet required for live sync) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -634,6 +668,8 @@ const SC = {
    Source: GBI Scorecard_upgrades_2.0_FINAL.xlsx
    Braden = 2026 rookie (no prior data). Carney not returning.
 ═══════════════════════════════════════════════════════ */
+const GBI_CHAMPS = { 'Nail': [2025], 'Evan': [2023] };
+
 const PLAYER_META = {
   'Basham':   { grade:'C', vibes:6.4, skill:7.8, prev:{rank:12,total:31,   d1:17,  d2:14,   d1m:20, d2m:0,  d1four:8,   d1match:3,d1rank:4, d1pay:2,d2four:2,   d2match:5,d2rank:7, d2pay:0} },
   'Bode':     { grade:'F', vibes:9.8, skill:4.8, prev:{rank:8, total:35.5, d1:9,   d2:26.5, d1m:20, d2m:40, d1four:4,   d1match:0,d1rank:3, d1pay:2,d2four:10.5,d2match:5,d2rank:7, d2pay:4} },
@@ -962,6 +998,136 @@ function playerStats(name) {
   return st;
 }
 
+function calcOdds() {
+  const AVG_SKILL = 7.1, AVG_RANK = 10.5, AVG_VIBES = 7.4;
+  function raw(name) {
+    const m = PLAYER_META[name];
+    const skill = m.skill !== null ? m.skill : AVG_SKILL;
+    const vibes = m.vibes !== null ? m.vibes : AVG_VIBES;
+    const rank25 = m.prev ? m.prev.rank : AVG_RANK;
+    const s = skill * 0.6 + (21 - rank25) * 0.5 * 0.3 + vibes * 0.1;
+    return s * s;
+  }
+  const raws = {}; let total = 0;
+  PLAYERS.forEach(n => { raws[n] = raw(n); total += raws[n]; });
+  const result = {};
+  PLAYERS.forEach(n => {
+    const p = raws[n] / total;
+    const o = (1 - p) / p;
+    let num = o < 10 ? Math.round(o) : o < 25 ? Math.round(o / 2) * 2 : o < 60 ? Math.round(o / 5) * 5 : Math.round(o / 10) * 10;
+    result[n] = `${num}/1`;
+  });
+  return result;
+}
+
+function showProfile(name) {
+  const m = PLAYER_META[name];
+  const rp = S.roster.find(r => r.name === name);
+  const team = rp ? rp.team : null;
+  const tColor = team ? S.teams[team].color : '#4a5568';
+  const tName  = team ? S.teams[team].name  : 'Unassigned';
+  const champYears = GBI_CHAMPS[name] || [];
+  const odds = calcOdds();
+  const gradeColor = { A:'#16a34a', B:'#2563eb', C:'#d97706', D:'#ea580c', F:'#dc2626' };
+
+  const st = playerStats(name);
+  const allStats = PLAYERS.map(n => playerStats(n)).sort((a,b) => b.total - a.total);
+  const myPts = st.total;
+  const rank26 = allStats.filter(s => s.total > myPts).length + 1;
+  const hasScores = allStats.some(s => s.total > 0);
+  const inPP = hasScores && allStats.slice(-5).some(s => s.name === name);
+
+  const champBadge = champYears.length
+    ? `<div style="margin-top:7px">${champYears.map(y => `<span style="background:rgba(255,255,255,.22);border-radius:12px;padding:2px 9px;font-size:.78em;margin-right:4px">&#127942; GBI Champion ${y}</span>`).join('')}</div>` : '';
+  const ppTag    = (inPP && myPts > 0) ? ` <span style="background:rgba(220,50,50,.3);border-radius:10px;padding:1px 8px;font-size:.78em">&#127814; PP Zone</span>` : '';
+  const rookieTag = !m.prev ? ` <span style="background:rgba(255,255,255,.2);border-radius:10px;padding:1px 8px;font-size:.78em">&#127381; Rookie</span>` : '';
+
+  function dayLine(day) {
+    const dk = day === 'day1' ? 'd1' : 'd2';
+    const ds = st[dk];
+    if (!hasScores || ds.total === 0) return `<span style="color:#bbb">No scores yet</span>`;
+    const parts = [];
+    if (ds.fourMan)   parts.push(`4-Man ${fmt(ds.fourMan)}pts`);
+    if (ds.matchWin)  parts.push(`Match W +${fmt(ds.matchWin)}`);
+    else if (ds.matchRank) parts.push(`Match ${fmt(ds.matchRank)}pts`);
+    if (ds.payout)    parts.push(`&#9971; ${ds.payout / SC.payoutPts | 0} hole win${ds.payout/SC.payoutPts>1?'s':''}`);
+    if (ds.money)     parts.push(`$${ds.money}`);
+    return parts.join(' &middot; ') || '&mdash;';
+  }
+
+  const medal25 = p => p.rank===1?'&#129351;':p.rank===2?'&#129352;':p.rank===3?'&#129353;':'';
+
+  let body = `
+  <div class="pm-section">
+    <div class="pm-sec-title">&#127922; Vegas Odds to Win GBI 2026</div>
+    <div style="font-size:1.7em;font-weight:bold;color:var(--green);font-family:'Cinzel',serif">${odds[name]}</div>
+    <div style="font-size:.72em;color:#aaa;margin-top:2px">Calculated from skill rating, 2025 finish &amp; vibes score</div>
+  </div>
+  <div class="pm-section">
+    <div class="pm-sec-title">&#128202; 2026 Season</div>
+    <div class="pm-stat-row">
+      <div class="pm-stat"><div class="pm-stat-val">${myPts > 0 ? '#'+rank26 : '&mdash;'}</div><div class="pm-stat-lbl">Current Rank</div></div>
+      <div class="pm-stat"><div class="pm-stat-val">${myPts > 0 ? fmt(myPts) : '&mdash;'}</div><div class="pm-stat-lbl">Total Pts</div></div>
+      <div class="pm-stat"><div class="pm-stat-val">${st.money > 0 ? '$'+st.money : '&mdash;'}</div><div class="pm-stat-lbl">$ Earned</div></div>
+    </div>
+    <div class="pm-day-row">
+      <div><strong>Day 1:</strong> ${dayLine('day1')}</div>
+      <div><strong>Day 2:</strong> ${dayLine('day2')}</div>
+    </div>
+  </div>`;
+
+  if (m.prev) {
+    const p = m.prev;
+    body += `
+  <div class="pm-section">
+    <div class="pm-sec-title">&#128197; 2025 Season</div>
+    <div class="pm-stat-row">
+      <div class="pm-stat"><div class="pm-stat-val">${medal25(p)}#${p.rank}</div><div class="pm-stat-lbl">Final Rank</div></div>
+      <div class="pm-stat"><div class="pm-stat-val">${p.total}</div><div class="pm-stat-lbl">Total Pts</div></div>
+      <div class="pm-stat"><div class="pm-stat-val">$${p.d1m + p.d2m}</div><div class="pm-stat-lbl">$ Earned</div></div>
+    </div>
+  </div>`;
+  } else {
+    body += `
+  <div class="pm-section">
+    <div class="pm-sec-title">&#128197; 2025 Season</div>
+    <div style="color:#aaa;font-style:italic;font-size:.88em">First year at GBI &mdash; no prior data</div>
+  </div>`;
+  }
+
+  if (m.skill !== null) {
+    const gc = gradeColor[m.grade] || '#888';
+    body += `
+  <div class="pm-section">
+    <div class="pm-sec-title">&#11088; Player Ratings</div>
+    <div class="pm-stat-row">
+      <div class="pm-stat"><div class="pm-stat-val" style="color:var(--green)">${m.skill}</div><div class="pm-stat-lbl">Skill / 10</div></div>
+      <div class="pm-stat"><div class="pm-stat-val" style="color:#8b5cf6">${m.vibes}</div><div class="pm-stat-lbl">Vibes / 10</div></div>
+      <div class="pm-stat"><div class="pm-stat-val"><span style="background:${gc};color:white;padding:2px 10px;border-radius:6px;font-size:.9em">${m.grade}</span></div><div class="pm-stat-lbl" style="margin-top:4px">Bode Grade</div></div>
+    </div>
+  </div>`;
+  }
+
+  document.getElementById('profile-modal').innerHTML = `
+    <div class="pm-backdrop" onclick="closeProfile()"></div>
+    <div class="pm-card">
+      <div class="pm-header" style="background:${esc(tColor)}">
+        <button class="pm-close" onclick="closeProfile()">&#10005;</button>
+        <div class="pm-name">${flag(name)} ${esc(name)}${rookieTag}</div>
+        <div class="pm-sub">${esc(tName)}${ppTag}</div>
+        ${champBadge}
+      </div>
+      <div class="pm-body">${body}</div>
+    </div>`;
+  document.getElementById('profile-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeProfile() {
+  document.getElementById('profile-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
 function allPlayerStats() {
   return PLAYERS.map(n => playerStats(n)).sort((a,b) => b.total - a.total || a.name.localeCompare(b.name));
 }
@@ -1178,7 +1344,7 @@ function renderScoreboard() {
         const tcol = p.team ? S.teams[p.team].color : '#aaa';
         html += `<div class="bb-row${rk<=3?' bb-top':''}">
           <div class="bb-pos${rk<=3?' bb-gold':''}">${rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':ordinal(rk)}</div>
-          <div class="bb-name" style="border-left-color:${tcol}">${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</div>
+          <div class="bb-name" style="border-left-color:${tcol}"><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}</div>
           <div class="bb-pts">${fmt(p.total)}</div>
           <div class="bb-par ${parCls}">${parStr}</div>
         </div>`;
@@ -1208,7 +1374,7 @@ function renderScoreboard() {
         const parClass = par===null?'':par<0?' style="color:var(--green);font-weight:bold"':par>0?' style="color:#b03030;font-weight:bold"':' style="font-weight:bold"';
         html += `<tr${rk<=3?' class="winner"':''}>
           <td class="c" style="font-size:1.2em">${medal(rk)}</td>
-          <td style="font-size:1.2em"><strong>${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</strong></td>
+          <td style="font-size:1.2em"><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}</strong></td>
           <td class="hide-mobile">${tBadge(p.team)}</td>
           <td class="c">${ppPts(p.name,pp,p.total)}</td>
           <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
@@ -1244,7 +1410,7 @@ function renderScoreboard() {
       const pos = all.length - 4 + i;
       html += `<div class="pp-row">
         <div class="pp-rank">${p.name===ppLast?'&#127814;':'&#9888;&#65039;'}</div>
-        <div class="pp-name">${flag(p.name)} ${esc(p.name)} ${tBadge(p.team)}</div>
+        <div class="pp-name"><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span> ${tBadge(p.team)}</div>
         <div style="text-align:right">
           <div class="pp-pts">${fmt(p.total)} pts</div>
           <div class="pp-msg">${msgs[i]}</div>
@@ -1276,7 +1442,7 @@ function renderScoreboard() {
         let rk=1, prev=null;
         sorted.forEach((p,i)=>{
           if(p.dp!==prev) rk=i+1;
-          html+=`<tr${rk<=3?' class="winner"':''}><td class="c" style="font-size:1.15em">${medal(rk)}</td><td><strong>${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</strong></td><td class="hide-mobile">${tBadge(p.team)}</td><td class="c">${ppPts(p.name,pp,p.dp)}</td><td class="c money">${fmtM(p.dm)}</td></tr>`;
+          html+=`<tr${rk<=3?' class="winner"':''}><td class="c" style="font-size:1.15em">${medal(rk)}</td><td><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}</strong></td><td class="hide-mobile">${tBadge(p.team)}</td><td class="c">${ppPts(p.name,pp,p.dp)}</td><td class="c money">${fmtM(p.dm)}</td></tr>`;
           prev=p.dp;
         });
         html += `</tbody></table>`;
@@ -1710,7 +1876,7 @@ function renderDayTable(day) {
     if (p.dp.total!==prev) rk=i+1;
     html+=`<tr${rk<=3?' class="winner"':''}>
       <td><span class="rank${rk<=3?' gold':''}">${rk}</span></td>
-      <td><strong>${flag(p.name)} ${esc(p.name)}${ppBadge(p.name,pp)}</strong></td><td class="hide-phone">${tBadge(p.team)}</td>
+      <td><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}</strong></td><td class="hide-phone">${tBadge(p.team)}</td>
       <td class="c hide-phone">${fmt(p.dp.fourMan)}</td>
       <td class="c hide-phone">${fmt(p.dp.matchWin)}</td>
       <td class="c hide-phone">${fmt(p.dp.matchRank)}</td>
@@ -2041,7 +2207,7 @@ function renderMonies() {
     const totalWon = holeMoney + fm + tm;
     html += `<tr${dispRk <= 3 ? ' class="winner"' : ''}>
       <td class="c" style="font-size:1.2em">${mdl(dispRk)}</td>
-      <td style="font-size:1.2em"><strong>${flag(p.name)} ${esc(p.name)}</strong></td>
+      <td style="font-size:1.2em"><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span></strong></td>
       <td class="c">${mc(holeMoney)}</td>
       <td class="c">${mc(tm)}</td>
       <td class="c">${mc(fm)}</td>
@@ -2508,5 +2674,6 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 </script>
+<div id="profile-modal"></div>
 </body>
 </html>
