@@ -2345,7 +2345,7 @@ function renderFormat() {
     <div class="card-header" style="background:#7a2a2a">⚠️ Admin: Reset All Tournament Data</div>
     <div class="card-body">
       <p style="margin-bottom:12px;color:#666;font-size:.9em">Clears all scores, team assignments, and payout winners. This <strong>cannot be undone</strong>.</p>
-      <button class="btn btn-red" onclick="if(confirm('Reset ALL 2026 GBI tournament data?\\nThis cannot be undone.')){S=defaultState();save();tab('scoreboard')}">
+      <button class="btn btn-red" onclick="if(prompt('Enter commissioner PIN to reset all data:')?.trim().toUpperCase()===ADMIN_PIN.toUpperCase()){if(confirm('Reset ALL 2026 GBI tournament data?\\nThis cannot be undone.')){S=defaultState();save();tab('scoreboard')}}else{alert('Incorrect PIN.')}">
         🗑️ Reset All Data
       </button>
     </div>
