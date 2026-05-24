@@ -1059,12 +1059,7 @@ function showProfile(name) {
 
   let body = `
   <div class="pm-section">
-    <div class="pm-sec-title">&#127922; Vegas Odds to Win GBI 2026</div>
-    <div style="font-size:1.7em;font-weight:bold;color:var(--green);font-family:'Cinzel',serif">${odds[name]}</div>
-    <div style="font-size:.72em;color:#aaa;margin-top:2px">Calculated from skill rating, 2025 finish &amp; vibes score</div>
-  </div>
-  <div class="pm-section">
-    <div class="pm-sec-title">&#128202; 2026 Season</div>
+    <div class="pm-sec-title"><span style="display:inline-block;width:7px;height:7px;background:#e53e3e;border-radius:50%;margin-right:5px;vertical-align:middle"></span>Current Position</div>
     <div class="pm-stat-row">
       <div class="pm-stat"><div class="pm-stat-val">${myPts > 0 ? '#'+rank26 : '&mdash;'}</div><div class="pm-stat-lbl">Current Rank</div></div>
       <div class="pm-stat"><div class="pm-stat-val">${myPts > 0 ? fmt(myPts) : '&mdash;'}</div><div class="pm-stat-lbl">Total Pts</div></div>
@@ -1080,7 +1075,7 @@ function showProfile(name) {
     const p = m.prev;
     body += `
   <div class="pm-section">
-    <div class="pm-sec-title">&#128197; 2025 Season</div>
+    <div class="pm-sec-title">&#9971; 2025 GBI Results</div>
     <div class="pm-stat-row">
       <div class="pm-stat"><div class="pm-stat-val">${medal25(p)}#${p.rank}</div><div class="pm-stat-lbl">Final Rank</div></div>
       <div class="pm-stat"><div class="pm-stat-val">${p.total}</div><div class="pm-stat-lbl">Total Pts</div></div>
@@ -1090,7 +1085,7 @@ function showProfile(name) {
   } else {
     body += `
   <div class="pm-section">
-    <div class="pm-sec-title">&#128197; 2025 Season</div>
+    <div class="pm-sec-title">&#9971; 2025 GBI Results</div>
     <div style="color:#aaa;font-style:italic;font-size:.88em">First year at GBI &mdash; no prior data</div>
   </div>`;
   }
@@ -1107,6 +1102,13 @@ function showProfile(name) {
     </div>
   </div>`;
   }
+
+  body += `
+  <div class="pm-section">
+    <div class="pm-sec-title">&#127922; Vegas Odds to Win GBI 2026</div>
+    <div style="font-size:1.7em;font-weight:bold;color:var(--green);font-family:'Cinzel',serif">${odds[name]}</div>
+    <div style="font-size:.72em;color:#aaa;margin-top:2px">Calculated from skill rating, 2025 finish &amp; vibes score</div>
+  </div>`;
 
   document.getElementById('profile-modal').innerHTML = `
     <div class="pm-backdrop" onclick="closeProfile()"></div>
