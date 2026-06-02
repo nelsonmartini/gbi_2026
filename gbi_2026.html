@@ -550,6 +550,7 @@ tr.winner { background: #fffce8 !important; }
 .dp-stats { display:flex;gap:5px;align-items:center;flex-wrap:wrap;font-size:.76em;color:#555;margin-bottom:6px; }
 .dp-pick-btn { padding:6px 0;border-radius:7px;border:none;cursor:pointer;font-weight:bold;letter-spacing:.02em; }
 .dp-pick-btn:hover { opacity:.88; }
+@keyframes draftFlash { 0%,100%{opacity:1} 50%{opacity:.3} }
 
 /* ── Player Profile Modal ── */
 #profile-modal {
@@ -730,7 +731,7 @@ function defaultState() {
     day1: defaultDayState(),
     day2: defaultDayState(),
     locks: { day1: false, day2: false },
-    draft: { active: false, complete: false, picks: [], currentPick: 0, timerStart: null, timerDuration: 180 }
+    draft: { active: false, complete: false, picks: [], currentPick: 0, timerStart: null, timerDuration: 180, paused: false, pausedRemaining: null }
   };
 }
 
@@ -1538,23 +1539,50 @@ function resetDraft() {
   if (!pin || pin.trim().toUpperCase() !== ADMIN_PIN.toUpperCase()) { alert('Incorrect PIN.'); return; }
   if (!confirm('Reset the draft? All team assignments will be cleared.')) return;
   S.roster.forEach(p => p.team = null);
-  S.draft = { active: false, complete: false, picks: [], currentPick: 0, timerStart: null, timerDuration: 180 };
+  S.draft = { active: false, complete: false, picks: [], currentPick: 0, timerStart: null, timerDuration: 180, paused: false, pausedRemaining: null };
   save();
   clearInterval(_draftTimer); _draftTimer = null;
   renderRoster();
 }
 
+function pauseDraft() {
+  if (!S.draft?.active || S.draft.paused) return;
+  const elapsed = Math.floor((Date.now() - (S.draft.timerStart || Date.now())) / 1000);
+  S.draft.pausedRemaining = Math.max(0, (S.draft.timerDuration || 180) - elapsed);
+  S.draft.paused = true;
+  clearInterval(_draftTimer); _draftTimer = null;
+  save();
+  renderRoster();
+}
+
+function resumeDraft() {
+  if (!S.draft?.active || !S.draft.paused) return;
+  const remaining = S.draft.pausedRemaining ?? S.draft.timerDuration;
+  S.draft.timerStart = Date.now() - ((S.draft.timerDuration - remaining) * 1000);
+  S.draft.paused = false;
+  S.draft.pausedRemaining = null;
+  save();
+  renderRoster();
+  startDraftTimer();
+}
+
 function startDraftTimer() {
   if (_draftTimer) { clearInterval(_draftTimer); _draftTimer = null; }
-  if (!S.draft?.active) return;
+  if (!S.draft?.active || S.draft.paused) return;
   _draftTimer = setInterval(() => {
-    if (!S.draft?.active) { clearInterval(_draftTimer); _draftTimer = null; return; }
+    if (!S.draft?.active || S.draft.paused) { clearInterval(_draftTimer); _draftTimer = null; return; }
     const elapsed = Math.floor((Date.now() - (S.draft.timerStart || Date.now())) / 1000);
-    const left = Math.max(0, (S.draft.timerDuration || 60) - elapsed);
+    const left = Math.max(0, (S.draft.timerDuration || 180) - elapsed);
     const el = document.getElementById('draft-timer-display');
     if (el) {
       el.textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
-      el.style.color = left <= 10 ? '#dc2626' : left <= 20 ? '#d97706' : 'white';
+      if (left === 0) {
+        el.style.color = '#ff4444';
+        el.style.animation = 'draftFlash .6s infinite';
+      } else {
+        el.style.animation = '';
+        el.style.color = left <= 20 ? '#fbbf24' : 'white';
+      }
     }
   }, 500);
 }
@@ -1643,22 +1671,52 @@ function renderDraftRoom() {
         <div style="font-size:1.15em;font-weight:bold;font-family:'Cinzel',serif">${tName} ON THE CLOCK</div>
         <div style="font-size:.75em;opacity:.75;margin-top:2px">${nextLabel}</div>
       </div>
-      <div>
-        <div id="draft-timer-display" style="font-size:2.2em;font-weight:bold;font-family:'Cinzel',serif;color:white;text-align:right">1:00</div>
-        <div style="font-size:.65em;opacity:.75;text-align:right">time on clock</div>
+      <div style="text-align:right">
+        <div id="draft-timer-display" style="font-size:2.2em;font-weight:bold;font-family:'Cinzel',serif;color:white">${S.draft.paused ? `${Math.floor((S.draft.pausedRemaining||0)/60)}:${String((S.draft.pausedRemaining||0)%60).padStart(2,'0')}` : '3:00'}</div>
+        <div style="margin-top:4px">
+          ${S.draft.paused
+            ? `<button onclick="resumeDraft()" style="background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.5);color:white;border-radius:8px;padding:4px 14px;cursor:pointer;font-size:.8em;font-weight:bold">▶ Resume</button>`
+            : `<button onclick="pauseDraft()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);color:white;border-radius:8px;padding:4px 14px;cursor:pointer;font-size:.8em">⏸ Pause</button>`
+          }
+        </div>
       </div>
     </div>
+    ${S.draft.paused ? `<div style="background:rgba(0,0,0,.15);color:white;text-align:center;padding:6px;font-size:.85em;font-weight:bold;letter-spacing:.05em">⏸ CLOCK PAUSED</div>` : ''}
     <div class="card-body" style="padding:12px">
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
-        <button onclick="setDraftCat(null)" style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:${!_draftCat?'var(--green)':'white'};color:${!_draftCat?'white':'#555'};font-size:.78em;cursor:pointer;font-weight:bold">All</button>
-        ${Object.entries(DRAFT_CATS).map(([key,c]) => {
-          const active = _draftCat === key;
-          const remaining = PLAYERS.filter(n => !draftedNames.has(n) && PLAYER_META[n].cat === key).length;
-          return `<button onclick="setDraftCat('${key}')" style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:${active?'var(--green)':'white'};color:${active?'white':'#555'};font-size:.78em;cursor:pointer;font-weight:bold">${c.label} <span style="opacity:.7">(${remaining})</span></button>`;
-        }).join('')}
+      <div style="${S.draft.paused ? 'opacity:.5;pointer-events:none;' : ''}">
+      ${Object.entries(DRAFT_CATS).map(([key, c]) => {
+        const catAvail = [...PLAYERS]
+          .filter(n => PLAYER_META[n].cat === key)
+          .sort((a,b) => (PLAYER_META[b].skill||0) - (PLAYER_META[a].skill||0));
+        const remaining = catAvail.filter(n => !draftedNames.has(n)).length;
+        const allGone = remaining === 0;
+        const cards = catAvail.map(name => {
+          const drafted = draftedNames.has(name);
+          if (drafted) return '';
+          const m = PLAYER_META[name];
+          const gc = gradeColor[m.grade] || '#888';
+          const rank25 = m.prev ? `#${m.prev.rank} '25` : (m.note ? 'N/A' : '&#127381;');
+          return `<div class="dp-card">
+            <div class="dp-name">${flag(name)} <strong>${esc(name)}</strong>${ppChampBadge(name)}<br><span style="font-size:.72em;color:#888">${rank25}</span></div>
+            <div class="dp-stats">
+              <span title="Skill">&#9889; ${m.skill ?? '—'}</span>
+              <span title="Vibes">&#10024; ${m.vibes ?? '—'}</span>
+              <span style="background:${gc};color:white;border-radius:4px;padding:1px 5px">${m.grade ?? '—'}</span>
+              <span style="color:var(--green)">${odds[name]}</span>
+            </div>
+            <button class="dp-pick-btn" style="background:${esc(tColor)};color:white;width:100%" onclick="makePick('${jsq(name)}')">DRAFT</button>
+          </div>`;
+        }).filter(Boolean).join('');
+        return `<div style="margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;padding-bottom:5px;border-bottom:2px solid var(--border)">
+            <span style="font-size:1em;font-weight:bold">${c.label}</span>
+            <span style="font-size:.75em;color:#888;font-style:italic">${c.sub}</span>
+            <span style="margin-left:auto;font-size:.78em;font-weight:bold;color:${allGone?'var(--green)':'#555'}">${allGone ? '✓ All drafted' : `${remaining} left`}</span>
+          </div>
+          ${allGone ? `<div style="color:#aaa;font-size:.82em;font-style:italic;padding:6px 0">All players drafted ✓</div>` : `<div class="dp-grid">${cards}</div>`}
+        </div>`;
+      }).join('')}
       </div>
-      ${_draftCat ? `<div style="font-size:.78em;color:#888;margin-bottom:8px;font-style:italic">${DRAFT_CATS[_draftCat].sub} &nbsp;·&nbsp; ${available.length} available</div>` : `<div style="font-size:.78em;color:#888;margin-bottom:8px">${available.length} players remaining</div>`}
-      <div class="dp-grid">${playerCards}</div>
       <details style="margin-top:12px">
         <summary style="font-size:.82em;color:var(--green);cursor:pointer;list-style:none;display:inline-block;padding:2px 10px;border:1px solid var(--green);border-radius:10px">Draft Board (${pickIdx} picks)</summary>
         ${buildDraftBoard(draft)}
