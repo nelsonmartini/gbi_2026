@@ -688,26 +688,26 @@ function ppChampBadge(name) {
 }
 
 const PLAYER_META = {
-  'Basham':   { grade:'C', vibes:6.4, skill:7.8, prev:{rank:12,total:31,   d1:17,  d2:14,   d1m:20, d2m:0,  d1four:8,   d1match:3,d1rank:4, d1pay:2,d2four:2,   d2match:5,d2rank:7, d2pay:0} },
-  'Bode':     { grade:'F', vibes:9.8, skill:4.8, prev:{rank:8, total:35.5, d1:9,   d2:26.5, d1m:20, d2m:40, d1four:4,   d1match:0,d1rank:3, d1pay:2,d2four:10.5,d2match:5,d2rank:7, d2pay:4} },
-  'Bryce':    { grade:'B', vibes:7.9, skill:8.3, prev:{rank:14,total:30.5, d1:15,  d2:15.5, d1m:20, d2m:0,  d1four:6,   d1match:0,d1rank:7, d1pay:2,d2four:6.5, d2match:0,d2rank:9, d2pay:0} },
-  'Braden':   { grade:null, vibes:null, skill:null, prev:null, note:'Did not attend 2025 GBI' },
-  'Kyle':     { grade:null, vibes:null, skill:null, prev:null },
-  'Evan':     { grade:'C', vibes:8.5, skill:7.9, prev:{rank:4, total:41.5, d1:20,  d2:21.5, d1m:40, d2m:40, d1four:4,   d1match:3,d1rank:9, d1pay:4,d2four:10.5,d2match:0,d2rank:7, d2pay:4} },
-  'Jordan':   { grade:null, vibes:null, skill:null, prev:null },
-  'Jake B':   { grade:'D', vibes:6.0, skill:6.0, prev:{rank:5, total:40.5, d1:17,  d2:23.5, d1m:20, d2m:0,  d1four:8,   d1match:0,d1rank:7, d1pay:2,d2four:6.5, d2match:5,d2rank:12,d2pay:0} },
-  'Moose':    { grade:'A', vibes:7.3, skill:9.3, prev:{rank:2, total:49.5, d1:21,  d2:28.5, d1m:0,  d2m:20, d1four:8,   d1match:3,d1rank:10,d1pay:0,d2four:6.5, d2match:5,d2rank:15,d2pay:2} },
-  'Nail':     { grade:'B', vibes:8.8, skill:8.8, prev:{rank:1, total:51.5, d1:21,  d2:30.5, d1m:40, d2m:20, d1four:4,   d1match:3,d1rank:10,d1pay:4,d2four:8.5, d2match:5,d2rank:15,d2pay:2} },
-  'NateDawg': { grade:'B', vibes:7.6, skill:7.9, prev:{rank:6, total:36.5, d1:18,  d2:18.5, d1m:0,  d2m:60, d1four:6,   d1match:3,d1rank:9, d1pay:0,d2four:8.5, d2match:0,d2rank:4, d2pay:6} },
-  'Neebs':    { grade:'F', vibes:7.8, skill:4.5, peterPutter:true, prev:{rank:20,total:14,   d1:3,   d2:11,   d1m:0,  d2m:0,  d1four:2,   d1match:0,d1rank:1, d1pay:0,d2four:2,   d2match:0,d2rank:9, d2pay:0} },
-  'Ponzi':    { grade:'A', vibes:4.4, skill:9.3, prev:{rank:12,total:31,   d1:14,  d2:17,   d1m:40, d2m:0,  d1four:2,   d1match:0,d1rank:8, d1pay:4,d2four:2,   d2match:5,d2rank:10,d2pay:0} },
-  'Rusty':    { grade:'D', vibes:7.8, skill:6.1, prev:{rank:14,total:30.5, d1:19,  d2:11.5, d1m:40, d2m:0,  d1four:6,   d1match:3,d1rank:6, d1pay:4,d2four:8.5, d2match:0,d2rank:3, d2pay:0} },
-  'Shawn':    { grade:'B', vibes:7.1, skill:8.6, prev:{rank:6, total:36.5, d1:17,  d2:19.5, d1m:20, d2m:0,  d1four:8,   d1match:3,d1rank:4, d1pay:2,d2four:10.5,d2match:0,d2rank:9, d2pay:0} },
-  'Tanner':   { grade:'F', vibes:9.4, skill:4.5, prev:{rank:18,total:19,   d1:13,  d2:6,    d1m:20, d2m:0,  d1four:2,   d1match:3,d1rank:6, d1pay:2,d2four:2,   d2match:0,d2rank:4, d2pay:0} },
-  'Tom':      { grade:'B', vibes:7.8, skill:8.1, prev:{rank:16,total:29.5, d1:11,  d2:18.5, d1m:0,  d2m:0,  d1four:2,   d1match:3,d1rank:6, d1pay:0,d2four:6.5, d2match:5,d2rank:7, d2pay:0} },
-  'Trevor':   { grade:'C', vibes:4.3, skill:7.4, prev:{rank:19,total:18.5, d1:7,   d2:11.5, d1m:20, d2m:20, d1four:4,   d1match:0,d1rank:1, d1pay:2,d2four:6.5, d2match:0,d2rank:3, d2pay:2} },
-  'Ty':       { grade:'C', vibes:7.6, skill:7.9, prev:{rank:9, total:34.5, d1:5,   d2:29.5, d1m:0,  d2m:40, d1four:2,   d1match:0,d1rank:3, d1pay:0,d2four:8.5, d2match:5,d2rank:12,d2pay:4} },
-  'Zach M.':  { grade:'D', vibes:8.1, skill:6.9, prev:{rank:9, total:34.5, d1:5,   d2:29.5, d1m:0,  d2m:40, d1four:2,   d1match:0,d1rank:3, d1pay:0,d2four:10.5,d2match:5,d2rank:10,d2pay:4} }
+  'Basham':   { cat:'straight',  grade:'C', vibes:6.4, skill:7.8, prev:{rank:12,total:31,   d1:17,  d2:14,   d1m:20, d2m:0,  d1four:8,   d1match:3,d1rank:4, d1pay:2,d2four:2,   d2match:5,d2rank:7, d2pay:0} },
+  'Bode':     { cat:'mystery',   grade:'F', vibes:9.8, skill:4.8, prev:{rank:8, total:35.5, d1:9,   d2:26.5, d1m:20, d2m:40, d1four:4,   d1match:0,d1rank:3, d1pay:2,d2four:10.5,d2match:5,d2rank:7, d2pay:4} },
+  'Bryce':    { cat:'bigdawg',   grade:'B', vibes:7.9, skill:8.3, prev:{rank:14,total:30.5, d1:15,  d2:15.5, d1m:20, d2m:0,  d1four:6,   d1match:0,d1rank:7, d1pay:2,d2four:6.5, d2match:0,d2rank:9, d2pay:0} },
+  'Braden':   { cat:'mystery',   grade:null, vibes:null, skill:null, prev:null, note:'Did not attend 2025 GBI' },
+  'Kyle':     { cat:'shotmaker', grade:null, vibes:null, skill:null, prev:null },
+  'Evan':     { cat:'bigdawg',   grade:'C', vibes:8.5, skill:7.9, prev:{rank:4, total:41.5, d1:20,  d2:21.5, d1m:40, d2m:40, d1four:4,   d1match:3,d1rank:9, d1pay:4,d2four:10.5,d2match:0,d2rank:7, d2pay:4} },
+  'Jordan':   { cat:'mystery',   grade:null, vibes:null, skill:null, prev:null },
+  'Jake B':   { cat:'shotmaker', grade:'D', vibes:6.0, skill:6.0, prev:{rank:5, total:40.5, d1:17,  d2:23.5, d1m:20, d2m:0,  d1four:8,   d1match:0,d1rank:7, d1pay:2,d2four:6.5, d2match:5,d2rank:12,d2pay:0} },
+  'Moose':    { cat:'bigdawg',   grade:'A', vibes:7.3, skill:9.3, prev:{rank:2, total:49.5, d1:21,  d2:28.5, d1m:0,  d2m:20, d1four:8,   d1match:3,d1rank:10,d1pay:0,d2four:6.5, d2match:5,d2rank:15,d2pay:2} },
+  'Nail':     { cat:'straight',  grade:'B', vibes:8.8, skill:8.8, prev:{rank:1, total:51.5, d1:21,  d2:30.5, d1m:40, d2m:20, d1four:4,   d1match:3,d1rank:10,d1pay:4,d2four:8.5, d2match:5,d2rank:15,d2pay:2} },
+  'NateDawg': { cat:'straight',  grade:'B', vibes:7.6, skill:7.9, prev:{rank:6, total:36.5, d1:18,  d2:18.5, d1m:0,  d2m:60, d1four:6,   d1match:3,d1rank:9, d1pay:0,d2four:8.5, d2match:0,d2rank:4, d2pay:6} },
+  'Neebs':    { cat:'mystery',   grade:'F', vibes:7.8, skill:4.5, peterPutter:true, prev:{rank:20,total:14,   d1:3,   d2:11,   d1m:0,  d2m:0,  d1four:2,   d1match:0,d1rank:1, d1pay:0,d2four:2,   d2match:0,d2rank:9, d2pay:0} },
+  'Ponzi':    { cat:'bigdawg',   grade:'A', vibes:4.4, skill:9.3, prev:{rank:12,total:31,   d1:14,  d2:17,   d1m:40, d2m:0,  d1four:2,   d1match:0,d1rank:8, d1pay:4,d2four:2,   d2match:5,d2rank:10,d2pay:0} },
+  'Rusty':    { cat:'shotmaker', grade:'D', vibes:7.8, skill:6.1, prev:{rank:14,total:30.5, d1:19,  d2:11.5, d1m:40, d2m:0,  d1four:6,   d1match:3,d1rank:6, d1pay:4,d2four:8.5, d2match:0,d2rank:3, d2pay:0} },
+  'Shawn':    { cat:'bigdawg',   grade:'B', vibes:7.1, skill:8.6, prev:{rank:6, total:36.5, d1:17,  d2:19.5, d1m:20, d2m:0,  d1four:8,   d1match:3,d1rank:4, d1pay:2,d2four:10.5,d2match:0,d2rank:9, d2pay:0} },
+  'Tanner':   { cat:'mystery',   grade:'F', vibes:9.4, skill:4.5, prev:{rank:18,total:19,   d1:13,  d2:6,    d1m:20, d2m:0,  d1four:2,   d1match:3,d1rank:6, d1pay:2,d2four:2,   d2match:0,d2rank:4, d2pay:0} },
+  'Tom':      { cat:'straight',  grade:'B', vibes:7.8, skill:8.1, prev:{rank:16,total:29.5, d1:11,  d2:18.5, d1m:0,  d2m:0,  d1four:2,   d1match:3,d1rank:6, d1pay:0,d2four:6.5, d2match:5,d2rank:7, d2pay:0} },
+  'Trevor':   { cat:'shotmaker', grade:'C', vibes:4.3, skill:7.4, prev:{rank:19,total:18.5, d1:7,   d2:11.5, d1m:20, d2m:20, d1four:4,   d1match:0,d1rank:1, d1pay:2,d2four:6.5, d2match:0,d2rank:3, d2pay:2} },
+  'Ty':       { cat:'straight',  grade:'C', vibes:7.6, skill:7.9, prev:{rank:9, total:34.5, d1:5,   d2:29.5, d1m:0,  d2m:40, d1four:2,   d1match:0,d1rank:3, d1pay:0,d2four:8.5, d2match:5,d2rank:12,d2pay:4} },
+  'Zach M.':  { cat:'shotmaker', grade:'D', vibes:8.1, skill:6.9, prev:{rank:9, total:34.5, d1:5,   d2:29.5, d1m:0,  d2m:40, d1four:2,   d1match:0,d1rank:3, d1pay:0,d2four:10.5,d2match:5,d2rank:10,d2pay:4} }
 };
 
 // 27 holes per day (20 payout, 7 No Prize) — mirrors 2025 structure
@@ -780,6 +780,7 @@ const ADMIN_PIN = 'GBIcommish26';
 
 let _db = null, _ref = null, _auth = null;
 let _draftTimer = null;
+let _draftCat = null;
 let S = defaultState();
 
 function fbReady() { return _ref !== null; }
@@ -1485,6 +1486,18 @@ function renderScoreboard() {
 /* ═══════════════════════════════════════════════════════
    DRAFT ROOM
 ═══════════════════════════════════════════════════════ */
+const DRAFT_CATS = {
+  bigdawg:   { label: '🐾 Big Dawgs',       sub: 'Ball bombers' },
+  straight:  { label: '🎯 Straight & Narrow', sub: 'Boring? Cashing.' },
+  shotmaker: { label: '🪄 Shot Makers',      sub: 'No fairway needed' },
+  mystery:   { label: '🎲 Mystery Box',      sub: 'Who knows?' },
+};
+
+function setDraftCat(cat) {
+  _draftCat = cat;
+  renderRoster();
+}
+
 function draftSnakeTeam(pickIdx) {
   const round = Math.floor(pickIdx / 2);
   return (round % 2 === 0) ? (pickIdx % 2 === 0 ? 't1' : 't2') : (pickIdx % 2 === 0 ? 't2' : 't1');
@@ -1600,6 +1613,7 @@ function renderDraftRoom() {
   const draftedNames = new Set((draft.picks || []).map(p => p.player));
   const available = [...PLAYERS]
     .filter(n => !draftedNames.has(n))
+    .filter(n => !_draftCat || PLAYER_META[n].cat === _draftCat)
     .sort((a, b) => (PLAYER_META[b].skill || 0) - (PLAYER_META[a].skill || 0));
 
   const playerCards = available.map(name => {
@@ -1635,7 +1649,15 @@ function renderDraftRoom() {
       </div>
     </div>
     <div class="card-body" style="padding:12px">
-      <div style="font-size:.8em;color:#888;margin-bottom:8px">Available players — sorted by skill &nbsp;·&nbsp; ${available.length} remaining</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <button onclick="setDraftCat(null)" style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:${!_draftCat?'var(--green)':'white'};color:${!_draftCat?'white':'#555'};font-size:.78em;cursor:pointer;font-weight:bold">All</button>
+        ${Object.entries(DRAFT_CATS).map(([key,c]) => {
+          const active = _draftCat === key;
+          const remaining = PLAYERS.filter(n => !draftedNames.has(n) && PLAYER_META[n].cat === key).length;
+          return `<button onclick="setDraftCat('${key}')" style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:${active?'var(--green)':'white'};color:${active?'white':'#555'};font-size:.78em;cursor:pointer;font-weight:bold">${c.label} <span style="opacity:.7">(${remaining})</span></button>`;
+        }).join('')}
+      </div>
+      ${_draftCat ? `<div style="font-size:.78em;color:#888;margin-bottom:8px;font-style:italic">${DRAFT_CATS[_draftCat].sub} &nbsp;·&nbsp; ${available.length} available</div>` : `<div style="font-size:.78em;color:#888;margin-bottom:8px">${available.length} players remaining</div>`}
       <div class="dp-grid">${playerCards}</div>
       <details style="margin-top:12px">
         <summary style="font-size:.82em;color:var(--green);cursor:pointer;list-style:none;display:inline-block;padding:2px 10px;border:1px solid var(--green);border-radius:10px">Draft Board (${pickIdx} picks)</summary>
