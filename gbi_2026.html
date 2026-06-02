@@ -723,7 +723,7 @@ function defaultState() {
     day1: defaultDayState(),
     day2: defaultDayState(),
     locks: { day1: false, day2: false },
-    draft: { active: false, complete: false, picks: [], currentPick: 0, timerStart: null, timerDuration: 60 }
+    draft: { active: false, complete: false, picks: [], currentPick: 0, timerStart: null, timerDuration: 180 }
   };
 }
 
@@ -1486,7 +1486,7 @@ function startDraft() {
   const t1 = esc(S.teams.t1.name), t2 = esc(S.teams.t2.name);
   if (!confirm(`Start the GBI 2026 Draft?\n\n${t1} picks first. Snake order. Commissioner controls all 20 picks.\n\nThis will clear current team assignments.`)) return;
   S.roster.forEach(p => p.team = null);
-  S.draft = { active: true, complete: false, picks: [], currentPick: 0, timerStart: Date.now(), timerDuration: 60 };
+  S.draft = { active: true, complete: false, picks: [], currentPick: 0, timerStart: Date.now(), timerDuration: 180 };
   save();
   renderRoster();
   startDraftTimer();
@@ -1517,7 +1517,7 @@ function resetDraft() {
   if (!pin || pin.trim().toUpperCase() !== ADMIN_PIN.toUpperCase()) { alert('Incorrect PIN.'); return; }
   if (!confirm('Reset the draft? All team assignments will be cleared.')) return;
   S.roster.forEach(p => p.team = null);
-  S.draft = { active: false, complete: false, picks: [], currentPick: 0, timerStart: null, timerDuration: 60 };
+  S.draft = { active: false, complete: false, picks: [], currentPick: 0, timerStart: null, timerDuration: 180 };
   save();
   clearInterval(_draftTimer); _draftTimer = null;
   renderRoster();
