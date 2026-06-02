@@ -1370,7 +1370,7 @@ function renderScoreboard() {
         const tcol = p.team ? S.teams[p.team].color : '#aaa';
         html += `<div class="bb-row${rk<=3?' bb-top':''}">
           <div class="bb-pos${rk<=3?' bb-gold':''}">${rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':ordinal(rk)}</div>
-          <div class="bb-name" style="border-left-color:${tcol}"><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppChampBadge(p.name)}${ppBadge(p.name,pp)}</div>
+          <div class="bb-name" style="border-left-color:${tcol}"><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}</div>
           <div class="bb-pts">${fmt(p.total)}</div>
           <div class="bb-par ${parCls}">${parStr}</div>
         </div>`;
@@ -1400,7 +1400,7 @@ function renderScoreboard() {
         const parClass = par===null?'':par<0?' style="color:var(--green);font-weight:bold"':par>0?' style="color:#b03030;font-weight:bold"':' style="font-weight:bold"';
         html += `<tr${rk<=3?' class="winner"':''}>
           <td class="c" style="font-size:1.2em">${medal(rk)}</td>
-          <td style="font-size:1.2em"><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppChampBadge(p.name)}${ppBadge(p.name,pp)}</strong></td>
+          <td style="font-size:1.2em"><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}</strong></td>
           <td class="hide-mobile">${tBadge(p.team)}</td>
           <td class="c">${ppPts(p.name,pp,p.total)}</td>
           <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
@@ -1468,7 +1468,7 @@ function renderScoreboard() {
         let rk=1, prev=null;
         sorted.forEach((p,i)=>{
           if(p.dp!==prev) rk=i+1;
-          html+=`<tr${rk<=3?' class="winner"':''}><td class="c" style="font-size:1.15em">${medal(rk)}</td><td><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppChampBadge(p.name)}${ppBadge(p.name,pp)}</strong></td><td class="hide-mobile">${tBadge(p.team)}</td><td class="c">${ppPts(p.name,pp,p.dp)}</td><td class="c money">${fmtM(p.dm)}</td></tr>`;
+          html+=`<tr${rk<=3?' class="winner"':''}><td class="c" style="font-size:1.15em">${medal(rk)}</td><td><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}</strong></td><td class="hide-mobile">${tBadge(p.team)}</td><td class="c">${ppPts(p.name,pp,p.dp)}</td><td class="c money">${fmtM(p.dm)}</td></tr>`;
           prev=p.dp;
         });
         html += `</tbody></table>`;
@@ -1607,7 +1607,7 @@ function renderDraftRoom() {
     const gc = gradeColor[m.grade] || '#888';
     const rank25 = m.prev ? `#${m.prev.rank} '25` : '&#127381; Rookie';
     return `<div class="dp-card">
-      <div class="dp-name">${flag(name)} <strong>${esc(name)}</strong><br><span style="font-size:.72em;color:#888">${rank25}</span></div>
+      <div class="dp-name">${flag(name)} <strong>${esc(name)}</strong>${ppChampBadge(name)}<br><span style="font-size:.72em;color:#888">${rank25}</span></div>
       <div class="dp-stats">
         <span title="Skill">&#9889; ${m.skill ?? '—'}</span>
         <span title="Vibes">&#10024; ${m.vibes ?? '—'}</span>
@@ -2070,7 +2070,7 @@ function renderDayTable(day) {
     if (p.dp.total!==prev) rk=i+1;
     html+=`<tr${rk<=3?' class="winner"':''}>
       <td><span class="rank${rk<=3?' gold':''}">${rk}</span></td>
-      <td><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppChampBadge(p.name)}${ppBadge(p.name,pp)}</strong></td><td class="hide-phone">${tBadge(p.team)}</td>
+      <td><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}</strong></td><td class="hide-phone">${tBadge(p.team)}</td>
       <td class="c hide-phone">${fmt(p.dp.fourMan)}</td>
       <td class="c hide-phone">${fmt(p.dp.matchWin)}</td>
       <td class="c hide-phone">${fmt(p.dp.matchRank)}</td>
@@ -2400,7 +2400,7 @@ function renderMonies() {
     const totalWon = holeMoney + fm + tm;
     html += `<tr${dispRk <= 3 ? ' class="winner"' : ''}>
       <td class="c" style="font-size:1.2em">${mdl(dispRk)}</td>
-      <td style="font-size:1.2em"><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppChampBadge(p.name)}</strong></td>
+      <td style="font-size:1.2em"><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span></strong></td>
       <td class="c">${mc(holeMoney)}</td>
       <td class="c">${mc(tm)}</td>
       <td class="c">${mc(fm)}</td>
@@ -2810,7 +2810,7 @@ function renderAnalytics() {
       <span style="font-size:.8em;font-weight:bold;color:${col};min-width:26px">${val}</span>
     </div>`;
     html += `<tr>
-      <td><strong>${flag(n)} ${esc(n)}</strong></td>
+      <td><strong>${flag(n)} ${esc(n)}</strong>${ppChampBadge(n)}</td>
       <td class="c hide-mobile">${tBadge(teamOf(n))}</td>
       <td class="c"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:${gc};color:white;font-weight:bold;font-size:.9em">${m.grade}</span></td>
       <td style="min-width:100px">${bar(m.skill,'var(--green)')}</td>
@@ -2841,7 +2841,7 @@ function renderAnalytics() {
     const p = PLAYER_META[n].prev;
     html += `<tr${p.rank<=3?' class="winner"':''}>
       <td class="c"><span class="rank${p.rank<=3?' gold':''}">${p.rank}</span></td>
-      <td><strong>${flag(n)} ${esc(n)}</strong></td>
+      <td><strong>${flag(n)} ${esc(n)}</strong>${ppChampBadge(n)}</td>
       <td class="c hide-mobile">${tBadge(teamOf(n))}</td>
       <td class="c pts">${p.total}</td>
       <td class="c money">$${p.d1m + p.d2m}</td>
