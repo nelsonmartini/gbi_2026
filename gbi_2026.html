@@ -2006,7 +2006,27 @@ function renderMonies() {
     prevTot = p.total;
   });
 
-  const PRIZE_AMOUNTS = [400, 200, 100];
+  // Hole payouts — computed first so rollover is available everywhere below
+  const holeDays = { day1: { claimed: 0, unclaimed: 0 }, day2: { claimed: 0, unclaimed: 0 } };
+  ['day1','day2'].forEach(day => {
+    S[day].payouts.forEach(p => {
+      if (p.cat === 'NP') return;
+      if (p.winner) holeDays[day].claimed += 20; else holeDays[day].unclaimed += 20;
+    });
+  });
+  const claimedHole = holeDays.day1.claimed + holeDays.day2.claimed;
+  const unclaimedHole = holeDays.day1.unclaimed + holeDays.day2.unclaimed;
+  const totalHolePot = claimedHole + unclaimedHole || 800;
+
+  const d1rollover = (S.locks?.day1) ? holeDays.day1.unclaimed : 0;
+  const d2rollover = (S.locks?.day2) ? holeDays.day2.unclaimed : 0;
+  const totalRollover = d1rollover + d2rollover;
+
+  // Unclaimed hole money rolls to individual prizes: 60% / 30% / 10%
+  const roll1 = Math.round(totalRollover * 0.6);
+  const roll2 = Math.round(totalRollover * 0.3);
+  const roll3 = totalRollover - roll1 - roll2;
+  const PRIZE_AMOUNTS = [400 + roll1, 200 + roll2, 100 + roll3];
 
   function finishPrize(name) {
     if (!anyScores) return 0;
@@ -2021,28 +2041,15 @@ function renderMonies() {
     return 0;
   }
 
-  // Team champ
+  // Team champ — flat $500, rollover no longer goes here
   const leadTeamKey = tt.t1.total > tt.t2.total ? 't1' : tt.t2.total > tt.t1.total ? 't2' : null;
   const leadTeamName = leadTeamKey ? tt[leadTeamKey].name : null;
 
   function teamPrize(name) {
     if (!anyScores || !leadTeamKey) return 0;
     const p = S.roster.find(r => r.name === name);
-    const perPlayer = Math.round((500 + totalRollover) / 10);
-    return (p && p.team === leadTeamKey) ? perPlayer : 0;
+    return (p && p.team === leadTeamKey) ? 50 : 0;
   }
-
-  // Hole payouts — split by day
-  const holeDays = { day1: { claimed: 0, unclaimed: 0 }, day2: { claimed: 0, unclaimed: 0 } };
-  ['day1','day2'].forEach(day => {
-    S[day].payouts.forEach(p => {
-      if (p.cat === 'NP') return;
-      if (p.winner) holeDays[day].claimed += 20; else holeDays[day].unclaimed += 20;
-    });
-  });
-  const claimedHole = holeDays.day1.claimed + holeDays.day2.claimed;
-  const unclaimedHole = holeDays.day1.unclaimed + holeDays.day2.unclaimed;
-  const totalHolePot = claimedHole + unclaimedHole || 800;
 
   // Pot totals for tracker bars
   const finishClaimed = anyScores ? PRIZE_AMOUNTS.reduce((sum, amt, i) => {
@@ -2050,11 +2057,8 @@ function renderMonies() {
     const tied = ranked.filter(p => p.rk === pos);
     return tied.length ? sum + amt : sum;
   }, 0) : 0;
-  const d1rollover = (S.locks?.day1) ? holeDays.day1.unclaimed : 0;
-  const d2rollover = (S.locks?.day2) ? holeDays.day2.unclaimed : 0;
-  const totalRollover = d1rollover + d2rollover;
   const teamBaseClaimed = (anyScores && leadTeamKey) ? 500 : 0;
-  const teamClaimed = teamBaseClaimed + totalRollover;
+  const teamClaimed = teamBaseClaimed;
   const totalDistributed = claimedHole + finishClaimed + teamClaimed;
   const GRAND_TOTAL = 2000;
 
@@ -2079,8 +2083,8 @@ function renderMonies() {
   const potRows = [
     { label: '📅 Day 1 Hole Payouts', pot: 400,                   claimed: holeDays.day1.claimed + d1rollover, color: 'var(--green)' },
     { label: '📅 Day 2 Hole Payouts', pot: 400,                   claimed: holeDays.day2.claimed + d2rollover, color: 'var(--green)' },
-    { label: '🎖️ Individual Prizes',  pot: 700,                   claimed: finishClaimed,                      color: '#c8a800'      },
-    { label: '🏆 Team Championship',  pot: 500 + totalRollover,   claimed: teamClaimed,                        color: '#1a4a8a'      },
+    { label: '🎖️ Individual Prizes',  pot: 700 + totalRollover,   claimed: finishClaimed,                      color: '#c8a800'      },
+    { label: '🏆 Team Championship',  pot: 500,                   claimed: teamClaimed,                        color: '#1a4a8a'      },
   ];
   html += `<div class="card" style="margin-bottom:10px">
     <div class="card-header">💰 Total Prize Pool — $${GRAND_TOTAL}</div>
@@ -2117,16 +2121,10 @@ function renderMonies() {
   let teamWho = `<span style="color:#aaa;font-style:italic">TBD — no scores yet</span>`;
   if (anyScores && leadTeamKey) {
     const tColor = S.teams[leadTeamKey].color;
-    const perPlayer = Math.round((500 + totalRollover) / 10);
     const teamPlayers = S.roster.filter(p => p.team === leadTeamKey).map(p => esc(p.name)).join(', ');
-    const d1rollPct = d1rollover ? Math.round((d1rollover / 400) * 100) : 0;
-    const d2rollPct = d2rollover ? Math.round((d2rollover / 400) * 100) : 0;
     teamWho = `<span class="tb" style="background:${esc(tColor)}">${esc(leadTeamName)}</span>
       <table style="margin-top:10px;font-size:.85em;border-collapse:collapse;width:100%;max-width:380px">
-        <tr><td style="padding:3px 8px 3px 0;color:#666">🏆 Base prize</td><td class="money" style="text-align:right">$500</td><td style="color:#aaa;font-size:.85em;padding-left:8px">fixed</td></tr>
-        ${d1rollover > 0 ? `<tr><td style="padding:3px 8px 3px 0;color:#1a7a1a">⛳ D1 rollover &#128274;</td><td class="money" style="text-align:right">+$${d1rollover}</td><td style="color:#aaa;font-size:.85em;padding-left:8px">${d1rollPct}% of D1 pot</td></tr>` : ''}
-        ${d2rollover > 0 ? `<tr><td style="padding:3px 8px 3px 0;color:#1a7a1a">⛳ D2 rollover &#128274;</td><td class="money" style="text-align:right">+$${d2rollover}</td><td style="color:#aaa;font-size:.85em;padding-left:8px">${d2rollPct}% of D2 pot</td></tr>` : ''}
-        <tr style="border-top:1px solid var(--border);font-weight:bold"><td style="padding:5px 8px 3px 0">Total pot</td><td class="money" style="text-align:right">$${500 + totalRollover}</td><td style="color:#888;font-size:.85em;padding-left:8px">$${perPlayer}/player</td></tr>
+        <tr><td style="padding:3px 8px 3px 0;color:#666">🏆 Prize</td><td class="money" style="text-align:right">$500</td><td style="color:#aaa;font-size:.85em;padding-left:8px">$50/player</td></tr>
       </table>
       <div style="color:#666;font-size:.8em;margin-top:6px">→ ${teamPlayers}</div>`;
   }
@@ -2136,20 +2134,21 @@ function renderMonies() {
     <div class="card-body">
 
     <div style="margin-bottom:18px">
-      <div style="font-weight:bold;margin-bottom:4px">🎖️ Individual Finish Prizes &mdash; $700</div>
-      ${pctBar(finishClaimed, 700, '#c8a800')}
+      <div style="font-weight:bold;margin-bottom:4px">🎖️ Individual Finish Prizes &mdash; $${700 + totalRollover}</div>
+      ${pctBar(finishClaimed, 700 + totalRollover, '#c8a800')}
       <details style="margin-top:2px">${detailsSummary}
-        <table style="width:100%;max-width:500px;margin-top:8px"><tbody>
-          <tr><td style="width:28px">🥇</td><td style="width:60px"><strong class="money">$400</strong></td><td>${posNames(1)}</td></tr>
-          <tr><td>🥈</td><td><strong class="money">$200</strong></td><td>${posNames(2)}</td></tr>
-          <tr><td>🥉</td><td><strong class="money">$100</strong></td><td>${posNames(3)}</td></tr>
+        <table style="width:100%;max-width:500px;margin-top:8px;font-size:.88em;border-collapse:collapse"><tbody>
+          <tr><td style="width:28px">🥇</td><td style="width:70px"><strong class="money">$${PRIZE_AMOUNTS[0]}</strong>${roll1>0?`<span style="color:#1a7a1a;font-size:.8em"> (+$${roll1})</span>`:''}</td><td>${posNames(1)}</td></tr>
+          <tr><td>🥈</td><td><strong class="money">$${PRIZE_AMOUNTS[1]}</strong>${roll2>0?`<span style="color:#1a7a1a;font-size:.8em"> (+$${roll2})</span>`:''}</td><td>${posNames(2)}</td></tr>
+          <tr><td>🥉</td><td><strong class="money">$${PRIZE_AMOUNTS[2]}</strong>${roll3>0?`<span style="color:#1a7a1a;font-size:.8em"> (+$${roll3})</span>`:''}</td><td>${posNames(3)}</td></tr>
+          ${totalRollover > 0 ? `<tr style="border-top:1px solid var(--border)"><td colspan="3" style="padding-top:6px;color:#1a7a1a;font-size:.82em">⛳ $${totalRollover} rolled from unclaimed hole payouts (60/30/10%)</td></tr>` : ''}
         </tbody></table>
       </details>
     </div>
 
     <div style="margin-bottom:18px">
-      <div style="font-weight:bold;margin-bottom:4px">🏆 Team Championship &mdash; $${500 + totalRollover}</div>
-      ${pctBar(teamClaimed, 500 + totalRollover, '#1a4a8a')}
+      <div style="font-weight:bold;margin-bottom:4px">🏆 Team Championship &mdash; $500</div>
+      ${pctBar(teamClaimed, 500, '#1a4a8a')}
       <details style="margin-top:2px">${detailsSummary}
         <div style="margin-top:6px">${teamWho}</div>
       </details>
