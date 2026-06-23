@@ -1697,7 +1697,7 @@ function renderDraftRoom() {
           const gc = gradeColor[m.grade] || '#888';
           const rank25 = m.prev ? `#${m.prev.rank} '25` : (m.note ? 'N/A' : '&#127381;');
           return `<div class="dp-card">
-            <div class="dp-name">${flag(name)} <strong>${esc(name)}</strong>${ppChampBadge(name)}<br><span style="font-size:.72em;color:#888">${rank25}</span></div>
+            <div class="dp-name"><span class="plink" onclick="showProfile('${jsq(name)}')">${flag(name)} <strong>${esc(name)}</strong></span>${ppChampBadge(name)}<br><span style="font-size:.72em;color:#888">${rank25}</span></div>
             <div class="dp-stats">
               <span title="Skill">&#9889; ${m.skill ?? '—'}</span>
               <span title="Vibes">&#10024; ${m.vibes ?? '—'}</span>
