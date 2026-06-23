@@ -1136,11 +1136,12 @@ function showProfile(name) {
     <div style="font-size:.72em;color:#aaa;margin-top:2px">Calculated from skill rating, 2025 finish &amp; vibes score</div>
   </div>`;
 
+  const pmText = contrastColor(tColor);
   document.getElementById('profile-modal').innerHTML = `
     <div class="pm-backdrop" onclick="closeProfile()"></div>
     <div class="pm-card">
-      <div class="pm-header" style="background:${esc(tColor)}">
-        <button class="pm-close" onclick="closeProfile()">&#10005;</button>
+      <div class="pm-header" style="background:${esc(tColor)};color:${pmText}">
+        <button class="pm-close" style="color:${pmText};background:${pmText==='#fff'?'rgba(255,255,255,.25)':'rgba(0,0,0,.12)'}" onclick="closeProfile()">&#10005;</button>
         <div class="pm-name">${flag(name)} ${esc(name)}${rookieTag}</div>
         <div class="pm-sub">${esc(tName)}${ppTag}</div>
         ${champBadge}${ppChampTag}
@@ -1182,6 +1183,18 @@ function teamOf(name) {
 ═══════════════════════════════════════════════════════ */
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+// Relative luminance of a hex color, 0 (black) - 1 (white)
+function hexLum(hex) {
+  const h = String(hex || '').replace('#','');
+  if (h.length !== 6) return 0;
+  const r = parseInt(h.substr(0,2),16), g = parseInt(h.substr(2,2),16), b = parseInt(h.substr(4,2),16);
+  return (0.299*r + 0.587*g + 0.114*b) / 255;
+}
+// Legible text color to put ON TOP of a team-color background (e.g. white team -> black text)
+function contrastColor(hex) { return hexLum(hex) > 0.6 ? '#161616' : '#fff'; }
+// Legible version of a team color when it's used AS text/fill on the site's light cream background
+function safeTeamColor(hex) { return hexLum(hex) > 0.85 ? '#161616' : hex; }
+
 // Returns {set: bottom-5 names, last: dead-last name} when scores exist
 function ppPlayers() {
   const all = allPlayerStats();
@@ -1216,7 +1229,7 @@ function fmtM(n) { return n ? `$${n}` : '$0'; }
 function tBadge(team) {
   if (!team) return `<span class="tb tb-none">Unassigned</span>`;
   const t = S.teams[team];
-  return `<span class="tb" style="background:${esc(t.color)}">${esc(t.name)}</span>`;
+  return `<span class="tb" style="background:${esc(t.color)};color:${contrastColor(t.color)}">${esc(t.name)}</span>`;
 }
 
 function playerOpts(val='') {
@@ -1327,7 +1340,7 @@ function renderScoreboard() {
   const midText = leadName ? `${esc(leadName)}<br>leads +${fmt(margin)}` : anyScores ? 'Tied' : 'GBI<br>2026';
   html += `
   <div class="team-compact-banner">
-    <div class="tcb-side" style="background:${t1col}">
+    <div class="tcb-side" style="background:${t1col};color:${contrastColor(t1col)}">
       <div class="tcb-name">${esc(tt.t1.name)}</div>
       <div class="tcb-score">${fmt(tt.t1.total)}</div>
     </div>
@@ -1335,7 +1348,7 @@ function renderScoreboard() {
       <div class="tcb-vs">VS</div>
       <div class="tcb-margin">${midText}</div>
     </div>
-    <div class="tcb-side" style="background:${t2col}">
+    <div class="tcb-side" style="background:${t2col};color:${contrastColor(t2col)}">
       <div class="tcb-name">${esc(tt.t2.name)}</div>
       <div class="tcb-score">${fmt(tt.t2.total)}</div>
     </div>
@@ -1594,7 +1607,7 @@ function buildDraftBoard(draft) {
     const tn = esc(S.teams[pk.team]?.name || pk.team);
     return `<tr>
       <td class="c" style="font-size:.82em;color:#888;width:32px">${pk.pick}</td>
-      <td style="padding:4px 8px"><span class="tb" style="background:${tc};font-size:.76em">${tn}</span></td>
+      <td style="padding:4px 8px"><span class="tb" style="background:${tc};color:${contrastColor(tc)};font-size:.76em">${tn}</span></td>
       <td style="font-size:.88em"><strong>${flag(pk.player)} ${esc(pk.player)}</strong></td>
     </tr>`;
   }).join('');
@@ -1637,6 +1650,12 @@ function renderDraftRoom() {
   const onClock = draftSnakeTeam(pickIdx);
   const tColor = S.teams[onClock].color;
   const tName  = esc(S.teams[onClock].name);
+  const headText = contrastColor(tColor);
+  const onLight = headText === '#161616';
+  const ovStrong = onLight ? 'rgba(0,0,0,.14)' : 'rgba(255,255,255,.25)';
+  const ovWeak = onLight ? 'rgba(0,0,0,.08)' : 'rgba(255,255,255,.15)';
+  const ovBorderStrong = onLight ? 'rgba(0,0,0,.35)' : 'rgba(255,255,255,.5)';
+  const ovBorderWeak = onLight ? 'rgba(0,0,0,.25)' : 'rgba(255,255,255,.4)';
   const nextTeam = pickIdx + 1 < 20 ? draftSnakeTeam(pickIdx + 1) : null;
   const draftedNames = new Set((draft.picks || []).map(p => p.player));
   const available = [...PLAYERS]
@@ -1656,7 +1675,7 @@ function renderDraftRoom() {
         <span style="background:${gc};color:white;border-radius:4px;padding:1px 5px">${m.grade ?? '—'}</span>
         <span style="color:var(--green)">${odds[name]}</span>
       </div>
-      <button class="dp-pick-btn" style="background:${esc(tColor)};color:white;width:100%;letter-spacing:.08em" onclick="makePick('${jsq(name)}')">
+      <button class="dp-pick-btn" style="background:${esc(tColor)};color:${headText};width:100%;letter-spacing:.08em" onclick="makePick('${jsq(name)}')">
         DRAFT
       </button>
     </div>`;
@@ -1665,18 +1684,18 @@ function renderDraftRoom() {
   const nextLabel = nextTeam ? `Up next: <strong>${esc(S.teams[nextTeam].name)}</strong>` : '';
 
   return `<div class="card" style="margin-bottom:12px">
-    <div class="draft-header" style="background:${esc(tColor)}">
+    <div class="draft-header" style="background:${esc(tColor)};color:${headText}">
       <div>
         <div style="font-size:.72em;opacity:.85;text-transform:uppercase;letter-spacing:.06em">Pick ${pickIdx + 1} of 20</div>
         <div style="font-size:1.15em;font-weight:bold;font-family:'Cinzel',serif">${tName} ON THE CLOCK</div>
         <div style="font-size:.75em;opacity:.75;margin-top:2px">${nextLabel}</div>
       </div>
       <div style="text-align:right">
-        <div id="draft-timer-display" style="font-size:2.2em;font-weight:bold;font-family:'Cinzel',serif;color:white">${S.draft.paused ? `${Math.floor((S.draft.pausedRemaining||0)/60)}:${String((S.draft.pausedRemaining||0)%60).padStart(2,'0')}` : '3:00'}</div>
+        <div id="draft-timer-display" style="font-size:2.2em;font-weight:bold;font-family:'Cinzel',serif;color:${headText}">${S.draft.paused ? `${Math.floor((S.draft.pausedRemaining||0)/60)}:${String((S.draft.pausedRemaining||0)%60).padStart(2,'0')}` : '3:00'}</div>
         <div style="margin-top:4px">
           ${S.draft.paused
-            ? `<button onclick="resumeDraft()" style="background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.5);color:white;border-radius:8px;padding:4px 14px;cursor:pointer;font-size:.8em;font-weight:bold">▶ Resume</button>`
-            : `<button onclick="pauseDraft()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);color:white;border-radius:8px;padding:4px 14px;cursor:pointer;font-size:.8em">⏸ Pause</button>`
+            ? `<button onclick="resumeDraft()" style="background:${ovStrong};border:1px solid ${ovBorderStrong};color:${headText};border-radius:8px;padding:4px 14px;cursor:pointer;font-size:.8em;font-weight:bold">▶ Resume</button>`
+            : `<button onclick="pauseDraft()" style="background:${ovWeak};border:1px solid ${ovBorderWeak};color:${headText};border-radius:8px;padding:4px 14px;cursor:pointer;font-size:.8em">⏸ Pause</button>`
           }
         </div>
       </div>
@@ -1704,7 +1723,7 @@ function renderDraftRoom() {
               <span style="background:${gc};color:white;border-radius:4px;padding:1px 5px">${m.grade ?? '—'}</span>
               <span style="color:var(--green)">${odds[name]}</span>
             </div>
-            <button class="dp-pick-btn" style="background:${esc(tColor)};color:white;width:100%" onclick="makePick('${jsq(name)}')">DRAFT</button>
+            <button class="dp-pick-btn" style="background:${esc(tColor)};color:${headText};width:100%" onclick="makePick('${jsq(name)}')">DRAFT</button>
           </div>`;
         }).filter(Boolean).join('');
         return `<div style="margin-bottom:16px">
@@ -1755,7 +1774,7 @@ function renderRoster() {
   <!-- Assign boxes -->
   <div class="two-col">
     <div class="card">
-      <div class="card-header" style="background:${esc(S.teams.t1.color)}">
+      <div class="card-header" style="background:${esc(S.teams.t1.color)};color:${contrastColor(S.teams.t1.color)}">
         ${esc(S.teams.t1.name)} <span style="opacity:.7;font-size:.8em">(${t1p.length} players)</span>
       </div>
       <div class="card-body">
@@ -1765,7 +1784,7 @@ function renderRoster() {
       </div>
     </div>
     <div class="card">
-      <div class="card-header" style="background:${esc(S.teams.t2.color)}">
+      <div class="card-header" style="background:${esc(S.teams.t2.color)};color:${contrastColor(S.teams.t2.color)}">
         ${esc(S.teams.t2.name)} <span style="opacity:.7;font-size:.8em">(${t2p.length} players)</span>
       </div>
       <div class="card-body">
@@ -1784,7 +1803,7 @@ function renderRoster() {
           ? unp.map(p => `<span class="chip" style="cursor:default">
               ${esc(p.name)}
               <button class="btn btn-xs btn-green" onclick="assign('${jsq(p.name)}','t1');save();renderRoster()">${esc(S.teams.t1.name.split(' ').slice(0,2).join(' '))}</button>
-              <button class="btn btn-xs" style="background:${esc(S.teams.t2.color)};color:white" onclick="assign('${jsq(p.name)}','t2');save();renderRoster()">${esc(S.teams.t2.name.split(' ').slice(0,2).join(' '))}</button>
+              <button class="btn btn-xs" style="background:${esc(S.teams.t2.color)};color:${contrastColor(S.teams.t2.color)}" onclick="assign('${jsq(p.name)}','t2');save();renderRoster()">${esc(S.teams.t2.name.split(' ').slice(0,2).join(' '))}</button>
             </span>`).join('')
           : '<span style="color:var(--green);font-style:italic">✓ All players assigned!</span>'}
       </div>
@@ -1936,7 +1955,7 @@ function renderDay(day) {
   const dayMid = dayLeadName ? `${esc(dayLeadName)} +${fmt(dayMargin)}` : (td.t1+td.t2>0?'Tied':'&mdash;');
   let html = `
   <div class="team-compact-banner" style="margin-bottom:10px">
-    <div class="tcb-side" style="background:${esc(S.teams.t1.color)}">
+    <div class="tcb-side" style="background:${esc(S.teams.t1.color)};color:${contrastColor(S.teams.t1.color)}">
       <div class="tcb-name">${esc(S.teams.t1.name)}</div>
       <div class="tcb-score">${fmt(td.t1)}</div>
     </div>
@@ -1944,7 +1963,7 @@ function renderDay(day) {
       <div class="tcb-vs">${label}</div>
       <div class="tcb-margin">${dayMid}</div>
     </div>
-    <div class="tcb-side" style="background:${esc(S.teams.t2.color)}">
+    <div class="tcb-side" style="background:${esc(S.teams.t2.color)};color:${contrastColor(S.teams.t2.color)}">
       <div class="tcb-name">${esc(S.teams.t2.name)}</div>
       <div class="tcb-score">${fmt(td.t2)}</div>
     </div>
@@ -1981,7 +2000,7 @@ function renderDay(day) {
       }).join('');
       const t = cur ? teamOf(cur) : null;
       const badge = t
-        ? `<span class="tb" style="background:${esc(S.teams[t].color)};display:inline-block;margin-top:4px">${esc(S.teams[t].name)}</span>`
+        ? `<span class="tb" style="background:${esc(S.teams[t].color)};color:${contrastColor(S.teams[t].color)};display:inline-block;margin-top:4px">${esc(S.teams[t].name)}</span>`
         : `<span style="display:inline-block;height:22px;margin-top:4px"></span>`;
       return `<div class="form-group">
           <label>Player ${pi+1}</label>
@@ -2079,7 +2098,7 @@ function renderDay(day) {
     </div>
     <div class="match-arena">
       <div class="match-side${win1?' match-winner':''}">
-        <div class="ms-header" style="background:${esc(S.teams.t1.color)}">${win1?'&#127942; ':''}${esc(S.teams.t1.name)}</div>
+        <div class="ms-header" style="background:${esc(S.teams.t1.color)};color:${contrastColor(S.teams.t1.color)}">${win1?'&#127942; ':''}${esc(S.teams.t1.name)}</div>
         <div class="form-group">
           <label>Player 1</label>${makeMSlot('p1a', m.p1a, matchT1Pool)}
         </div>
@@ -2098,7 +2117,7 @@ function renderDay(day) {
         <div style="font-size:.68em;color:#888;text-align:center;letter-spacing:.3px">${dividerSub}</div>
       </div>
       <div class="match-side${win2?' match-winner':''}">
-        <div class="ms-header" style="background:${esc(S.teams.t2.color)}">${win2?'&#127942; ':''}${esc(S.teams.t2.name)}</div>
+        <div class="ms-header" style="background:${esc(S.teams.t2.color)};color:${contrastColor(S.teams.t2.color)}">${win2?'&#127942; ':''}${esc(S.teams.t2.name)}</div>
         <div class="form-group">
           <label>Player 1</label>${makeMSlot('p2a', m.p2a, matchT2Pool)}
         </div>
@@ -2394,7 +2413,7 @@ function renderMonies() {
   if (anyScores && leadTeamKey) {
     const tColor = S.teams[leadTeamKey].color;
     const teamPlayers = S.roster.filter(p => p.team === leadTeamKey).map(p => esc(p.name)).join(', ');
-    teamWho = `<span class="tb" style="background:${esc(tColor)}">${esc(leadTeamName)}</span>
+    teamWho = `<span class="tb" style="background:${esc(tColor)};color:${contrastColor(tColor)}">${esc(leadTeamName)}</span>
       <table style="margin-top:10px;font-size:.85em;border-collapse:collapse;width:100%;max-width:380px">
         <tr><td style="padding:3px 8px 3px 0;color:#666">🏆 Prize</td><td class="money" style="text-align:right">$500</td><td style="color:#aaa;font-size:.85em;padding-left:8px">$50/player</td></tr>
       </table>
@@ -2685,7 +2704,7 @@ function renderAnalytics() {
     const aLead   = tt.t1.total > tt.t2.total ? tt.t1.name : tt.t2.total > tt.t1.total ? tt.t2.name : null;
     html += `
     <div class="team-compact-banner" style="margin-bottom:18px">
-      <div class="tcb-side" style="background:${t1col}">
+      <div class="tcb-side" style="background:${t1col};color:${contrastColor(t1col)}">
         <div class="tcb-name">${t1name}</div>
         <div class="tcb-score">${fmt(tt.t1.total)}</div>
         <div style="font-size:.7em;opacity:.7;margin-top:2px">D1: ${fmt(tt.t1.d1)} &middot; D2: ${fmt(tt.t1.d2)}</div>
@@ -2694,7 +2713,7 @@ function renderAnalytics() {
         <div class="tcb-vs">VS</div>
         <div class="tcb-margin">${aLead ? `${esc(aLead)} +${fmt(aMargin)}` : 'Tied'}</div>
       </div>
-      <div class="tcb-side" style="background:${t2col}">
+      <div class="tcb-side" style="background:${t2col};color:${contrastColor(t2col)}">
         <div class="tcb-name">${t2name}</div>
         <div class="tcb-score">${fmt(tt.t2.total)}</div>
         <div style="font-size:.7em;opacity:.7;margin-top:2px">D1: ${fmt(tt.t2.d1)} &middot; D2: ${fmt(tt.t2.d2)}</div>
@@ -2714,9 +2733,9 @@ function renderAnalytics() {
       html += `
       <div style="margin-bottom:14px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-size:.84em">
-          <span style="font-weight:bold;color:${t1col}">${fmt(c.t1v)} pts${c.t1v>c.t2v?' &laquo;':''}</span>
+          <span style="font-weight:bold;color:${safeTeamColor(t1col)}">${fmt(c.t1v)} pts${c.t1v>c.t2v?' &laquo;':''}</span>
           <span style="color:var(--gray)">${c.label}</span>
-          <span style="font-weight:bold;color:${t2col}">${c.t2v>c.t1v?'&raquo; ':''}${fmt(c.t2v)} pts</span>
+          <span style="font-weight:bold;color:${safeTeamColor(t2col)}">${c.t2v>c.t1v?'&raquo; ':''}${fmt(c.t2v)} pts</span>
         </div>
         <div style="display:flex;height:11px;border-radius:5px;overflow:hidden;background:#e5e7eb">
           <div style="width:${t1pct}%;background:${t1col};transition:width .4s"></div>
@@ -2742,15 +2761,16 @@ function renderAnalytics() {
       const tTotal   = tt[tk].total || 1;
       const tname    = esc(S.teams[tk].name);
       const tcol     = S.teams[tk].color;
+      const tBarText = contrastColor(tcol);
       html += `<div style="margin-bottom:22px">
-        <div style="font-weight:bold;color:white;background:${tcol};padding:7px 13px;border-radius:6px;margin-bottom:10px;font-size:.88em;letter-spacing:.3px">${tname}</div>`;
+        <div style="font-weight:bold;color:${tBarText};background:${tcol};padding:7px 13px;border-radius:6px;margin-bottom:10px;font-size:.88em;letter-spacing:.3px">${tname}</div>`;
       tPlayers.forEach(p => {
         const pct = Math.round(p.total / tTotal * 100);
         html += `
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
           <div style="min-width:88px;font-size:.86em;font-weight:bold;white-space:nowrap">${flag(p.name)} ${esc(p.name)}</div>
           <div style="flex:1;height:20px;background:#e5e7eb;border-radius:5px;overflow:hidden">
-            <div style="height:100%;width:${pct}%;background:${tcol};border-radius:5px;display:flex;align-items:center;padding-left:7px;font-size:.7em;color:white;font-weight:bold;transition:width .4s;white-space:nowrap">
+            <div style="height:100%;width:${pct}%;background:${tcol};border-radius:5px;display:flex;align-items:center;padding-left:7px;font-size:.7em;color:${tBarText};font-weight:bold;transition:width .4s;white-space:nowrap">
               ${pct >= 10 ? pct+'%' : ''}
             </div>
           </div>
