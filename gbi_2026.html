@@ -1683,7 +1683,7 @@ function renderDraftRoom() {
         <span style="background:${gc};color:white;border-radius:4px;padding:1px 5px">${m.grade ?? '—'}</span>
         <span style="color:var(--green)">${odds[name]}</span>
       </div>
-      <button class="dp-pick-btn" style="background:${esc(tColor)};color:${headText};width:100%;letter-spacing:.08em" onclick="makePick('${jsq(name)}')">
+      <button class="dp-pick-btn" style="background:${esc(tColor)};color:${headText};border:${onLight ? '2px solid #161616' : 'none'};width:100%;letter-spacing:.08em" onclick="makePick('${jsq(name)}')">
         DRAFT
       </button>
     </div>`;
@@ -1734,7 +1734,7 @@ function renderDraftRoom() {
               <span style="background:${gc};color:white;border-radius:4px;padding:1px 5px">${m.grade ?? '—'}</span>
               <span style="color:var(--green)">${odds[name]}</span>
             </div>
-            <button class="dp-pick-btn" style="background:${esc(tColor)};color:${headText};width:100%" onclick="makePick('${jsq(name)}')">DRAFT</button>
+            <button class="dp-pick-btn" style="background:${esc(tColor)};color:${headText};border:${onLight ? '2px solid #161616' : 'none'};width:100%" onclick="makePick('${jsq(name)}')">DRAFT</button>
           </div>`;
         }).filter(Boolean).join('');
         return `<div style="margin-bottom:16px">
