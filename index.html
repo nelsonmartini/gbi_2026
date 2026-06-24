@@ -771,6 +771,7 @@ const FB = {
 const FB_PATH   = 'gbi2026/state';
 const CLIENT_ID = Math.random().toString(36).slice(2);  // unique per browser tab
 let _bigBoard = false;
+let _draftBigScreen = false;
 let _collapsed = {};
 function toggleCollapse(key, day) {
   _collapsed[key] = _collapsed[key] === false ? true : false;
@@ -1666,6 +1667,25 @@ function renderDraftRoom() {
   const ovBorderWeak = onLight ? 'rgba(0,0,0,.25)' : 'rgba(255,255,255,.4)';
   const nextTeam = pickIdx + 1 < 20 ? draftSnakeTeam(pickIdx + 1) : null;
   const draftedNames = new Set((draft.picks || []).map(p => p.player));
+
+  // Big Screen Mode — bigger fonts, less clutter, for projecting on a TV
+  const bs = _draftBigScreen;
+  const bsz = {
+    pickLabel: bs ? '1.05em' : '.72em',
+    onClock:   bs ? '2.4em'  : '1.15em',
+    nextLabel: bs ? '1.05em' : '.75em',
+    timer:     bs ? '4.8em'  : '2.2em',
+    cardPad:   bs ? '18px'   : '10px',
+    name:      bs ? '1.3em'  : '.9em',
+    rank25:    bs ? '.9em'   : '.72em',
+    avatar:    bs ? '76px'   : '40px',
+    btnFont:   bs ? '1.15em' : '1em',
+    btnPad:    bs ? '14px 0' : '6px 0',
+    gridMin:   bs ? '230px'  : '155px',
+    gridGap:   bs ? '16px'   : '8px',
+    catLabel:  bs ? '1.3em'  : '1em',
+    catSub:    bs ? '.95em'  : '.75em',
+  };
   const available = [...PLAYERS]
     .filter(n => !draftedNames.has(n))
     .filter(n => !_draftCat || PLAYER_META[n].cat === _draftCat)
@@ -1691,15 +1711,18 @@ function renderDraftRoom() {
 
   const nextLabel = nextTeam ? `Up next: <strong>${esc(S.teams[nextTeam].name)}</strong>` : '';
 
-  return `<div class="card" style="margin-bottom:12px">
-    <div class="draft-header" style="background:${esc(tColor)};color:${headText}">
+  return `<div style="text-align:right;margin-bottom:8px">
+    <button class="btn btn-sm" onclick="_draftBigScreen=!_draftBigScreen;renderRoster()">${bs ? '&#128241; Normal View' : '&#128250; Big Screen Mode'}</button>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="draft-header" style="background:${esc(tColor)};color:${headText};padding:${bs?'22px 28px':'14px 18px'}">
       <div>
-        <div style="font-size:.72em;opacity:.85;text-transform:uppercase;letter-spacing:.06em">Pick ${pickIdx + 1} of 20</div>
-        <div style="font-size:1.15em;font-weight:bold;font-family:'Cinzel',serif">${tName} ON THE CLOCK</div>
-        <div style="font-size:.75em;opacity:.75;margin-top:2px">${nextLabel}</div>
+        <div style="font-size:${bsz.pickLabel};opacity:.85;text-transform:uppercase;letter-spacing:.06em">Pick ${pickIdx + 1} of 20</div>
+        <div style="font-size:${bsz.onClock};font-weight:bold;font-family:'Cinzel',serif">${tName} ON THE CLOCK</div>
+        <div style="font-size:${bsz.nextLabel};opacity:.75;margin-top:2px">${nextLabel}</div>
       </div>
       <div style="text-align:right">
-        <div id="draft-timer-display" style="font-size:2.2em;font-weight:bold;font-family:'Cinzel',serif;color:${headText}">${S.draft.paused ? `${Math.floor((S.draft.pausedRemaining||0)/60)}:${String((S.draft.pausedRemaining||0)%60).padStart(2,'0')}` : '3:00'}</div>
+        <div id="draft-timer-display" style="font-size:${bsz.timer};font-weight:bold;font-family:'Cinzel',serif;color:${headText}">${S.draft.paused ? `${Math.floor((S.draft.pausedRemaining||0)/60)}:${String((S.draft.pausedRemaining||0)%60).padStart(2,'0')}` : '3:00'}</div>
         <div style="margin-top:4px">
           ${S.draft.paused
             ? `<button onclick="resumeDraft()" style="background:${ovStrong};border:1px solid ${ovBorderStrong};color:${headText};border-radius:8px;padding:4px 14px;cursor:pointer;font-size:.8em;font-weight:bold">▶ Resume</button>`
@@ -1709,7 +1732,7 @@ function renderDraftRoom() {
       </div>
     </div>
     ${S.draft.paused ? `<div style="background:rgba(0,0,0,.15);color:white;text-align:center;padding:6px;font-size:.85em;font-weight:bold;letter-spacing:.05em">⏸ CLOCK PAUSED</div>` : ''}
-    <div class="card-body" style="padding:12px">
+    <div class="card-body" style="padding:${bs?'18px':'12px'}">
       <div style="${S.draft.paused ? 'opacity:.5;pointer-events:none;' : ''}">
       ${Object.entries(DRAFT_CATS).map(([key, c]) => {
         const catAvail = [...PLAYERS]
@@ -1723,37 +1746,37 @@ function renderDraftRoom() {
           const m = PLAYER_META[name];
           const gc = gradeColor[m.grade] || '#888';
           const rank25 = m.prev ? `#${m.prev.rank} '25` : (m.note ? 'N/A' : '&#127381;');
-          return `<div class="dp-card">
+          return `<div class="dp-card" style="padding:${bsz.cardPad}">
             <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:5px">
-              ${m.avatar ? `<img class="dp-avatar" src="${esc(m.avatar)}" alt="${esc(name)}" onclick="showProfile('${jsq(name)}')" style="cursor:pointer" />` : ''}
-              <div class="dp-name" style="margin-bottom:0"><span class="plink" onclick="showProfile('${jsq(name)}')">${flag(name)} <strong>${esc(name)}</strong></span>${ppChampBadge(name)}<br><span style="font-size:.72em;color:#888">${rank25}</span></div>
+              ${m.avatar ? `<img class="dp-avatar" src="${esc(m.avatar)}" alt="${esc(name)}" onclick="showProfile('${jsq(name)}')" style="cursor:pointer;width:${bsz.avatar};height:${bsz.avatar}" />` : ''}
+              <div class="dp-name" style="margin-bottom:0;font-size:${bsz.name}"><span class="plink" onclick="showProfile('${jsq(name)}')">${flag(name)} <strong>${esc(name)}</strong></span>${ppChampBadge(name)}<br><span style="font-size:${bsz.rank25};color:#888">${rank25}</span></div>
             </div>
-            <div class="dp-stats">
+            ${bs ? '' : `<div class="dp-stats">
               <span title="Skill">&#9889; ${m.skill ?? '—'}</span>
               <span title="Vibes">&#10024; ${m.vibes ?? '—'}</span>
               <span style="background:${gc};color:white;border-radius:4px;padding:1px 5px">${m.grade ?? '—'}</span>
               <span style="color:var(--green)">${odds[name]}</span>
-            </div>
-            <button class="dp-pick-btn" style="background:${esc(tColor)};color:${headText};border:${onLight ? '2px solid #161616' : 'none'};width:100%" onclick="makePick('${jsq(name)}')">DRAFT</button>
+            </div>`}
+            <button class="dp-pick-btn" style="background:${esc(tColor)};color:${headText};border:${onLight ? '2px solid #161616' : 'none'};width:100%;font-size:${bsz.btnFont};padding:${bsz.btnPad}" onclick="makePick('${jsq(name)}')">DRAFT</button>
           </div>`;
         }).filter(Boolean).join('');
         return `<div style="margin-bottom:16px">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;padding-bottom:5px;border-bottom:2px solid var(--border)">
-            <span style="font-size:1em;font-weight:bold">${c.label}</span>
-            <span style="font-size:.75em;color:#888;font-style:italic">${c.sub}</span>
-            <span style="margin-left:auto;font-size:.78em;font-weight:bold;color:${allGone?'var(--green)':'#555'}">${allGone ? '✓ All drafted' : `${remaining} left`}</span>
+            <span style="font-size:${bsz.catLabel};font-weight:bold">${c.label}</span>
+            <span style="font-size:${bsz.catSub};color:#888;font-style:italic">${c.sub}</span>
+            <span style="margin-left:auto;font-size:${bsz.catSub};font-weight:bold;color:${allGone?'var(--green)':'#555'}">${allGone ? '✓ All drafted' : `${remaining} left`}</span>
           </div>
-          ${allGone ? `<div style="color:#aaa;font-size:.82em;font-style:italic;padding:6px 0">All players drafted ✓</div>` : `<div class="dp-grid">${cards}</div>`}
+          ${allGone ? `<div style="color:#aaa;font-size:.82em;font-style:italic;padding:6px 0">All players drafted ✓</div>` : `<div class="dp-grid" style="grid-template-columns:repeat(auto-fill,minmax(${bsz.gridMin},1fr));gap:${bsz.gridGap}">${cards}</div>`}
         </div>`;
       }).join('')}
       </div>
-      <details style="margin-top:12px">
+      ${bs ? '' : `<details style="margin-top:12px">
         <summary style="font-size:.82em;color:var(--green);cursor:pointer;list-style:none;display:inline-block;padding:2px 10px;border:1px solid var(--green);border-radius:10px">Draft Board (${pickIdx} picks)</summary>
         ${buildDraftBoard(draft)}
       </details>
       <div style="margin-top:10px;text-align:right">
         <button class="btn" style="background:#7a1a1a;color:white;font-size:.78em" onclick="resetDraft()">&#8635; Reset Draft</button>
-      </div>
+      </div>`}
     </div>
   </div>`;
 }
