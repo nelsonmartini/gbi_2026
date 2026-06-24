@@ -483,7 +483,6 @@ tr.winner { background: #fffce8 !important; }
 .cd-label{ font-size:.68em; color:var(--gray-light); letter-spacing:1.5px; text-transform:uppercase; margin-top:3px; }
 .cd-sep  { font-size:2em; font-weight:bold; color:var(--gold-dark); align-self:flex-start; padding-top:4px; }
 .cd-sub  { text-align:center; font-size:.78em; color:var(--gray-light); margin-top:4px; font-style:italic; }
-.cd-live { text-align:center; font-size:1.3em; font-weight:bold; color:var(--green); padding:12px 0; }
 
 /* ─── PP ZONE ─── */
 .pp-zone-header { background:#8b1a1a !important; }
@@ -1338,8 +1337,6 @@ function renderScoreboard() {
         <div class="cd-sub">Friday, September 18, 2026 &nbsp;&middot;&nbsp; 8:30 AM &nbsp;&middot;&nbsp; General Burnside Island GC, Somerset KY</div>
       </div>
     </div>`;
-  } else if (diff > -172800000) {
-    html += `<div class="card"><div class="card-body"><div class="cd-live">&#127948; GBI 2026 is LIVE &mdash; let&rsquo;s play!</div></div></div>`;
   }
 
   // Compact team banner
