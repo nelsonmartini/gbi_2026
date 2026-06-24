@@ -1100,6 +1100,19 @@ function showProfile(name) {
     </div>
   </div>`;
 
+  if (m.skill !== null) {
+    const gc = gradeColor[m.grade] || '#888';
+    body += `
+  <div class="pm-section">
+    <div class="pm-sec-title">&#11088; Player Ratings</div>
+    <div class="pm-stat-row">
+      <div class="pm-stat"><div class="pm-stat-val" style="color:var(--green)">${m.skill}</div><div class="pm-stat-lbl">Skill / 10</div></div>
+      <div class="pm-stat"><div class="pm-stat-val" style="color:#8b5cf6">${m.vibes}</div><div class="pm-stat-lbl">Vibes / 10</div></div>
+      <div class="pm-stat"><div class="pm-stat-val"><span style="background:${gc};color:white;padding:2px 10px;border-radius:6px;font-size:.9em">${m.grade}</span></div><div class="pm-stat-lbl" style="margin-top:4px">Bode Grade</div></div>
+    </div>
+  </div>`;
+  }
+
   if (m.prev) {
     const p = m.prev;
     body += `
@@ -1116,19 +1129,6 @@ function showProfile(name) {
   <div class="pm-section">
     <div class="pm-sec-title">&#9971; 2025 GBI Results</div>
     <div style="color:#aaa;font-style:italic;font-size:.88em">First year at GBI &mdash; no prior data</div>
-  </div>`;
-  }
-
-  if (m.skill !== null) {
-    const gc = gradeColor[m.grade] || '#888';
-    body += `
-  <div class="pm-section">
-    <div class="pm-sec-title">&#11088; Player Ratings</div>
-    <div class="pm-stat-row">
-      <div class="pm-stat"><div class="pm-stat-val" style="color:var(--green)">${m.skill}</div><div class="pm-stat-lbl">Skill / 10</div></div>
-      <div class="pm-stat"><div class="pm-stat-val" style="color:#8b5cf6">${m.vibes}</div><div class="pm-stat-lbl">Vibes / 10</div></div>
-      <div class="pm-stat"><div class="pm-stat-val"><span style="background:${gc};color:white;padding:2px 10px;border-radius:6px;font-size:.9em">${m.grade}</span></div><div class="pm-stat-lbl" style="margin-top:4px">Bode Grade</div></div>
-    </div>
   </div>`;
   }
 
@@ -2218,11 +2218,15 @@ function renderPayouts() {
   function holeTable(day, label) {
     const dayLocked = !!(S.locks && S.locks[day]);
     const won = day==='day1'?d1won:d2won;
+    const key = 'payouts_' + day;
+    const expanded = _collapsed[key] === false;
     let t = `<div class="card">
-      <div class="card-header">${label}
-        <span class="badge-gold" style="font-size:.82em">${won}/20 assigned &nbsp;|&nbsp; $${won*20} of $400</span>
-      </div>
-      <div class="card-body">
+      <div class="card-header" style="cursor:pointer" onclick="_collapsed['${key}']=_collapsed['${key}']===false?true:false;renderPayouts()">
+        <span>${label} <span class="badge-gold" style="font-size:.82em">${won}/20 assigned &nbsp;|&nbsp; $${won*20} of $400</span></span>
+        <span style="font-size:.78em;white-space:nowrap">${expanded ? '&#9650; Hide' : '&#9660; Show'}</span>
+      </div>`;
+    if (expanded) {
+    t += `<div class="card-body">
       <table><thead><tr><th>Hole</th><th>Category</th><th>Winner</th><th class="c">Pts</th><th class="c">$</th></tr></thead><tbody>`;
     S[day].payouts.forEach((p,i) => {
       if (p.cat==='NP') {
@@ -2251,7 +2255,9 @@ function renderPayouts() {
       : `<div style="display:flex;justify-content:flex-end;padding:10px 14px;border-top:1px solid var(--border);margin-top:8px">
           <button class="btn btn-sm" style="background:var(--green);color:white;font-size:.8em" onclick="lockDay('${day}');renderPayouts()">&#128274; Lock ${label}</button>
          </div>`;
-    t += `</div></div>`;
+    t += `</div>`;
+    }
+    t += `</div>`;
     return t;
   }
 
