@@ -890,9 +890,11 @@ async function boot() {
         const snap = await _ref.once('value');
         if (snap.exists()) {
           S = applyRoster({ ...defaultState(), ...snap.val() });
-        } else {
-          await _ref.set(S);
         }
+        // If snap doesn't exist, leave S as the in-memory defaultState() and do NOT
+        // write it to Firebase. A transient/false-negative read here must never be
+        // allowed to overwrite real shared data — Firebase only gets written to from
+        // an explicit user action via save().
 
         _ref.on('value', snap => {
           if (!snap.exists()) return;
@@ -1810,7 +1812,7 @@ function renderRoster() {
       </div>
       <div class="card-body">
         <div class="chip-pool">
-          ${t1p.length ? t1p.map(p=>`<span class="chip t1" onclick="unassign('${jsq(p.name)}')" title="Click to unassign">${esc(p.name)} ✕</span>`).join('') : '<span style="color:#999;font-style:italic">No players assigned yet</span>'}
+          ${t1p.length ? t1p.map(p=>`<span class="chip t1"><span class="plink" onclick="showProfile('${jsq(p.name)}')">${esc(p.name)}</span> <span onclick="unassign('${jsq(p.name)}')" style="cursor:pointer" title="Click to unassign">✕</span></span>`).join('') : '<span style="color:#999;font-style:italic">No players assigned yet</span>'}
         </div>
       </div>
     </div>
@@ -1820,7 +1822,7 @@ function renderRoster() {
       </div>
       <div class="card-body">
         <div class="chip-pool">
-          ${t2p.length ? t2p.map(p=>`<span class="chip t2" onclick="unassign('${jsq(p.name)}')" title="Click to unassign">${esc(p.name)} ✕</span>`).join('') : '<span style="color:#999;font-style:italic">No players assigned yet</span>'}
+          ${t2p.length ? t2p.map(p=>`<span class="chip t2"><span class="plink" onclick="showProfile('${jsq(p.name)}')">${esc(p.name)}</span> <span onclick="unassign('${jsq(p.name)}')" style="cursor:pointer" title="Click to unassign">✕</span></span>`).join('') : '<span style="color:#999;font-style:italic">No players assigned yet</span>'}
         </div>
       </div>
     </div>
@@ -1832,7 +1834,7 @@ function renderRoster() {
       <div class="chip-pool" id="unassigned-pool">
         ${unp.length
           ? unp.map(p => `<span class="chip" style="cursor:default">
-              ${esc(p.name)}
+              <span class="plink" onclick="showProfile('${jsq(p.name)}')">${esc(p.name)}</span>
               <button class="btn btn-xs btn-green" onclick="assign('${jsq(p.name)}','t1');save();renderRoster()">${esc(S.teams.t1.name.split(' ').slice(0,2).join(' '))}</button>
               <button class="btn btn-xs" style="background:${esc(S.teams.t2.color)};color:${contrastColor(S.teams.t2.color)}" onclick="assign('${jsq(p.name)}','t2');save();renderRoster()">${esc(S.teams.t2.name.split(' ').slice(0,2).join(' '))}</button>
             </span>`).join('')
@@ -1852,7 +1854,7 @@ function renderRoster() {
             const st = playerStats(p.name);
             return `<tr>
               <td>${i+1}</td>
-              <td><strong>${esc(p.name)}</strong></td>
+              <td><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span></strong></td>
               <td>
                 <select onchange="assign('${jsq(p.name)}',this.value);save();renderRoster()">
                   <option value="">— Unassigned —</option>
