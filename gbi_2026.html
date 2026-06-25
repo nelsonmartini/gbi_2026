@@ -74,6 +74,14 @@ body {
   font-size: .78em; color: rgba(255,255,255,.5);
   letter-spacing: .5px;
 }
+.update-badge {
+  position: absolute; top: 40px; left: 20px;
+  font-size: .72em; font-weight: bold; letter-spacing: .4px;
+  background: var(--gold); color: var(--green-dark);
+  padding: 3px 10px; border-radius: 12px; cursor: pointer;
+  display: none; white-space: nowrap;
+}
+.update-badge:hover { opacity: .85; }
 .site-logo-wrap {
   width: 100px; height: 100px;
   border-radius: 50%;
@@ -615,6 +623,7 @@ tr.winner { background: #fffce8 !important; }
 <header class="site-header">
   <div class="year-tag">GBI 2026</div>
   <div class="conn-status" id="conn-status">○ Offline</div>
+  <div class="update-badge" id="update-badge" onclick="location.reload()">&#128260; Tap to Update</div>
   <div class="site-logo-wrap">
     <img src="gbi-logo.jpg" alt="Garland Bend Invitational Logo">
   </div>
@@ -3003,7 +3012,19 @@ boot();
 setInterval(() => { if (_cur === 'scoreboard' && TOURNEY_DATE - new Date() > 0) renderScoreboard(); }, 1000);
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      if (!newWorker) return;
+      newWorker.addEventListener('statechange', () => {
+        // installed + an existing controller means this is an UPDATE, not the first-ever install
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          const badge = document.getElementById('update-badge');
+          if (badge) badge.style.display = 'inline-block';
+        }
+      });
+    });
+  }).catch(() => {});
 }
 </script>
 <div id="profile-modal"></div>
