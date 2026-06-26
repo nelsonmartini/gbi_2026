@@ -199,7 +199,9 @@ thead th {
   background: var(--green); color: var(--gold);
   padding: 9px 11px; text-align: left; font-size: .82em;
   letter-spacing: .4px; white-space: nowrap;
+  position: sticky; top: 0; z-index: 5;
 }
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 th.c, td.c { text-align: center; }
 tbody tr:nth-child(even) { background: #f8f5f0; }
 tbody tr:hover { background: #edf5f0; }
@@ -2398,11 +2400,12 @@ function renderDayTable(day) {
   let html = `<table><thead><tr>
     <th>Rank</th><th>Player</th><th class="hide-phone">Team</th>
     <th class="c hide-phone">4-Man</th><th class="c hide-phone">Match W</th><th class="c hide-phone">Rank</th><th class="c hide-phone">Payouts</th>
-    <th class="c">Total</th><th class="c">$</th>
+    <th class="c">Holes</th><th class="c">Total</th><th class="c">$</th>
   </tr></thead><tbody>`;
   let rk=1,prev=null;
   rows.forEach((p,i)=>{
     if (p.dp.total!==prev) rk=i+1;
+    const holesWon = SC.payoutPts ? Math.round(p.dp.payout / SC.payoutPts) : 0;
     html+=`<tr${rk<=3?' class="winner"':''}>
       <td><span class="rank${rk<=3?' gold':''}">${rk}</span></td>
       <td><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}</strong></td><td class="hide-phone">${tBadge(p.team)}</td>
@@ -2410,12 +2413,13 @@ function renderDayTable(day) {
       <td class="c hide-phone">${fmt(p.dp.matchWin)}</td>
       <td class="c hide-phone">${fmt(p.dp.matchRank)}</td>
       <td class="c hide-phone">${fmt(p.dp.payout)}</td>
+      <td class="c">${holesWon || '—'}</td>
       <td class="c">${ppPts(p.name,pp,p.dp.total)}</td>
       <td class="c money">${fmtM(p.dp.money)}</td>
     </tr>`;
     prev=p.dp.total;
   });
-  return html+'</tbody></table>';
+  return `<div class="table-scroll">${html}</tbody></table></div>`;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -2503,18 +2507,18 @@ function renderPayouts() {
   if (!leaderRows.length) {
     html += `<div class="empty"><div class="eicon">💰</div>No hole winners assigned yet.</div>`;
   } else {
-    html += `<table><thead><tr><th>Rank</th><th>Player</th><th>Team</th><th class="c">Holes Won</th><th class="c">Payout Pts</th><th class="c">Payout $</th></tr></thead><tbody>`;
+    html += `<div class="table-scroll"><table><thead><tr><th>Rank</th><th>Player</th><th>Team</th><th class="c">Holes Won</th><th class="c">Payout Pts</th><th class="c">Payout $</th></tr></thead><tbody>`;
     leaderRows.forEach(([name,s],i) => {
       html += `<tr${i<3?' class="winner"':''}>
         <td><span class="rank${i<3?' gold':''}">${i+1}</span></td>
-        <td><strong>${esc(name)}</strong></td>
+        <td><strong><span class="plink" onclick="showProfile('${jsq(name)}')">${flag(name)} ${esc(name)}</span></strong></td>
         <td>${tBadge(teamOf(name))}</td>
         <td class="c">${s.wins}</td>
         <td class="c pts">${s.pts}</td>
         <td class="c money">$${s.money}</td>
       </tr>`;
     });
-    html += `</tbody></table>`;
+    html += `</tbody></table></div>`;
   }
   html += `</div></div>`;
   el.innerHTML = html;
@@ -2722,6 +2726,7 @@ function renderMonies() {
   html += `<div class="card">
     <div class="card-header">💵 Player Winnings</div>
     <div class="card-body" style="padding:0">
+      <div class="table-scroll">
       <table class="sb-table" style="width:100%"><thead><tr>
         <th class="c" style="width:36px"></th>
         <th>Player</th>
@@ -2749,7 +2754,7 @@ function renderMonies() {
     </tr>`;
   });
 
-  html += `</tbody></table></div></div>`;
+  html += `</tbody></table></div></div></div>`;
   el.innerHTML = html;
 }
 
