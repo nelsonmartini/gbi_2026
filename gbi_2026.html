@@ -52,7 +52,6 @@ body {
   color: var(--dark);
   min-height: 100vh;
   font-size: 15px;
-  padding-top: 44px;
 }
 
 /* ─── HEADER ─── */
@@ -116,7 +115,7 @@ body {
   display: flex; overflow-x: auto;
   border-bottom: 3px solid var(--gold);
   scrollbar-width: none;
-  position: fixed; top: 0; left: 0; right: 0; width: 100%; z-index: 50;
+  position: sticky; top: 0; z-index: 50;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
   -webkit-user-select: none; user-select: none;
