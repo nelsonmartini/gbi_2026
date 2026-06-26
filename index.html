@@ -136,6 +136,39 @@ body {
 .tab-btn:hover { color: var(--gold-light); }
 .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); background: rgba(255,255,255,.07); }
 
+/* ─── MOBILE HAMBURGER NAV — phone-width screens only ─── */
+.mobile-nav-bar {
+  display: none; align-items: center; gap: 12px;
+  background: var(--green-dark); padding: 11px 16px;
+  border-bottom: 3px solid var(--gold);
+}
+.hamburger-btn {
+  background: none; border: none; color: var(--gold);
+  font-size: 1.5em; cursor: pointer; padding: 0 4px; line-height: 1;
+}
+.current-tab-label {
+  color: var(--gold-light); font-family: Georgia, serif;
+  font-weight: bold; font-size: .95em; letter-spacing: .3px;
+}
+.mobile-nav-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 55; }
+.mobile-nav-backdrop.show { display: block; }
+@media (max-width: 720px) {
+  .mobile-nav-bar { display: flex; }
+  .tab-nav {
+    display: none; position: fixed; top: 49px; left: 0; z-index: 60;
+    flex-direction: column; width: 230px; max-height: calc(100vh - 49px);
+    overflow-y: auto; border-bottom: none; border-right: 3px solid var(--gold);
+    box-shadow: 4px 0 24px rgba(0,0,0,.45);
+  }
+  .tab-nav.mobile-open { display: flex; }
+  .tab-nav .tab-btn {
+    width: 100%; text-align: left; padding: 13px 18px;
+    border-bottom: 1px solid rgba(255,255,255,.1); border-left: 3px solid transparent;
+    margin-bottom: 0; scroll-snap-align: none;
+  }
+  .tab-nav .tab-btn.active { border-left-color: var(--gold); background: rgba(255,255,255,.09); }
+}
+
 /* ─── CONTENT AREA ─── */
 .tab-pane { display: none; padding: 22px 20px; max-width: 1260px; margin: 0 auto; }
 .tab-pane.active { display: block; }
@@ -640,8 +673,15 @@ tr.winner { background: #fffce8 !important; }
   <div class="gbi-abbr">G · B · I</div>
 </header>
 
+<!-- MOBILE NAV BAR — hamburger + current tab name, only visible on narrow screens -->
+<div class="mobile-nav-bar">
+  <button class="hamburger-btn" onclick="toggleMobileNav()" id="hamburger-btn">☰</button>
+  <span class="current-tab-label" id="current-tab-label">🏆 Scoreboard</span>
+</div>
+<div class="mobile-nav-backdrop" id="mobile-nav-backdrop" onclick="closeMobileNav()"></div>
+
 <!-- TAB NAV -->
-<nav class="tab-nav">
+<nav class="tab-nav" id="tab-nav">
   <button class="tab-btn active" onclick="tab('scoreboard')">🏆 Scoreboard</button>
   <button class="tab-btn" onclick="tab('day1')">⛳ Day 1</button>
   <button class="tab-btn" onclick="tab('day2')">⛳ Day 2</button>
@@ -1351,9 +1391,23 @@ function tab(id) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('pane-'+id).classList.add('active');
   document.querySelectorAll('.tab-btn').forEach(b => {
-    if (b.getAttribute('onclick') === `tab('${id}')`) b.classList.add('active');
+    if (b.getAttribute('onclick') === `tab('${id}')`) {
+      b.classList.add('active');
+      const label = document.getElementById('current-tab-label');
+      if (label) label.textContent = b.textContent;
+    }
   });
+  closeMobileNav();
   render(id);
+}
+
+function toggleMobileNav() {
+  document.getElementById('tab-nav').classList.toggle('mobile-open');
+  document.getElementById('mobile-nav-backdrop').classList.toggle('show');
+}
+function closeMobileNav() {
+  document.getElementById('tab-nav').classList.remove('mobile-open');
+  document.getElementById('mobile-nav-backdrop').classList.remove('show');
 }
 
 function render(id) {
