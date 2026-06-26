@@ -3313,6 +3313,11 @@ function showErrorBanner(text) {
   document.body.appendChild(el);
 }
 window.addEventListener('error', e => {
+  // The generic "Script error." with 0:0 is the browser's cross-origin redaction —
+  // it carries zero diagnostic info and shows up harmlessly during things like the
+  // iOS Share Sheet briefly inspecting the page (e.g. for Add to Home Screen).
+  // Not worth alarming over since there's nothing actionable in it.
+  if (e.message === 'Script error.' && e.lineno === 0 && e.colno === 0) return;
   showErrorBanner('⚠️ JS ERROR: ' + e.message + ' (' + (e.filename||'') + ':' + e.lineno + ':' + e.colno + ')');
 });
 window.addEventListener('unhandledrejection', e => {
