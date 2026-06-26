@@ -750,7 +750,7 @@ const DEFAULT_RATINGS = {
   'Tom':      { skill:8.1, vibes:7.8, grade:'B' },
   'Trevor':   { skill:7.4, vibes:4.3, grade:'C' },
   'Ty':       { skill:7.9, vibes:7.6, grade:'C' },
-  'Zach M.':  { skill:6.9, vibes:8.1, grade:'D' }
+  'Zach M_':  { skill:6.9, vibes:8.1, grade:'D' }
 };
 
 
@@ -779,9 +779,14 @@ function defaultState() {
   };
 }
 
+// Firebase Realtime Database forbids '.', '#', '$', '/', '[', ']' in object keys —
+// player names (e.g. "Zach M.") can't be used as raw keys or EVERY save silently
+// fails outright (the whole write gets rejected, not just that one player's data).
+function ratingKey(name) { return name.replace(/[.#$/\[\]]/g, '_'); }
+
 // Skill/Vibes/Bode Grade now live in S.ratings (editable via the Bode Matrix), not PLAYER_META
 function rating(name) {
-  const r = (S.ratings && S.ratings[name]) || {};
+  const r = (S.ratings && S.ratings[ratingKey(name)]) || {};
   return { skill: r.skill ?? null, vibes: r.vibes ?? null, grade: r.grade ?? null };
 }
 
@@ -2836,8 +2841,9 @@ function lockMatrix() {
   rerenderAnalytics();
 }
 function setRating(name, field, value) {
-  if (!S.ratings[name]) S.ratings[name] = { skill:null, vibes:null, grade:null };
-  S.ratings[name][field] = field === 'grade' ? (value || null) : (value === '' ? null : parseFloat(value));
+  const key = ratingKey(name);
+  if (!S.ratings[key]) S.ratings[key] = { skill:null, vibes:null, grade:null };
+  S.ratings[key][field] = field === 'grade' ? (value || null) : (value === '' ? null : parseFloat(value));
   save();
   rerenderAnalytics();
 }
