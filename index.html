@@ -3214,6 +3214,23 @@ function renderAnalytics() {
 }
 
 /* ═══════════════════════════════════════════════════════
+   GLOBAL ERROR CATCHER — shows real JS errors on-screen instead of
+   silently failing, so issues can be reported with exact detail
+═══════════════════════════════════════════════════════ */
+window.addEventListener('error', e => {
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#7a1a1a;color:white;padding:10px 14px;font-size:.78em;z-index:99999;font-family:monospace;max-height:40vh;overflow-y:auto;white-space:pre-wrap';
+  el.textContent = '⚠️ JS ERROR: ' + e.message + ' (' + (e.filename||'') + ':' + e.lineno + ':' + e.colno + ')';
+  document.body.appendChild(el);
+});
+window.addEventListener('unhandledrejection', e => {
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#7a1a1a;color:white;padding:10px 14px;font-size:.78em;z-index:99999;font-family:monospace;max-height:40vh;overflow-y:auto;white-space:pre-wrap';
+  el.textContent = '⚠️ PROMISE ERROR: ' + (e.reason?.message || e.reason);
+  document.body.appendChild(el);
+});
+
+/* ═══════════════════════════════════════════════════════
    BOOT
 ═══════════════════════════════════════════════════════ */
 boot();
