@@ -821,6 +821,10 @@ let _bigBoard = false;
 let _draftBigScreen = false;
 let _matrixUnlocked = false;
 let _collapsed = {};
+// Stays false until the real Firebase data (or localStorage fallback) has actually
+// loaded. Tabs refuse to render real, editable content while this is false — prevents
+// editing a still-blank defaultState() and saving over real data before it arrives.
+let _dataLoaded = false;
 function toggleCollapse(key, day) {
   _collapsed[key] = _collapsed[key] === false ? true : false;
   if (day) renderDay(day); else renderScoreboard();
@@ -958,14 +962,16 @@ async function boot() {
         });
 
         firebase.database().ref('.info/connected').on('value', snap => setConnStatus(!!snap.val()));
-        render('scoreboard');
+        _dataLoaded = true;
+        render(_cur);
         updateTabLockBadges();
         if (S.draft?.active) startDraftTimer();
       } catch(e) {
         console.warn('Firebase load failed, falling back to localStorage:', e);
         try { const r = localStorage.getItem('gbi2026v1'); if (r) S = JSON.parse(r); } catch(_) {}
         setConnStatus(false);
-        render('scoreboard');
+        _dataLoaded = true;
+        render(_cur);
         updateTabLockBadges();
         if (S.draft?.active) startDraftTimer();
       }
@@ -974,7 +980,8 @@ async function boot() {
     // No Firebase config — localStorage only
     try { const r = localStorage.getItem('gbi2026v1'); if (r) S = JSON.parse(r); } catch(_) {}
     setConnStatus(false);
-    render('scoreboard');
+    _dataLoaded = true;
+    render(_cur);
     updateTabLockBadges();
     if (S.draft?.active) startDraftTimer();
   }
@@ -1322,6 +1329,13 @@ function tab(id) {
 }
 
 function render(id) {
+  if (!_dataLoaded) {
+    const el = document.getElementById('pane-' + id);
+    if (el) el.innerHTML = '<div style="text-align:center;padding:80px 20px;color:#888">' +
+      '<div style="font-size:2.4em;margin-bottom:14px">🔄</div>Loading your saved data&hellip;' +
+      '<div style="font-size:.8em;margin-top:10px;color:#bbb">Please wait — entering scores before this finishes could overwrite real data.</div></div>';
+    return;
+  }
   const map = { scoreboard: renderScoreboard, roster: renderRoster, day1: ()=>renderDay('day1'), day2: ()=>renderDay('day2'), payouts: renderPayouts, monies: renderMonies, analytics: renderAnalytics, format: renderFormat };
   if (map[id]) map[id]();
 }
@@ -3203,7 +3217,7 @@ function renderAnalytics() {
    BOOT
 ═══════════════════════════════════════════════════════ */
 boot();
-setInterval(() => { if (_cur === 'scoreboard' && TOURNEY_DATE - new Date() > 0) renderScoreboard(); }, 1000);
+setInterval(() => { if (_dataLoaded && _cur === 'scoreboard' && TOURNEY_DATE - new Date() > 0) renderScoreboard(); }, 1000);
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').then(reg => {
