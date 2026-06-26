@@ -39,12 +39,12 @@ curl -X DELETE "https://gbi-2026-default-rtdb.firebaseio.com/gbi2026/state/roste
 `PETERputter26` — case-insensitive. Change via `const SITE_PIN` near top of script.
 
 ## Players (20)
-Basham, Bode, Bryce, Braden, Chris O, Evan, Grant, Jake B, Moose, Nail, NateDawg, Neebs, Ponzi, Rusty, Shawn, Tanner, Tom, Trevor, Ty, Zach M.
+Basham, Bode, Bryce, Braden, Kyle, Evan, Jordan, Jake B, Moose, Nail, NateDawg, Neebs, Ponzi, Rusty, Shawn, Tanner, Tom, Trevor, Ty, Zach M.
 - Trevor → 🇪🇬, everyone else → 🇺🇸 (set in `flag()` function)
 
 ## Teams
-- **Team O'Hara** (blue `#1a4a8a`) vs **Team Bode** (red `#7a1a1a`)
-- Not pre-assigned — set via Roster & Teams tab in the UI
+- Default names/colors: Team O'Hara (blue `#1a4a8a`) vs Team Bode (red `#7a1a1a`) — fully renamable/recolorable live in the UI, never hardcode a team name in new code
+- Not pre-assigned — set via **Draft and Rosters** tab in the UI (snake draft or manual assignment)
 
 ## Scoring
 | Format | Day 1 | Day 2 |
@@ -64,12 +64,20 @@ Basham, Bode, Bryce, Braden, Chris O, Evan, Grant, Jake B, Moose, Nail, NateDawg
 1st: $400 · 2nd: $200 · 3rd: $100 · Team champs: $500 · Hole payouts: $800 (40 × $20)
 
 ## Tab Order
-Scoreboard → Day 1 → Day 2 → Hole Payouts → Roster & Teams → Format & Rules
+Scoreboard → Day 1 → Day 2 → Hole Payouts → Monies → Draft and Rosters → Analytics → Format & Rules
 
 ## Key Technical Notes
 - **Points math:** `rankedPts()` correctly averages tied positions. Bug was previously giving 7pts to solo 1st (should be 8).
-- **Player dedup:** Selecting a player in one group/match removes them from all other dropdowns for that day.
+- **Player dedup:** Selecting a player removes them from all *other slots in that same format* for the day (all 5 four-man groups dedupe against each other; all 5 2v2 matches dedupe against each other, including both slots of the same match). A player WILL legitimately appear once in a 4-Man group AND once in a 2v2 Match the same day — that's correct, not a duplicate, since every player competes in both formats daily.
+- **Team badges depend on roster assignment:** `teamOf(name)` returns `null` until that player has a team set in Draft and Rosters — if badges look blank everywhere, the roster needs assigning, that's not a rendering bug.
 - **2v2 teams locked:** Each side only shows players from that team per roster assignment.
 - **Roster sync:** `applyRoster()` rebuilds roster from `PLAYERS` array on every load — renames in code take effect immediately.
 - **Real-time sync:** Firebase `onValue` listener updates all connected devices. Own-write echoes suppressed via `CLIENT_ID` stamp.
 - **Mobile:** Scoreboard hides Team column on small screens; Score to Par always visible.
+
+## Core Integrity — Non-Negotiable, Verify After ANY Change Touching Scoring/Roster Code
+The player↔team relationship and the points/money math are the entire reason this site exists — a bug here corrupts real money and real standings, silently. After touching `defaultState()`, `playerStats()`, `teamTotals()`, `rank()`/`rankedPts()`, `fourManPoints()`, `matchResults()`, `renderDay()`'s dropdown logic, or anything in `S.roster`/`S.day1`/`S.day2`:
+1. **No duplicate selection within a format.** Simulate (don't just read the code) that picking a player in one 4-Man slot removes them from every other 4-Man slot that day, and same for 2v2 Match slots — see the Node `vm`-sandbox technique used in this session's transcript for how to test this without a browser.
+2. **Team badges populate once rosters are assigned.** Confirm `teamOf(name)` resolves correctly for an assigned player.
+3. **Math matches hand-calculation.** Run at least one scenario with a tie in each format (4-Man and 2v2) and verify the tie-averaging and win/rank point totals by hand against the code's output before trusting it.
+- Incident history: a 2026-06-25 boot-sequence bug wiped team assignments by auto-writing blank state to Firebase on a transient empty read — fixed, see [[project-data-loss-incident]] in memory. A 2026-06-26 user report of "duplicate names" turned out to be the correct cross-format design (point 1 above) plus blank team badges from an unassigned roster, not a logic bug — verified via direct simulation, not assumption.
