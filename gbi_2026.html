@@ -921,7 +921,13 @@ if (checkPin()) {
 function applyRoster(loaded) {
   const teamMap = {};
   (loaded.roster || []).forEach(p => { if (p.name) teamMap[p.name] = p.team; });
-  loaded.roster = PLAYERS.map(n => ({ name: n, team: teamMap[n] || null }));
+  // Only 't1'/'t2' are ever valid — anything else (corrupted data, a stray value from
+  // an old bug, manual edits) silently heals back to unassigned instead of crashing
+  // every render that touches that player's team badge.
+  loaded.roster = PLAYERS.map(n => {
+    const t = teamMap[n];
+    return { name: n, team: (t === 't1' || t === 't2') ? t : null };
+  });
   return loaded;
 }
 
@@ -1113,7 +1119,7 @@ function showProfile(name) {
   const m = PLAYER_META[name];
   const rt = rating(name);
   const rp = S.roster.find(r => r.name === name);
-  const team = rp ? rp.team : null;
+  const team = rp && S.teams[rp.team] ? rp.team : null;
   const tColor = team ? S.teams[team].color : '#4a5568';
   const tName  = team ? S.teams[team].name  : 'Unassigned';
   const champYears = GBI_CHAMPS[name] || [];
@@ -1237,7 +1243,7 @@ function allPlayerStats() {
 function teamTotals() {
   let r = { t1: {name:S.teams.t1.name, d1:0, d2:0, total:0}, t2: {name:S.teams.t2.name, d1:0, d2:0, total:0} };
   S.roster.forEach(p => {
-    if (!p.team) return;
+    if (p.team !== 't1' && p.team !== 't2') return;
     const s = playerStats(p.name);
     r[p.team].d1    += s.d1.total;
     r[p.team].d2    += s.d2.total;
@@ -1300,8 +1306,8 @@ function fmt(n) {
 function fmtM(n) { return n ? `$${n}` : '$0'; }
 
 function tBadge(team) {
-  if (!team) return `<span class="tb tb-none">Unassigned</span>`;
-  const t = S.teams[team];
+  const t = team ? S.teams[team] : null;
+  if (!t) return `<span class="tb tb-none">Unassigned</span>`;
   return `<span class="tb" style="background:${esc(t.color)};color:${contrastColor(t.color)}">${esc(t.name)}</span>`;
 }
 
@@ -2140,9 +2146,10 @@ function renderDay(day) {
         if (usedInDay.has(n) && n !== cur) return '';
         return `<option value="${esc(n)}" ${n===cur?'selected':''}>${esc(n)}</option>`;
       }).join('');
-      const t = cur ? teamOf(cur) : null;
-      const badge = t
-        ? `<span class="tb" style="background:${esc(S.teams[t].color)};color:${contrastColor(S.teams[t].color)};display:inline-block;margin-top:4px">${esc(S.teams[t].name)}</span>`
+      const tk = cur ? teamOf(cur) : null;
+      const tm = tk ? S.teams[tk] : null;
+      const badge = tm
+        ? `<span class="tb" style="background:${esc(tm.color)};color:${contrastColor(tm.color)};display:inline-block;margin-top:4px">${esc(tm.name)}</span>`
         : `<span style="display:inline-block;height:22px;margin-top:4px"></span>`;
       return `<div class="form-group">
           <label>Player ${pi+1}</label>
