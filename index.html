@@ -2028,6 +2028,44 @@ function unlockDay(day) {
   updateTabLockBadges();
 }
 
+// Hard guarantee against duplicate player picks — enforced at the data layer, not
+// just by hiding <option>s in the dropdown. Rejects the write outright (with a clear
+// alert) if that name is already used elsewhere in this day's 4-Man groups, no matter
+// what the UI was showing at the moment of selection (stale render, race, anything).
+function setGroupPlayer(day, gi, pi, value) {
+  if (value) {
+    const dupe = S[day].groups.some((g, gIdx) =>
+      g.players.some((p, pIdx) => p === value && !(gIdx === gi && pIdx === pi))
+    );
+    if (dupe) {
+      alert(`${value} is already in another 4-Man group today. Pick a different player.`);
+      renderDay(day);
+      return;
+    }
+  }
+  S[day].groups[gi].players[pi] = value;
+  save();
+  renderDay(day);
+}
+
+// Same hard guarantee for the 2v2 matches — rejects if that name is already used in
+// any other match slot today (including the other slot of the same match).
+function setMatchPlayer(day, mi, field, value) {
+  if (value) {
+    const dupe = S[day].matches.some((m, mIdx) =>
+      ['p1a', 'p1b', 'p2a', 'p2b'].some(f => m[f] === value && !(mIdx === mi && f === field))
+    );
+    if (dupe) {
+      alert(`${value} is already in another 2v2 match today. Pick a different player.`);
+      renderDay(day);
+      return;
+    }
+  }
+  S[day].matches[mi][field] = value;
+  save();
+  renderDay(day);
+}
+
 function renderDay(day) {
   const el = document.getElementById('pane-'+day);
   const label = day==='day1' ? 'Day 1' : 'Day 2';
@@ -2094,7 +2132,7 @@ function renderDay(day) {
         : `<span style="display:inline-block;height:22px;margin-top:4px"></span>`;
       return `<div class="form-group">
           <label>Player ${pi+1}</label>
-          <select ${locked ? 'disabled' : `onchange="S.${day}.groups[${gi}].players[${pi}]=this.value;save();renderDay('${day}')"`}>
+          <select ${locked ? 'disabled' : `onchange="setGroupPlayer('${day}',${gi},${pi},this.value)"`}>
             <option value="">— Select —</option>${opts}
           </select>
           ${badge}
@@ -2165,7 +2203,7 @@ function renderDay(day) {
         if (usedInMatches.has(n) && n !== cur) return '';
         return `<option value="${esc(n)}" ${n===cur?'selected':''}>${esc(n)}</option>`;
       }).join('');
-      return `<select ${locked ? 'disabled' : `onchange="S.${day}.matches[${mi}].${field}=this.value;save();renderDay('${day}')"`}>
+      return `<select ${locked ? 'disabled' : `onchange="setMatchPlayer('${day}',${mi},'${field}',this.value)"`}>
               <option value="">— Select —</option>${opts}
             </select>`;
     };
