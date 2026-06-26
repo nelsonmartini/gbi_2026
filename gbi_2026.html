@@ -2733,22 +2733,29 @@ function renderFormat() {
 /* ═══════════════════════════════════════════════════════
    THE BODE MATRIX — editable skill/vibes/grade ratings
 ═══════════════════════════════════════════════════════ */
+// Animates the scatter dots sliding to their new spot instead of just snapping there,
+// using the View Transitions API where supported (falls back to an instant re-render
+// on older browsers — no loss of functionality, just no slide animation)
+function rerenderAnalytics() {
+  if (document.startViewTransition) document.startViewTransition(() => renderAnalytics());
+  else renderAnalytics();
+}
 function unlockMatrix() {
   const pin = prompt('Enter Bode Matrix PIN to unlock editing:');
   if (!pin || pin.trim().toUpperCase() !== MATRIX_PIN.toUpperCase()) { alert('Incorrect PIN.'); return; }
   _matrixUnlocked = true;
   _collapsed['analytics_matrix'] = false;
-  renderAnalytics();
+  rerenderAnalytics();
 }
 function lockMatrix() {
   _matrixUnlocked = false;
-  renderAnalytics();
+  rerenderAnalytics();
 }
 function setRating(name, field, value) {
   if (!S.ratings[name]) S.ratings[name] = { skill:null, vibes:null, grade:null };
   S.ratings[name][field] = field === 'grade' ? (value || null) : (value === '' ? null : parseFloat(value));
   save();
-  renderAnalytics();
+  rerenderAnalytics();
 }
 function initials(name) {
   const clean = name.replace('.', '').trim();
@@ -2790,10 +2797,11 @@ function renderBodeMatrixScatter() {
   const dots = points.map(({ name, left, top }) => {
     const m = PLAYER_META[name];
     const tc = teamOf(name) ? S.teams[teamOf(name)].color : '#999';
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const inner = m.avatar
       ? `<img src="${esc(m.avatar)}" alt="${esc(name)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.3)" />`
       : `<div style="width:100%;height:100%;border-radius:50%;background:${tc};color:${contrastColor(tc)};display:flex;align-items:center;justify-content:center;font-size:.68em;font-weight:bold;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.3)">${initials(name)}</div>`;
-    return `<div style="position:absolute;left:${left}%;top:${top}%;width:34px;height:34px;margin:-17px 0 0 -17px;cursor:pointer;z-index:1" title="${esc(name)}" onclick="showProfile('${jsq(name)}')">${inner}</div>`;
+    return `<div style="position:absolute;left:${left}%;top:${top}%;width:34px;height:34px;margin:-17px 0 0 -17px;cursor:pointer;z-index:1;view-transition-name:bode-dot-${slug}" title="${esc(name)}" onclick="showProfile('${jsq(name)}')">${inner}</div>`;
   }).join('');
   return `
   <div style="position:relative;width:100%;padding-bottom:100%;background:#f7f4ec;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:6px">
