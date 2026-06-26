@@ -118,6 +118,9 @@ body {
   position: sticky; top: 0; z-index: 50;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: pan-x;
 }
 .tab-nav::-webkit-scrollbar { display: none; }
 .tab-btn {
@@ -128,6 +131,8 @@ body {
   cursor: pointer; font-family: Georgia, serif; font-size: .9em;
   white-space: nowrap; transition: color .2s, border-color .2s;
   scroll-snap-align: start;
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
 }
 .tab-btn:hover { color: var(--gold-light); }
 .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); background: rgba(255,255,255,.07); }
