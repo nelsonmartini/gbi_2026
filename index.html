@@ -115,6 +115,8 @@ body {
   display: flex; overflow-x: auto;
   border-bottom: 3px solid var(--gold);
   scrollbar-width: none;
+  position: sticky; top: 0; z-index: 50;
+  -webkit-overflow-scrolling: touch;
 }
 .tab-nav::-webkit-scrollbar { display: none; }
 .tab-btn {
@@ -639,7 +641,7 @@ tr.winner { background: #fffce8 !important; }
   <button class="tab-btn" onclick="tab('day2')">⛳ Day 2</button>
   <button class="tab-btn" onclick="tab('payouts')">💰 Hole Payouts</button>
   <button class="tab-btn" onclick="tab('monies')">💵 Monies</button>
-  <button class="tab-btn" onclick="tab('roster')">👥 Roster &amp; Teams</button>
+  <button class="tab-btn" onclick="tab('roster')">👥 Draft and Rosters</button>
   <button class="tab-btn" onclick="tab('analytics')">📈 Analytics</button>
   <button class="tab-btn" onclick="tab('format')">📋 Format &amp; Rules</button>
 </nav>
@@ -1360,7 +1362,7 @@ function renderScoreboard() {
   let html = '';
 
   if (unassigned > 0) {
-    html += `<div class="alert alert-gold">&#9888;&#65039; <strong>${unassigned} player${unassigned>1?'s':''} not yet assigned to a team.</strong> Visit the <strong>Roster &amp; Teams</strong> tab to assign all players before scoring begins.</div>`;
+    html += `<div class="alert alert-gold">&#9888;&#65039; <strong>${unassigned} player${unassigned>1?'s':''} not yet assigned to a team.</strong> Visit the <strong>Draft and Rosters</strong> tab to assign all players before scoring begins.</div>`;
   }
 
   // Countdown
@@ -2136,7 +2138,7 @@ function renderDay(day) {
   const matchT2Pool = S.roster.filter(p => p.team === 't2').map(p => p.name);
 
   if (matchT1Pool.length === 0 || matchT2Pool.length === 0) {
-    html += `<div class="alert alert-red">⚠️ Teams are not fully assigned. Go to <strong>Roster &amp; Teams</strong> and assign all players before setting up matches.</div>`;
+    html += `<div class="alert alert-red">⚠️ Teams are not fully assigned. Go to <strong>Draft and Rosters</strong> and assign all players before setting up matches.</div>`;
   }
 
   S[day].matches.forEach((m,mi) => {
