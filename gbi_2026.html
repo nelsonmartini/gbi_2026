@@ -1195,7 +1195,7 @@ function showProfile(name) {
   const hasScores = allStats.some(s => s.total > 0);
   const pp = ppPlayers();
   const inPP = hasScores && pp.set.has(name);
-  const isLastPlace = inPP && pp.last === name;
+  const isLastPlace = inPP && pp.lastSet.has(name);
 
   const champBadge = champYears.length
     ? `<div style="margin-top:7px">${champYears.map(y => `<span style="background:rgba(255,255,255,.22);border-radius:12px;padding:2px 9px;font-size:.78em;margin-right:4px">&#127942; GBI Champion ${y}</span>`).join('')}</div>` : '';
@@ -1343,14 +1343,22 @@ function safeTeamColor(hex) { return hexLum(hex) > 0.85 ? '#161616' : hex; }
 // Returns {set: bottom-5 names, last: dead-last name} when scores exist
 function ppPlayers() {
   const all = allPlayerStats();
-  if (!all.some(p => p.total > 0)) return { set: new Set(), last: null };
+  if (!all.some(p => p.total > 0)) return { set: new Set(), lastSet: new Set(), last: null };
   const sorted = [...all].sort((a,b) => a.total - b.total);
-  return { set: new Set(sorted.slice(0,5).map(p => p.name)), last: sorted[0].name };
+  // Bottom 5 by position, but ties at that boundary expand the group — nobody tied
+  // with the nominal 5th-worst score gets unfairly left out.
+  const thresholdScore = sorted[Math.min(4, sorted.length - 1)].total;
+  const bottomGroup = sorted.filter(p => p.total <= thresholdScore);
+  // Same logic for "last place" — if multiple players are tied for dead last,
+  // all of them are equally in last place, not just whichever sorted first.
+  const minScore = sorted[0].total;
+  const lastSet = new Set(sorted.filter(p => p.total === minScore).map(p => p.name));
+  return { set: new Set(bottomGroup.map(p => p.name)), lastSet, last: sorted[0].name };
 }
 // 🍆 for dead last, ⚠️ for the other bottom 4
 function ppBadge(name, pp) {
   if (!pp || !pp.set.has(name)) return '';
-  return ` <span style="font-size:.78em">${name === pp.last ? '&#127814;' : '&#9888;&#65039;'}</span>`;
+  return ` <span style="font-size:.78em">${pp.lastSet.has(name) ? '&#127814;' : '&#9888;&#65039;'}</span>`;
 }
 // Red DM Mono pts for PP Zone players, normal green otherwise
 function ppPts(name, pp, val) {
@@ -1592,7 +1600,7 @@ function renderScoreboard() {
     html += `</div></div>`;
   }
 
-  // PP Zone — bottom 5 when scores exist
+  // Danger Zone — bottom 5 when scores exist, expanded to include anyone tied at that boundary
   if (anyScores) {
     const msgs = [
       'Seeking professional help.',
@@ -1601,25 +1609,23 @@ function renderScoreboard() {
       'Checking flights home early.',
       'Has not told family yet.',
     ];
-    const bottom5 = [...all].sort((a,b) => a.total - b.total).slice(0,5);
-    const ppLast = pp.last;
+    const bottomGroup = [...all].filter(p => pp.set.has(p.name)).sort((a,b) => a.total - b.total);
     html += `
     <div class="card" style="margin-top:8px">
       <div class="card-header pp-zone-header">&#128680; The Danger Zone &mdash; Pray for These Players</div>
       <div class="card-body" style="padding:0">
         <div class="alert alert-red" style="margin:12px 12px 0;border-radius:5px">
-          Bottom 5 on the leaderboard. Last place earns a punishment. You know who you are.
+          Bottom 5 on the leaderboard (ties included). Last place earns a punishment. You know who you are.
           <div style="font-size:.78em;opacity:.75;font-style:italic;margin-top:3px">If results stand as of right now &mdash; plenty of golf left to play.</div>
         </div>
         <div style="margin-top:8px">`;
-    bottom5.forEach((p, i) => {
-      const pos = all.length - 4 + i;
+    bottomGroup.forEach((p, i) => {
       html += `<div class="pp-row">
-        <div class="pp-rank">${p.name===ppLast?'&#127814;':'&#9888;&#65039;'}</div>
+        <div class="pp-rank">${pp.lastSet.has(p.name)?'&#127814;':'&#9888;&#65039;'}</div>
         <div class="pp-name"><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span> ${tBadge(p.team)}</div>
         <div style="text-align:right">
           <div class="pp-pts">${fmt(p.total)} pts</div>
-          <div class="pp-msg">${msgs[i]}</div>
+          <div class="pp-msg">${msgs[i % msgs.length]}</div>
         </div>
       </div>`;
     });
