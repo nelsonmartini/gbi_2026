@@ -700,27 +700,51 @@ function ppChampBadge(name) {
 }
 
 const PLAYER_META = {
-  'Basham':   { cat:'straight',  grade:'C', vibes:6.4, skill:7.8, prev:{rank:12,total:31,   d1:17,  d2:14,   d1m:20, d2m:0,  d1four:8,   d1match:3,d1rank:4, d1pay:2,d2four:2,   d2match:5,d2rank:7, d2pay:0} },
-  'Bode':     { cat:'mystery',   grade:'F', vibes:9.8, skill:4.8, avatar:'avatars/bode.jpg', prev:{rank:8, total:35.5, d1:9,   d2:26.5, d1m:20, d2m:40, d1four:4,   d1match:0,d1rank:3, d1pay:2,d2four:10.5,d2match:5,d2rank:7, d2pay:4} },
-  'Bryce':    { cat:'bigdawg',   grade:'B', vibes:7.9, skill:8.3, prev:{rank:14,total:30.5, d1:15,  d2:15.5, d1m:20, d2m:0,  d1four:6,   d1match:0,d1rank:7, d1pay:2,d2four:6.5, d2match:0,d2rank:9, d2pay:0} },
-  'Braden':   { cat:'mystery',   grade:null, vibes:null, skill:null, prev:null, note:'Did not attend 2025 GBI' },
-  'Kyle':     { cat:'shotmaker', grade:null, vibes:null, skill:null, prev:null },
-  'Evan':     { cat:'bigdawg',   grade:'C', vibes:8.5, skill:7.9, avatar:'avatars/evan.jpg', prev:{rank:4, total:41.5, d1:20,  d2:21.5, d1m:40, d2m:40, d1four:4,   d1match:3,d1rank:9, d1pay:4,d2four:10.5,d2match:0,d2rank:7, d2pay:4} },
-  'Jordan':   { cat:'mystery',   grade:null, vibes:null, skill:null, prev:null },
-  'Jake B':   { cat:'shotmaker', grade:'D', vibes:6.0, skill:6.0, prev:{rank:5, total:40.5, d1:17,  d2:23.5, d1m:20, d2m:0,  d1four:8,   d1match:0,d1rank:7, d1pay:2,d2four:6.5, d2match:5,d2rank:12,d2pay:0} },
-  'Moose':    { cat:'bigdawg',   grade:'A', vibes:7.3, skill:9.3, avatar:'avatars/moose.jpg', prev:{rank:2, total:49.5, d1:21,  d2:28.5, d1m:0,  d2m:20, d1four:8,   d1match:3,d1rank:10,d1pay:0,d2four:6.5, d2match:5,d2rank:15,d2pay:2} },
-  'Nail':     { cat:'straight',  grade:'B', vibes:8.8, skill:8.8, avatar:'avatars/nail.jpg', prev:{rank:1, total:51.5, d1:21,  d2:30.5, d1m:40, d2m:20, d1four:4,   d1match:3,d1rank:10,d1pay:4,d2four:8.5, d2match:5,d2rank:15,d2pay:2} },
-  'NateDawg': { cat:'straight',  grade:'B', vibes:7.6, skill:7.9, avatar:'avatars/natedawg.jpg', prev:{rank:6, total:36.5, d1:18,  d2:18.5, d1m:0,  d2m:60, d1four:6,   d1match:3,d1rank:9, d1pay:0,d2four:8.5, d2match:0,d2rank:4, d2pay:6} },
-  'Neebs':    { cat:'mystery',   grade:'F', vibes:7.8, skill:4.5, peterPutter:true, avatar:'avatars/neebs.jpg', prev:{rank:20,total:14,   d1:3,   d2:11,   d1m:0,  d2m:0,  d1four:2,   d1match:0,d1rank:1, d1pay:0,d2four:2,   d2match:0,d2rank:9, d2pay:0} },
-  'Ponzi':    { cat:'bigdawg',   grade:'A', vibes:4.4, skill:9.3, avatar:'avatars/ponzi.jpg', prev:{rank:12,total:31,   d1:14,  d2:17,   d1m:40, d2m:0,  d1four:2,   d1match:0,d1rank:8, d1pay:4,d2four:2,   d2match:5,d2rank:10,d2pay:0} },
-  'Rusty':    { cat:'shotmaker', grade:'D', vibes:7.8, skill:6.1, avatar:'avatars/rusty.jpg', prev:{rank:14,total:30.5, d1:19,  d2:11.5, d1m:40, d2m:0,  d1four:6,   d1match:3,d1rank:6, d1pay:4,d2four:8.5, d2match:0,d2rank:3, d2pay:0} },
-  'Shawn':    { cat:'bigdawg',   grade:'B', vibes:7.1, skill:8.6, prev:{rank:6, total:36.5, d1:17,  d2:19.5, d1m:20, d2m:0,  d1four:8,   d1match:3,d1rank:4, d1pay:2,d2four:10.5,d2match:0,d2rank:9, d2pay:0} },
-  'Tanner':   { cat:'mystery',   grade:'F', vibes:9.4, skill:4.5, avatar:'avatars/tanner.jpg', prev:{rank:18,total:19,   d1:13,  d2:6,    d1m:20, d2m:0,  d1four:2,   d1match:3,d1rank:6, d1pay:2,d2four:2,   d2match:0,d2rank:4, d2pay:0} },
-  'Tom':      { cat:'straight',  grade:'B', vibes:7.8, skill:8.1, avatar:'avatars/tom.jpg', prev:{rank:16,total:29.5, d1:11,  d2:18.5, d1m:0,  d2m:0,  d1four:2,   d1match:3,d1rank:6, d1pay:0,d2four:6.5, d2match:5,d2rank:7, d2pay:0} },
-  'Trevor':   { cat:'shotmaker', grade:'C', vibes:4.3, skill:7.4, avatar:'avatars/trevor.jpg', prev:{rank:19,total:18.5, d1:7,   d2:11.5, d1m:20, d2m:20, d1four:4,   d1match:0,d1rank:1, d1pay:2,d2four:6.5, d2match:0,d2rank:3, d2pay:2} },
-  'Ty':       { cat:'straight',  grade:'C', vibes:7.6, skill:7.9, prev:{rank:9, total:34.5, d1:5,   d2:29.5, d1m:0,  d2m:40, d1four:2,   d1match:0,d1rank:3, d1pay:0,d2four:8.5, d2match:5,d2rank:12,d2pay:4} },
-  'Zach M.':  { cat:'shotmaker', grade:'D', vibes:8.1, skill:6.9, prev:{rank:9, total:34.5, d1:5,   d2:29.5, d1m:0,  d2m:40, d1four:2,   d1match:0,d1rank:3, d1pay:0,d2four:10.5,d2match:5,d2rank:10,d2pay:4} }
+  'Basham':   { cat:'straight',  prev:{rank:12,total:31,   d1:17,  d2:14,   d1m:20, d2m:0,  d1four:8,   d1match:3,d1rank:4, d1pay:2,d2four:2,   d2match:5,d2rank:7, d2pay:0} },
+  'Bode':     { cat:'mystery',   avatar:'avatars/bode.jpg', prev:{rank:8, total:35.5, d1:9,   d2:26.5, d1m:20, d2m:40, d1four:4,   d1match:0,d1rank:3, d1pay:2,d2four:10.5,d2match:5,d2rank:7, d2pay:4} },
+  'Bryce':    { cat:'bigdawg',   prev:{rank:14,total:30.5, d1:15,  d2:15.5, d1m:20, d2m:0,  d1four:6,   d1match:0,d1rank:7, d1pay:2,d2four:6.5, d2match:0,d2rank:9, d2pay:0} },
+  'Braden':   { cat:'mystery',   prev:null, note:'Did not attend 2025 GBI' },
+  'Kyle':     { cat:'shotmaker', prev:null },
+  'Evan':     { cat:'bigdawg',   avatar:'avatars/evan.jpg', prev:{rank:4, total:41.5, d1:20,  d2:21.5, d1m:40, d2m:40, d1four:4,   d1match:3,d1rank:9, d1pay:4,d2four:10.5,d2match:0,d2rank:7, d2pay:4} },
+  'Jordan':   { cat:'mystery',   prev:null },
+  'Jake B':   { cat:'shotmaker', prev:{rank:5, total:40.5, d1:17,  d2:23.5, d1m:20, d2m:0,  d1four:8,   d1match:0,d1rank:7, d1pay:2,d2four:6.5, d2match:5,d2rank:12,d2pay:0} },
+  'Moose':    { cat:'bigdawg',   avatar:'avatars/moose.jpg', prev:{rank:2, total:49.5, d1:21,  d2:28.5, d1m:0,  d2m:20, d1four:8,   d1match:3,d1rank:10,d1pay:0,d2four:6.5, d2match:5,d2rank:15,d2pay:2} },
+  'Nail':     { cat:'straight',  avatar:'avatars/nail.jpg', prev:{rank:1, total:51.5, d1:21,  d2:30.5, d1m:40, d2m:20, d1four:4,   d1match:3,d1rank:10,d1pay:4,d2four:8.5, d2match:5,d2rank:15,d2pay:2} },
+  'NateDawg': { cat:'straight',  avatar:'avatars/natedawg.jpg', prev:{rank:6, total:36.5, d1:18,  d2:18.5, d1m:0,  d2m:60, d1four:6,   d1match:3,d1rank:9, d1pay:0,d2four:8.5, d2match:0,d2rank:4, d2pay:6} },
+  'Neebs':    { cat:'mystery',   peterPutter:true, avatar:'avatars/neebs.jpg', prev:{rank:20,total:14,   d1:3,   d2:11,   d1m:0,  d2m:0,  d1four:2,   d1match:0,d1rank:1, d1pay:0,d2four:2,   d2match:0,d2rank:9, d2pay:0} },
+  'Ponzi':    { cat:'bigdawg',   avatar:'avatars/ponzi.jpg', prev:{rank:12,total:31,   d1:14,  d2:17,   d1m:40, d2m:0,  d1four:2,   d1match:0,d1rank:8, d1pay:4,d2four:2,   d2match:5,d2rank:10,d2pay:0} },
+  'Rusty':    { cat:'shotmaker', avatar:'avatars/rusty.jpg', prev:{rank:14,total:30.5, d1:19,  d2:11.5, d1m:40, d2m:0,  d1four:6,   d1match:3,d1rank:6, d1pay:4,d2four:8.5, d2match:0,d2rank:3, d2pay:0} },
+  'Shawn':    { cat:'bigdawg',   prev:{rank:6, total:36.5, d1:17,  d2:19.5, d1m:20, d2m:0,  d1four:8,   d1match:3,d1rank:4, d1pay:2,d2four:10.5,d2match:0,d2rank:9, d2pay:0} },
+  'Tanner':   { cat:'mystery',   avatar:'avatars/tanner.jpg', prev:{rank:18,total:19,   d1:13,  d2:6,    d1m:20, d2m:0,  d1four:2,   d1match:3,d1rank:6, d1pay:2,d2four:2,   d2match:0,d2rank:4, d2pay:0} },
+  'Tom':      { cat:'straight',  avatar:'avatars/tom.jpg', prev:{rank:16,total:29.5, d1:11,  d2:18.5, d1m:0,  d2m:0,  d1four:2,   d1match:3,d1rank:6, d1pay:0,d2four:6.5, d2match:5,d2rank:7, d2pay:0} },
+  'Trevor':   { cat:'shotmaker', avatar:'avatars/trevor.jpg', prev:{rank:19,total:18.5, d1:7,   d2:11.5, d1m:20, d2m:20, d1four:4,   d1match:0,d1rank:1, d1pay:2,d2four:6.5, d2match:0,d2rank:3, d2pay:2} },
+  'Ty':       { cat:'straight',  prev:{rank:9, total:34.5, d1:5,   d2:29.5, d1m:0,  d2m:40, d1four:2,   d1match:0,d1rank:3, d1pay:0,d2four:8.5, d2match:5,d2rank:12,d2pay:4} },
+  'Zach M.':  { cat:'shotmaker', prev:{rank:9, total:34.5, d1:5,   d2:29.5, d1m:0,  d2m:40, d1four:2,   d1match:0,d1rank:3, d1pay:0,d2four:10.5,d2match:5,d2rank:10,d2pay:4} }
 };
+
+const DEFAULT_RATINGS = {
+  'Basham':   { skill:7.8, vibes:6.4, grade:'C' },
+  'Bode':     { skill:4.8, vibes:9.8, grade:'F' },
+  'Bryce':    { skill:8.3, vibes:7.9, grade:'B' },
+  'Braden':   { skill:7.8, vibes:9,   grade:'C' },
+  'Kyle':     { skill:7.3, vibes:7.5, grade:null },
+  'Evan':     { skill:7.9, vibes:8.5, grade:'C' },
+  'Jordan':   { skill:9.4, vibes:8.1, grade:'A' },
+  'Jake B':   { skill:6,   vibes:6,   grade:'D' },
+  'Moose':    { skill:9.3, vibes:7.3, grade:'A' },
+  'Nail':     { skill:8.8, vibes:8.8, grade:'B' },
+  'NateDawg': { skill:7.9, vibes:7.6, grade:'B' },
+  'Neebs':    { skill:4.5, vibes:7.8, grade:'F' },
+  'Ponzi':    { skill:9.3, vibes:4.4, grade:'A' },
+  'Rusty':    { skill:6.1, vibes:7.8, grade:'D' },
+  'Shawn':    { skill:8.6, vibes:7.1, grade:'B' },
+  'Tanner':   { skill:4.5, vibes:9.4, grade:'F' },
+  'Tom':      { skill:8.1, vibes:7.8, grade:'B' },
+  'Trevor':   { skill:7.4, vibes:4.3, grade:'C' },
+  'Ty':       { skill:7.9, vibes:7.6, grade:'C' },
+  'Zach M.':  { skill:6.9, vibes:8.1, grade:'D' }
+};
+
 
 // 27 holes per day (20 payout, 7 No Prize) — mirrors 2025 structure
 const HOLE_CATS = [
@@ -742,8 +766,15 @@ function defaultState() {
     day1: defaultDayState(),
     day2: defaultDayState(),
     locks: { day1: false, day2: false },
-    draft: { active: false, complete: false, picks: [], currentPick: 0, timerStart: null, timerDuration: 180, paused: false, pausedRemaining: null }
+    draft: { active: false, complete: false, picks: [], currentPick: 0, timerStart: null, timerDuration: 180, paused: false, pausedRemaining: null },
+    ratings: JSON.parse(JSON.stringify(DEFAULT_RATINGS))
   };
+}
+
+// Skill/Vibes/Bode Grade now live in S.ratings (editable via the Bode Matrix), not PLAYER_META
+function rating(name) {
+  const r = (S.ratings && S.ratings[name]) || {};
+  return { skill: r.skill ?? null, vibes: r.vibes ?? null, grade: r.grade ?? null };
 }
 
 function defaultDayState() {
@@ -780,6 +811,7 @@ const FB_PATH   = 'gbi2026/state';
 const CLIENT_ID = Math.random().toString(36).slice(2);  // unique per browser tab
 let _bigBoard = false;
 let _draftBigScreen = false;
+let _matrixUnlocked = false;
 let _collapsed = {};
 function toggleCollapse(key, day) {
   _collapsed[key] = _collapsed[key] === false ? true : false;
@@ -790,6 +822,8 @@ function toggleCollapse(key, day) {
 const SITE_PIN  = 'PETERputter26';
 // ─── COMMISSIONER PIN ─── required to lock/unlock day scores
 const ADMIN_PIN = 'GBIcommish26';
+// ─── BODE MATRIX PIN ─── required to unlock editing on the ratings table
+const MATRIX_PIN = 'BodeMatrix26';
 
 let _db = null, _ref = null, _auth = null;
 let _draftTimer = null;
@@ -1041,8 +1075,9 @@ function calcOdds() {
   const AVG_SKILL = 7.1, AVG_RANK = 10.5, AVG_VIBES = 7.4;
   function raw(name) {
     const m = PLAYER_META[name];
-    const skill = m.skill !== null ? m.skill : AVG_SKILL;
-    const vibes = m.vibes !== null ? m.vibes : AVG_VIBES;
+    const r = rating(name);
+    const skill = r.skill !== null ? r.skill : AVG_SKILL;
+    const vibes = r.vibes !== null ? r.vibes : AVG_VIBES;
     const rank25 = m.prev ? m.prev.rank : AVG_RANK;
     const s = skill * 0.6 + (21 - rank25) * 0.5 * 0.3 + vibes * 0.1;
     return s * s;
@@ -1061,6 +1096,7 @@ function calcOdds() {
 
 function showProfile(name) {
   const m = PLAYER_META[name];
+  const rt = rating(name);
   const rp = S.roster.find(r => r.name === name);
   const team = rp ? rp.team : null;
   const tColor = team ? S.teams[team].color : '#4a5568';
@@ -1111,15 +1147,18 @@ function showProfile(name) {
     </div>
   </div>`;
 
-  if (m.skill !== null) {
-    const gc = gradeColor[m.grade] || '#888';
+  if (rt.skill !== null) {
+    const gc = gradeColor[rt.grade] || '#888';
+    const gradeDisplay = rt.grade
+      ? `<span style="background:${gc};color:white;padding:2px 10px;border-radius:6px;font-size:.9em">${rt.grade}</span>`
+      : `<span style="color:#aaa">&mdash;</span>`;
     body += `
   <div class="pm-section">
     <div class="pm-sec-title">&#11088; Player Ratings</div>
     <div class="pm-stat-row">
-      <div class="pm-stat"><div class="pm-stat-val" style="color:var(--green)">${m.skill}</div><div class="pm-stat-lbl">Skill / 10</div></div>
-      <div class="pm-stat"><div class="pm-stat-val" style="color:#8b5cf6">${m.vibes}</div><div class="pm-stat-lbl">Vibes / 10</div></div>
-      <div class="pm-stat"><div class="pm-stat-val"><span style="background:${gc};color:white;padding:2px 10px;border-radius:6px;font-size:.9em">${m.grade}</span></div><div class="pm-stat-lbl" style="margin-top:4px">Bode Grade</div></div>
+      <div class="pm-stat"><div class="pm-stat-val" style="color:var(--green)">${rt.skill}</div><div class="pm-stat-lbl">Skill / 10</div></div>
+      <div class="pm-stat"><div class="pm-stat-val" style="color:#8b5cf6">${rt.vibes}</div><div class="pm-stat-lbl">Vibes / 10</div></div>
+      <div class="pm-stat"><div class="pm-stat-val">${gradeDisplay}</div><div class="pm-stat-lbl" style="margin-top:4px">Bode Grade</div></div>
     </div>
   </div>`;
   }
@@ -1745,14 +1784,15 @@ function renderDraftRoom() {
       ${Object.entries(DRAFT_CATS).map(([key, c]) => {
         const catAvail = [...PLAYERS]
           .filter(n => PLAYER_META[n].cat === key)
-          .sort((a,b) => (PLAYER_META[b].skill||0) - (PLAYER_META[a].skill||0));
+          .sort((a,b) => (rating(b).skill||0) - (rating(a).skill||0));
         const remaining = catAvail.filter(n => !draftedNames.has(n)).length;
         const allGone = remaining === 0;
         const cards = catAvail.map(name => {
           const drafted = draftedNames.has(name);
           if (drafted) return '';
           const m = PLAYER_META[name];
-          const gc = gradeColor[m.grade] || '#888';
+          const r = rating(name);
+          const gc = gradeColor[r.grade] || '#888';
           const rank25 = m.prev ? `#${m.prev.rank} '25` : (m.note ? 'N/A' : '&#127381;');
           return `<div class="dp-card" style="padding:${bsz.cardPad}">
             <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:5px">
@@ -1760,9 +1800,9 @@ function renderDraftRoom() {
               <div class="dp-name" style="margin-bottom:0;font-size:${bsz.name}"><span class="plink" onclick="showProfile('${jsq(name)}')">${flag(name)} <strong>${esc(name)}</strong></span>${ppChampBadge(name)}<br><span style="font-size:${bsz.rank25};color:#888">${rank25}</span></div>
             </div>
             ${bs ? '' : `<div class="dp-stats">
-              <span title="Skill">&#9889; ${m.skill ?? '—'}</span>
-              <span title="Vibes">&#10024; ${m.vibes ?? '—'}</span>
-              <span style="background:${gc};color:white;border-radius:4px;padding:1px 5px">${m.grade ?? '—'}</span>
+              <span title="Skill">&#9889; ${r.skill ?? '—'}</span>
+              <span title="Vibes">&#10024; ${r.vibes ?? '—'}</span>
+              <span style="background:${gc};color:white;border-radius:4px;padding:1px 5px">${r.grade ?? '—'}</span>
               <span style="color:var(--green)">${odds[name]}</span>
             </div>`}
             <button class="dp-pick-btn" style="background:${esc(tColor)};color:${headText};border:${onLight ? '2px solid #161616' : 'none'};width:100%;font-size:${bsz.btnFont};padding:${bsz.btnPad}" onclick="makePick('${jsq(name)}')">DRAFT</button>
@@ -2691,6 +2731,117 @@ function renderFormat() {
 }
 
 /* ═══════════════════════════════════════════════════════
+   THE BODE MATRIX — editable skill/vibes/grade ratings
+═══════════════════════════════════════════════════════ */
+function unlockMatrix() {
+  const pin = prompt('Enter Bode Matrix PIN to unlock editing:');
+  if (!pin || pin.trim().toUpperCase() !== MATRIX_PIN.toUpperCase()) { alert('Incorrect PIN.'); return; }
+  _matrixUnlocked = true;
+  renderAnalytics();
+}
+function lockMatrix() {
+  _matrixUnlocked = false;
+  renderAnalytics();
+}
+function setRating(name, field, value) {
+  if (!S.ratings[name]) S.ratings[name] = { skill:null, vibes:null, grade:null };
+  S.ratings[name][field] = field === 'grade' ? (value || null) : (value === '' ? null : parseFloat(value));
+  save();
+  renderAnalytics();
+}
+function initials(name) {
+  const clean = name.replace('.', '').trim();
+  const parts = clean.split(' ');
+  return (parts.length > 1 ? parts[0][0] + parts[1][0] : clean.slice(0, 2)).toUpperCase();
+}
+function renderBodeMatrixScatter() {
+  const dots = PLAYERS.map(name => {
+    const r = rating(name);
+    if (r.skill === null || r.vibes === null) return '';
+    const left = Math.min(100, Math.max(0, r.skill * 10));
+    const top  = Math.min(100, Math.max(0, (10 - r.vibes) * 10));
+    const m = PLAYER_META[name];
+    const tc = teamOf(name) ? S.teams[teamOf(name)].color : '#999';
+    const inner = m.avatar
+      ? `<img src="${esc(m.avatar)}" alt="${esc(name)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.3)" />`
+      : `<div style="width:100%;height:100%;border-radius:50%;background:${tc};color:${contrastColor(tc)};display:flex;align-items:center;justify-content:center;font-size:.68em;font-weight:bold;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.3)">${initials(name)}</div>`;
+    return `<div style="position:absolute;left:${left}%;top:${top}%;width:34px;height:34px;margin:-17px 0 0 -17px;cursor:pointer" title="${esc(name)}" onclick="showProfile('${jsq(name)}')">${inner}</div>`;
+  }).join('');
+  return `
+  <div style="position:relative;width:100%;padding-bottom:100%;background:#f7f4ec;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:6px">
+    <div style="position:absolute;left:25%;top:0;bottom:0;width:1px;background:rgba(0,0,0,.06)"></div>
+    <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(0,0,0,.12)"></div>
+    <div style="position:absolute;left:75%;top:0;bottom:0;width:1px;background:rgba(0,0,0,.06)"></div>
+    <div style="position:absolute;top:25%;left:0;right:0;height:1px;background:rgba(0,0,0,.06)"></div>
+    <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(0,0,0,.12)"></div>
+    <div style="position:absolute;top:75%;left:0;right:0;height:1px;background:rgba(0,0,0,.06)"></div>
+    <div style="position:absolute;top:4px;left:6px;font-size:.68em;color:#aaa;font-style:italic">High Vibes</div>
+    <div style="position:absolute;bottom:4px;left:6px;font-size:.68em;color:#aaa;font-style:italic">Low Vibes</div>
+    ${dots}
+  </div>
+  <div style="display:flex;justify-content:space-between;font-size:.72em;color:#888;margin-bottom:14px">
+    <span>&#11013; Low Skill</span><span>High Skill &#10145;</span>
+  </div>`;
+}
+function renderBodeMatrixTable() {
+  const gradeColor = { A:'#16a34a', B:'#2563eb', C:'#d97706', D:'#ea580c', F:'#dc2626' };
+  const bySkill = [...PLAYERS].sort((a,b) => (rating(b).skill ?? -1) - (rating(a).skill ?? -1));
+  const bar = (val, col) => `<div style="display:flex;align-items:center;gap:6px">
+      <div style="flex:1;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;min-width:60px">
+        <div style="height:100%;width:${(val||0)*10}%;background:${col};border-radius:4px"></div>
+      </div>
+      <span style="font-size:.8em;font-weight:bold;color:${col};min-width:26px">${val ?? '—'}</span>
+    </div>`;
+  let rows = '';
+  bySkill.forEach(n => {
+    const r = rating(n);
+    const gc = gradeColor[r.grade] || '#888';
+    const gradeCell = _matrixUnlocked
+      ? `<select onchange="setRating('${jsq(n)}','grade',this.value)" style="font-size:.85em">
+          <option value="">—</option>
+          ${['A','B','C','D','F'].map(g => `<option value="${g}" ${r.grade===g?'selected':''}>${g}</option>`).join('')}
+        </select>`
+      : (r.grade ? `<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:${gc};color:white;font-weight:bold;font-size:.9em">${r.grade}</span>` : `<span style="color:#aaa">&mdash;</span>`);
+    const skillCell = _matrixUnlocked
+      ? `<input type="number" min="0" max="10" step="0.1" value="${r.skill ?? ''}" style="width:64px" onchange="setRating('${jsq(n)}','skill',this.value)" />`
+      : bar(r.skill, 'var(--green)');
+    const vibesCell = _matrixUnlocked
+      ? `<input type="number" min="0" max="10" step="0.1" value="${r.vibes ?? ''}" style="width:64px" onchange="setRating('${jsq(n)}','vibes',this.value)" />`
+      : bar(r.vibes, 'var(--gold-dark)');
+    rows += `<tr>
+      <td><strong>${flag(n)} ${esc(n)}</strong>${ppChampBadge(n)}</td>
+      <td class="c hide-mobile">${tBadge(teamOf(n))}</td>
+      <td class="c">${gradeCell}</td>
+      <td style="min-width:100px">${skillCell}</td>
+      <td style="min-width:100px">${vibesCell}</td>
+    </tr>`;
+  });
+  return `<table><thead><tr>
+    <th>Player</th><th class="c hide-mobile">Team</th>
+    <th class="c">Bode Grade</th><th>Skill</th><th>Vibes</th>
+  </tr></thead><tbody>${rows}</tbody></table>`;
+}
+function renderBodeMatrix() {
+  return `<div class="card">
+    <div class="card-header">
+      <span>&#129518; The Bode Matrix <span style="font-size:.78em;font-weight:normal;opacity:.7">(Skill &times; Vibes)</span></span>
+      ${_matrixUnlocked
+        ? `<button class="btn btn-xs" style="background:rgba(255,255,255,.25);color:white" onclick="lockMatrix()">&#128274; Lock</button>`
+        : `<button class="btn btn-xs" style="background:rgba(255,255,255,.25);color:white" onclick="unlockMatrix()">&#128275; Unlock to Edit</button>`}
+    </div>
+    <div class="card-body">
+      <div class="alert alert-info" style="margin-bottom:12px">
+        ${_matrixUnlocked
+          ? '<strong>Editing unlocked.</strong> Tap any Skill, Vibes, or Bode Grade cell to update it &mdash; changes save and sync immediately.'
+          : 'Pre-tournament ratings used for Vegas odds, the Draft Room, and player profiles. <strong>Bode Grade</strong> = overall GBI performance history &nbsp;&middot;&nbsp; <strong>Skill</strong> and <strong>Vibes</strong> out of 10.'}
+      </div>
+      ${renderBodeMatrixScatter()}
+      ${renderBodeMatrixTable()}
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════
    ANALYTICS
 ═══════════════════════════════════════════════════════ */
 function renderAnalytics() {
@@ -2730,10 +2881,9 @@ function renderAnalytics() {
     return shown + (names.length > max ? ` <span style="font-size:.78em;opacity:.7">+${names.length-max}</span>` : '');
   };
 
-  const gradeColor = { A:'#16a34a', B:'#2563eb', C:'#d97706', D:'#ea580c', F:'#dc2626' };
   const withPrev   = PLAYERS.filter(n => PLAYER_META[n].prev);
 
-  let html = '';
+  let html = renderBodeMatrix();
 
   if (!anyScores) {
     html += `<div class="alert alert-gold">&#9971; <strong>No scores entered yet!</strong> The Analytics tab comes to life once Day 1 scoring begins.</div>`;
@@ -2934,43 +3084,6 @@ function renderAnalytics() {
     });
   }
   html += `</div></div>`;
-
-  /* ── SECTION 5: Player Ratings (placeholder) ── */
-  const bySkill = [...PLAYERS].filter(n => PLAYER_META[n].skill !== null)
-    .sort((a,b) => PLAYER_META[b].skill - PLAYER_META[a].skill);
-  html += `
-  <div class="card">
-    <div class="card-header">&#127919; Player Ratings <span style="font-size:.78em;font-weight:normal;opacity:.7">(Pre-Tournament Reference)</span></div>
-    <div class="card-body">
-      <div class="alert alert-info" style="margin-bottom:12px">
-        Static pre-tournament ratings. <strong>Bode Grade</strong> = overall GBI performance history &nbsp;&middot;&nbsp; <strong>Skill</strong> and <strong>Vibes</strong> out of 10.
-      </div>
-      <table><thead><tr>
-        <th>Player</th><th class="c hide-mobile">Team</th>
-        <th class="c">Bode Grade</th><th>Skill</th><th>Vibes</th>
-      </tr></thead><tbody>`;
-  bySkill.forEach(n => {
-    const m = PLAYER_META[n], gc = gradeColor[m.grade] || '#888';
-    const bar = (val, col) => `<div style="display:flex;align-items:center;gap:6px">
-      <div style="flex:1;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;min-width:60px">
-        <div style="height:100%;width:${val*10}%;background:${col};border-radius:4px"></div>
-      </div>
-      <span style="font-size:.8em;font-weight:bold;color:${col};min-width:26px">${val}</span>
-    </div>`;
-    html += `<tr>
-      <td><strong>${flag(n)} ${esc(n)}</strong>${ppChampBadge(n)}</td>
-      <td class="c hide-mobile">${tBadge(teamOf(n))}</td>
-      <td class="c"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:${gc};color:white;font-weight:bold;font-size:.9em">${m.grade}</span></td>
-      <td style="min-width:100px">${bar(m.skill,'var(--green)')}</td>
-      <td style="min-width:100px">${bar(m.vibes,'var(--gold-dark)')}</td>
-    </tr>`;
-  });
-  html += `<tr>
-    <td><strong>${flag('Braden')} Braden</strong> <span style="font-size:.7em;background:#888;color:white;padding:1px 6px;border-radius:8px;font-weight:bold">Did not attend 2025</span></td>
-    <td class="c hide-mobile">${tBadge(teamOf('Braden'))}</td>
-    <td class="c" style="color:#aaa">&mdash;</td>
-    <td colspan="2" style="color:#aaa;font-style:italic;font-size:.85em">First year &mdash; ratings TBD</td>
-  </tr></tbody></table></div></div>`;
 
   /* ── SECTION 6: 2025 Historical (compact reference) ── */
   const sorted25 = [...withPrev].sort((a,b) => PLAYER_META[a].prev.rank - PLAYER_META[b].prev.rank);
