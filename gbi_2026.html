@@ -2737,6 +2737,7 @@ function unlockMatrix() {
   const pin = prompt('Enter Bode Matrix PIN to unlock editing:');
   if (!pin || pin.trim().toUpperCase() !== MATRIX_PIN.toUpperCase()) { alert('Incorrect PIN.'); return; }
   _matrixUnlocked = true;
+  _collapsed['analytics_matrix'] = false;
   renderAnalytics();
 }
 function lockMatrix() {
@@ -2755,17 +2756,44 @@ function initials(name) {
   return (parts.length > 1 ? parts[0][0] + parts[1][0] : clean.slice(0, 2)).toUpperCase();
 }
 function renderBodeMatrixScatter() {
-  const dots = PLAYERS.map(name => {
+  // Raw positions for every player with a rating
+  const points = PLAYERS.map(name => {
     const r = rating(name);
-    if (r.skill === null || r.vibes === null) return '';
-    const left = Math.min(100, Math.max(0, r.skill * 10));
-    const top  = Math.min(100, Math.max(0, (10 - r.vibes) * 10));
+    if (r.skill === null || r.vibes === null) return null;
+    return { name, left: Math.min(100, Math.max(0, r.skill * 10)), top: Math.min(100, Math.max(0, (10 - r.vibes) * 10)) };
+  }).filter(Boolean);
+
+  // Push apart any dots close enough to bury each other, by gently relaxing the
+  // whole layout over a few passes — keeps everyone near their true position while
+  // guaranteeing every dot stays fully visible and clickable (no overlap, however dense)
+  const MIN_DIST = 9;
+  for (let iter = 0; iter < 60; iter++) {
+    let moved = false;
+    for (let i = 0; i < points.length; i++) {
+      for (let j = i + 1; j < points.length; j++) {
+        const a = points[i], b = points[j];
+        const dx = b.left - a.left, dy = b.top - a.top;
+        const dist = Math.hypot(dx, dy) || 0.01;
+        if (dist < MIN_DIST) {
+          const push = (MIN_DIST - dist) / 2;
+          const ux = dx / dist, uy = dy / dist;
+          a.left -= ux * push; a.top -= uy * push;
+          b.left += ux * push; b.top += uy * push;
+          moved = true;
+        }
+      }
+    }
+    points.forEach(p => { p.left = Math.min(96, Math.max(4, p.left)); p.top = Math.min(96, Math.max(4, p.top)); });
+    if (!moved) break;
+  }
+
+  const dots = points.map(({ name, left, top }) => {
     const m = PLAYER_META[name];
     const tc = teamOf(name) ? S.teams[teamOf(name)].color : '#999';
     const inner = m.avatar
       ? `<img src="${esc(m.avatar)}" alt="${esc(name)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.3)" />`
       : `<div style="width:100%;height:100%;border-radius:50%;background:${tc};color:${contrastColor(tc)};display:flex;align-items:center;justify-content:center;font-size:.68em;font-weight:bold;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.3)">${initials(name)}</div>`;
-    return `<div style="position:absolute;left:${left}%;top:${top}%;width:34px;height:34px;margin:-17px 0 0 -17px;cursor:pointer" title="${esc(name)}" onclick="showProfile('${jsq(name)}')">${inner}</div>`;
+    return `<div style="position:absolute;left:${left}%;top:${top}%;width:34px;height:34px;margin:-17px 0 0 -17px;cursor:pointer;z-index:1" title="${esc(name)}" onclick="showProfile('${jsq(name)}')">${inner}</div>`;
   }).join('');
   return `
   <div style="position:relative;width:100%;padding-bottom:100%;background:#f7f4ec;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:6px">
@@ -2822,22 +2850,28 @@ function renderBodeMatrixTable() {
   </tr></thead><tbody>${rows}</tbody></table>`;
 }
 function renderBodeMatrix() {
-  return `<div class="card">
-    <div class="card-header">
-      <span>&#129518; The Bode Matrix <span style="font-size:.78em;font-weight:normal;opacity:.7">(Skill &times; Vibes)</span></span>
-      ${_matrixUnlocked
-        ? `<button class="btn btn-xs" style="background:rgba(255,255,255,.25);color:white" onclick="lockMatrix()">&#128274; Lock</button>`
-        : `<button class="btn btn-xs" style="background:rgba(255,255,255,.25);color:white" onclick="unlockMatrix()">&#128275; Unlock to Edit</button>`}
-    </div>
-    <div class="card-body">
+  return `
       <div class="alert alert-info" style="margin-bottom:12px">
         ${_matrixUnlocked
           ? '<strong>Editing unlocked.</strong> Tap any Skill, Vibes, or Bode Grade cell to update it &mdash; changes save and sync immediately.'
           : 'Pre-tournament ratings used for Vegas odds, the Draft Room, and player profiles. <strong>Bode Grade</strong> = overall GBI performance history &nbsp;&middot;&nbsp; <strong>Skill</strong> and <strong>Vibes</strong> out of 10.'}
       </div>
       ${renderBodeMatrixScatter()}
-      ${renderBodeMatrixTable()}
+      ${renderBodeMatrixTable()}`;
+}
+
+// Generic collapsible card for Analytics tab sections — collapsed by default on every page load
+function analyticsCard(key, headerLabel, bodyFn, extraHeaderHtml) {
+  const expanded = _collapsed[key] === false;
+  return `<div class="card">
+    <div class="card-header" style="cursor:pointer" onclick="_collapsed['${key}']=_collapsed['${key}']===false?true:false;renderAnalytics()">
+      <span>${headerLabel}</span>
+      <span style="display:flex;align-items:center;gap:8px">
+        ${extraHeaderHtml || ''}
+        <span style="font-size:.78em;font-weight:normal">${expanded ? '&#9650; Hide' : '&#9660; Show'}</span>
+      </span>
     </div>
+    ${expanded ? `<div class="card-body">${bodyFn()}</div>` : ''}
   </div>`;
 }
 
@@ -2883,24 +2917,24 @@ function renderAnalytics() {
 
   const withPrev   = PLAYERS.filter(n => PLAYER_META[n].prev);
 
-  let html = renderBodeMatrix();
+  const matrixLockBtn = _matrixUnlocked
+    ? `<button class="btn btn-xs" style="background:rgba(255,255,255,.25);color:white" onclick="event.stopPropagation();lockMatrix()">&#128274; Lock</button>`
+    : `<button class="btn btn-xs" style="background:rgba(255,255,255,.25);color:white" onclick="event.stopPropagation();unlockMatrix()">&#128275; Unlock to Edit</button>`;
+  let html = analyticsCard('analytics_matrix', '&#129518; The Bode Matrix <span style="font-size:.78em;font-weight:normal;opacity:.7">(Skill &times; Vibes)</span>', renderBodeMatrix, matrixLockBtn);
 
   if (!anyScores) {
     html += `<div class="alert alert-gold">&#9971; <strong>No scores entered yet!</strong> The Analytics tab comes to life once Day 1 scoring begins.</div>`;
   }
 
   /* ── SECTION 1: Team Performance Dashboard ── */
-  html += `
-  <div class="card">
-    <div class="card-header">&#9876;&#65039; 2026 Team Performance Dashboard</div>
-    <div class="card-body">`;
-
+  html += analyticsCard('analytics_dashboard', '&#9876;&#65039; 2026 Team Performance Dashboard', () => {
+  let sec = '';
   if (!anyScores) {
-    html += `<div class="empty"><div class="eicon">&#128202;</div>Waiting for scores&hellip;</div>`;
+    sec += `<div class="empty"><div class="eicon">&#128202;</div>Waiting for scores&hellip;</div>`;
   } else {
     const aMargin = Math.abs(tt.t1.total - tt.t2.total);
     const aLead   = tt.t1.total > tt.t2.total ? tt.t1.name : tt.t2.total > tt.t1.total ? tt.t2.name : null;
-    html += `
+    sec += `
     <div class="team-compact-banner" style="margin-bottom:18px">
       <div class="tcb-side" style="background:${t1col};color:${contrastColor(t1col)}">
         <div class="tcb-name">${t1name}</div>
@@ -2924,11 +2958,11 @@ function renderAnalytics() {
       { label:'Rank Pts',       t1v:tb.t1.rank,  t2v:tb.t2.rank  },
       { label:'Hole Payouts',   t1v:tb.t1.pay,   t2v:tb.t2.pay   },
     ];
-    html += `<div>`;
+    sec += `<div>`;
     cats.forEach(c => {
       const total = c.t1v + c.t2v || 1;
       const t1pct = Math.round(c.t1v / total * 100);
-      html += `
+      sec += `
       <div style="margin-bottom:14px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-size:.84em">
           <span style="font-weight:bold;color:${safeTeamColor(t1col)}">${fmt(c.t1v)} pts${c.t1v>c.t2v?' &laquo;':''}</span>
@@ -2941,18 +2975,16 @@ function renderAnalytics() {
         </div>
       </div>`;
     });
-    html += `</div>`;
+    sec += `</div>`;
   }
-  html += `</div></div>`;
+  return sec;
+  });
 
   /* ── SECTION 2: Who's Producing ── */
-  html += `
-  <div class="card">
-    <div class="card-header">&#128170; Who&rsquo;s Producing &mdash; Player Contributions</div>
-    <div class="card-body">`;
-
+  html += analyticsCard('analytics_producing', '&#128170; Who&rsquo;s Producing &mdash; Player Contributions', () => {
+  let sec = '';
   if (!anyScores) {
-    html += `<div class="empty"><div class="eicon">&#127948;</div>Waiting for scores&hellip;</div>`;
+    sec += `<div class="empty"><div class="eicon">&#127948;</div>Waiting for scores&hellip;</div>`;
   } else {
     ['t1','t2'].forEach(tk => {
       const tPlayers = all26.filter(p => p.team === tk).sort((a,b) => b.total - a.total);
@@ -2960,11 +2992,11 @@ function renderAnalytics() {
       const tname    = esc(S.teams[tk].name);
       const tcol     = S.teams[tk].color;
       const tBarText = contrastColor(tcol);
-      html += `<div style="margin-bottom:22px">
+      sec += `<div style="margin-bottom:22px">
         <div style="font-weight:bold;color:${tBarText};background:${tcol};padding:7px 13px;border-radius:6px;margin-bottom:10px;font-size:.88em;letter-spacing:.3px">${tname}</div>`;
       tPlayers.forEach(p => {
         const pct = Math.round(p.total / tTotal * 100);
-        html += `
+        sec += `
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
           <div style="min-width:88px;font-size:.86em;font-weight:bold;white-space:nowrap">${flag(p.name)} ${esc(p.name)}</div>
           <div style="flex:1;height:20px;background:#e5e7eb;border-radius:5px;overflow:hidden">
@@ -2977,25 +3009,23 @@ function renderAnalytics() {
           </div>
         </div>`;
       });
-      html += `</div>`;
+      sec += `</div>`;
     });
   }
-  html += `</div></div>`;
+  return sec;
+  });
 
   /* ── SECTION 3: Category Leaders ── */
-  html += `
-  <div class="card">
-    <div class="card-header">&#127941; 2026 Category Leaders</div>
-    <div class="card-body">`;
-
+  html += analyticsCard('analytics_leaders', '&#127941; 2026 Category Leaders', () => {
+  let sec = '';
   if (!anyScores) {
-    html += `<div class="empty"><div class="eicon">&#127919;</div>Waiting for scores&hellip;</div>`;
+    sec += `<div class="empty"><div class="eicon">&#127919;</div>Waiting for scores&hellip;</div>`;
   } else {
     const lCard = (icon, label, leader) => {
       if (!leader) return `<div class="highlight-card"><div class="hc-label">${icon} ${label}</div><div class="hc-name" style="opacity:.45">&mdash;</div><div class="hc-val">No data yet</div></div>`;
       return `<div class="highlight-card"><div class="hc-label">${icon} ${label}</div><div class="hc-name">${leadStr(leader.players)}</div><div class="hc-val">${leader.val} pts</div></div>`;
     };
-    html += `<div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(145px,1fr))">
+    sec += `<div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(145px,1fr))">
       ${lCard('&#9971;&#65039;','4-Man King',   fourLead)}
       ${lCard('&#129354;','Match Dominator', matchLead)}
       ${lCard('&#127941;','Rank Pts Leader', rankLead)}
@@ -3003,20 +3033,18 @@ function renderAnalytics() {
       ${lCard('&#128640;','Day 2 Surge',  surgeLead)}
     </div>`;
   }
-  html += `</div></div>`;
+  return sec;
+  });
 
   /* ── SECTION 4: Stacked bar chart ── */
-  html += `
-  <div class="card">
-    <div class="card-header">&#128202; 2026 Points Breakdown &mdash; Visual</div>
-    <div class="card-body">`;
-
+  html += analyticsCard('analytics_breakdown', '&#128202; 2026 Points Breakdown &mdash; Visual', () => {
+  let sec = '';
   if (!anyScores) {
-    html += `<div class="empty"><div class="eicon">&#128202;</div>Waiting for scores&hellip;</div>`;
+    sec += `<div class="empty"><div class="eicon">&#128202;</div>Waiting for scores&hellip;</div>`;
   } else {
     const sorted26 = [...all26].sort((a,b) => b.total - a.total || a.name.localeCompare(b.name));
     const maxPts = Math.max(...sorted26.map(p => p.total), 1);
-    html += `<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;font-size:.78em;align-items:center">
+    sec += `<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;font-size:.78em;align-items:center">
       <span><span style="display:inline-block;width:12px;height:12px;background:#16a34a;border-radius:2px;margin-right:4px;vertical-align:middle"></span>4-Man</span>
       <span><span style="display:inline-block;width:12px;height:12px;background:#2563eb;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Match Win</span>
       <span><span style="display:inline-block;width:12px;height:12px;background:var(--gold);border-radius:2px;margin-right:4px;vertical-align:middle"></span>Rank Pts</span>
@@ -3026,7 +3054,7 @@ function renderAnalytics() {
       const f = p.d1.fourMan+p.d2.fourMan, m = p.d1.matchWin+p.d2.matchWin,
             r = p.d1.matchRank+p.d2.matchRank, y = p.d1.payout+p.d2.payout;
       const fp=f/maxPts*100, mp=m/maxPts*100, rp=r/maxPts*100, yp=y/maxPts*100;
-      html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
+      sec += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
         <div style="min-width:82px;font-size:.83em;font-weight:bold;white-space:nowrap;text-align:right">${flag(p.name)} ${esc(p.name)}</div>
         <div style="flex:1;height:22px;border-radius:4px;overflow:hidden;background:#f0f0f0;display:flex">
           ${f>0?`<div style="width:${fp.toFixed(1)}%;background:#16a34a;height:100%" title="4-Man: ${f}"></div>`:''}
@@ -3038,24 +3066,22 @@ function renderAnalytics() {
       </div>`;
     });
   }
-  html += `</div></div>`;
+  return sec;
+  });
 
   /* ── SECTION 4b: Day 1 → Day 2 Progression ── */
-  html += `
-  <div class="card">
-    <div class="card-header">&#128336; Day 1 &rarr; Day 2 Progression</div>
-    <div class="card-body">`;
-
+  html += analyticsCard('analytics_progression', '&#128336; Day 1 &rarr; Day 2 Progression', () => {
+  let sec = '';
   if (!anyScores) {
-    html += `<div class="empty"><div class="eicon">&#9200;</div>Waiting for scores&hellip;</div>`;
+    sec += `<div class="empty"><div class="eicon">&#9200;</div>Waiting for scores&hellip;</div>`;
   } else {
     const hasD2 = all26.some(p => p.d2.total > 0);
     if (!hasD2) {
-      html += `<div class="alert alert-info" style="margin-bottom:12px">Day 2 scores not entered yet &mdash; this chart fills in after Day 2 is played.</div>`;
+      sec += `<div class="alert alert-info" style="margin-bottom:12px">Day 2 scores not entered yet &mdash; this chart fills in after Day 2 is played.</div>`;
     }
     const sorted26d = [...all26].sort((a,b) => b.total - a.total);
     const maxDay = Math.max(...sorted26d.map(p => Math.max(p.d1.total, p.d2.total)), 1);
-    html += `<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:.78em;align-items:center">
+    sec += `<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:.78em;align-items:center">
       <span><span style="display:inline-block;width:20px;height:4px;background:var(--green);border-radius:2px;margin-right:4px;vertical-align:middle"></span>Day 1</span>
       <span><span style="display:inline-block;width:20px;height:4px;background:var(--gold);border-radius:2px;margin-right:4px;vertical-align:middle"></span>Day 2</span>
     </div>`;
@@ -3068,7 +3094,7 @@ function renderAnalytics() {
         : delta<0
           ? `<span style="color:#b03030;font-size:.75em;font-weight:bold">${fmt(delta)}</span>`
           : `<span style="color:#aaa;font-size:.75em">&mdash;</span>`;
-      html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+      sec += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
         <div style="min-width:82px;font-size:.83em;font-weight:bold;white-space:nowrap;text-align:right">${flag(p.name)} ${esc(p.name)}</div>
         <div style="flex:1">
           <div style="height:9px;background:var(--green);border-radius:3px;width:${d1p}%;margin-bottom:2px;opacity:.85"></div>
@@ -3083,14 +3109,13 @@ function renderAnalytics() {
       </div>`;
     });
   }
-  html += `</div></div>`;
+  return sec;
+  });
 
   /* ── SECTION 6: 2025 Historical (compact reference) ── */
   const sorted25 = [...withPrev].sort((a,b) => PLAYER_META[a].prev.rank - PLAYER_META[b].prev.rank);
-  html += `
-  <div class="card">
-    <div class="card-header">&#128220; 2025 Final Results &mdash; Reference</div>
-    <div class="card-body">
+  html += analyticsCard('analytics_historical', '&#128220; 2025 Final Results &mdash; Reference', () => {
+  let sec = `
       <div class="alert alert-gold" style="margin-bottom:12px">
         <strong>2025 Champions: Team Bode</strong> (370.5 &ndash; 291.5) &nbsp;&middot;&nbsp; Individual champion: ${flag('Nail')} Nail (51.5 pts)
       </div>
@@ -3100,7 +3125,7 @@ function renderAnalytics() {
       </tr></thead><tbody>`;
   sorted25.forEach(n => {
     const p = PLAYER_META[n].prev;
-    html += `<tr${p.rank<=3?' class="winner"':''}>
+    sec += `<tr${p.rank<=3?' class="winner"':''}>
       <td class="c"><span class="rank${p.rank<=3?' gold':''}">${p.rank}</span></td>
       <td><strong>${flag(n)} ${esc(n)}</strong>${ppChampBadge(n)}</td>
       <td class="c hide-mobile">${tBadge(teamOf(n))}</td>
@@ -3108,12 +3133,14 @@ function renderAnalytics() {
       <td class="c money">$${p.d1m + p.d2m}</td>
     </tr>`;
   });
-  html += `<tr>
+  sec += `<tr>
     <td class="c" style="color:#aaa">&mdash;</td>
     <td><strong>${flag('Braden')} Braden</strong> <span style="font-size:.7em;background:#888;color:white;padding:1px 6px;border-radius:8px;font-weight:bold">Did not attend 2025</span></td>
     <td class="c hide-mobile">${tBadge(teamOf('Braden'))}</td>
     <td class="c" style="color:#aaa">&mdash;</td><td class="c" style="color:#aaa">&mdash;</td>
-  </tr></tbody></table></div></div>`;
+  </tr></tbody></table>`;
+  return sec;
+  });
 
   el.innerHTML = html;
 }
