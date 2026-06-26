@@ -605,9 +605,9 @@ tr.winner { background: #fffce8 !important; }
 .plink:hover { opacity: .7; }
 </style>
 <!-- Firebase SDK (loaded from CDN — internet required for live sync) -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -874,7 +874,10 @@ function save() {
   S._cid = CLIENT_ID;                                    // stamp so we can ignore our own echoes
   localStorage.setItem('gbi2026v1', JSON.stringify(S));
   if (fbReady()) {
-    _ref.set(S).catch(e => console.warn('Sync error:', e));
+    _ref.set(S).catch(e => {
+      console.warn('Sync error:', e);
+      showErrorBanner('⚠️ SAVE FAILED — did NOT reach Firebase: ' + (e.code || '') + ' ' + (e.message || e));
+    });
   }
   const t = document.getElementById('toast');
   t.textContent = fbReady() ? '✓ Saved & Synced' : '✓ Saved (offline)';
@@ -958,13 +961,19 @@ async function boot() {
         // an explicit user action via save().
 
         _ref.on('value', snap => {
-          if (!snap.exists()) return;
-          const d = snap.val();
-          if (d._cid === CLIENT_ID) return;
-          S = applyRoster({ ...defaultState(), ...d });
-          render(_cur);
-          updateTabLockBadges();
-          if (S.draft?.active) startDraftTimer();
+          try {
+            if (!snap.exists()) return;
+            const d = snap.val();
+            if (d._cid === CLIENT_ID) return;
+            S = applyRoster({ ...defaultState(), ...d });
+            render(_cur);
+            updateTabLockBadges();
+            if (S.draft?.active) startDraftTimer();
+          } catch(e) {
+            showErrorBanner('⚠️ LIVE SYNC ERROR: ' + (e.message || e) + (e.stack ? ('\n' + e.stack.split('\n').slice(0,3).join('\n')) : ''));
+          }
+        }, e => {
+          showErrorBanner('⚠️ LIVE LISTENER FAILED (likely a permissions/auth issue): ' + (e.code || '') + ' ' + (e.message || e));
         });
 
         firebase.database().ref('.info/connected').on('value', snap => setConnStatus(!!snap.val()));
@@ -974,6 +983,7 @@ async function boot() {
         if (S.draft?.active) startDraftTimer();
       } catch(e) {
         console.warn('Firebase load failed, falling back to localStorage:', e);
+        showErrorBanner('⚠️ COULD NOT LOAD FROM FIREBASE (using local copy instead): ' + (e.code || '') + ' ' + (e.message || e));
         try { const r = localStorage.getItem('gbi2026v1'); if (r) S = JSON.parse(r); } catch(_) {}
         setConnStatus(false);
         _dataLoaded = true;
@@ -3224,17 +3234,17 @@ function renderAnalytics() {
    GLOBAL ERROR CATCHER — shows real JS errors on-screen instead of
    silently failing, so issues can be reported with exact detail
 ═══════════════════════════════════════════════════════ */
-window.addEventListener('error', e => {
+function showErrorBanner(text) {
   const el = document.createElement('div');
   el.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#7a1a1a;color:white;padding:10px 14px;font-size:.78em;z-index:99999;font-family:monospace;max-height:40vh;overflow-y:auto;white-space:pre-wrap';
-  el.textContent = '⚠️ JS ERROR: ' + e.message + ' (' + (e.filename||'') + ':' + e.lineno + ':' + e.colno + ')';
+  el.textContent = text;
   document.body.appendChild(el);
+}
+window.addEventListener('error', e => {
+  showErrorBanner('⚠️ JS ERROR: ' + e.message + ' (' + (e.filename||'') + ':' + e.lineno + ':' + e.colno + ')');
 });
 window.addEventListener('unhandledrejection', e => {
-  const el = document.createElement('div');
-  el.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#7a1a1a;color:white;padding:10px 14px;font-size:.78em;z-index:99999;font-family:monospace;max-height:40vh;overflow-y:auto;white-space:pre-wrap';
-  el.textContent = '⚠️ PROMISE ERROR: ' + (e.reason?.message || e.reason);
-  document.body.appendChild(el);
+  showErrorBanner('⚠️ PROMISE ERROR: ' + (e.reason?.message || e.reason));
 });
 
 /* ═══════════════════════════════════════════════════════
