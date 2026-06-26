@@ -1193,12 +1193,15 @@ function showProfile(name) {
   const myPts = st.total;
   const rank26 = allStats.filter(s => s.total > myPts).length + 1;
   const hasScores = allStats.some(s => s.total > 0);
-  const inPP = hasScores && allStats.slice(-5).some(s => s.name === name);
+  const pp = ppPlayers();
+  const inPP = hasScores && pp.set.has(name);
+  const isLastPlace = inPP && pp.last === name;
 
   const champBadge = champYears.length
     ? `<div style="margin-top:7px">${champYears.map(y => `<span style="background:rgba(255,255,255,.22);border-radius:12px;padding:2px 9px;font-size:.78em;margin-right:4px">&#127942; GBI Champion ${y}</span>`).join('')}</div>` : '';
-  const ppTag    = (inPP && myPts > 0) ? ` <span style="background:rgba(220,50,50,.3);border-radius:10px;padding:1px 8px;font-size:.78em">&#127814; PP Zone</span>` : '';
-  const rookieTag = !m.prev ? ` <span style="background:rgba(255,255,255,.2);border-radius:10px;padding:1px 8px;font-size:.78em">${m.note ? m.note : '&#127381; Rookie'}</span>` : '';
+  const ppTag    = (inPP && myPts > 0) ? ` <span style="background:rgba(220,50,50,.3);border-radius:10px;padding:1px 8px;font-size:.78em">${isLastPlace ? '&#127814;' : '&#9888;&#65039;'} Danger Zone</span>` : '';
+  const ppDisclaimer = ppTag ? `<div style="font-size:.66em;opacity:.65;font-style:italic;margin-top:3px">If results stand as of right now</div>` : '';
+  const rookieTag = (!m.prev && !m.note) ? ` <span style="background:rgba(255,255,255,.2);border-radius:10px;padding:1px 8px;font-size:.78em">&#127381; Rookie</span>` : '';
   const ppChampTag = m.peterPutter ? `<div style="margin-top:5px"><span style="background:rgba(120,20,20,.5);border-radius:12px;padding:2px 10px;font-size:.8em">&#127814; Reigning Peter Putter 2025</span></div>` : '';
 
   function dayLine(day) {
@@ -1283,6 +1286,7 @@ function showProfile(name) {
           <div>
             <div class="pm-name">${flag(name)} ${esc(name)}${rookieTag}</div>
             <div class="pm-sub">${esc(tName)}${ppTag}</div>
+            ${ppDisclaimer}
           </div>
         </div>
         ${champBadge}${ppChampTag}
@@ -1601,10 +1605,11 @@ function renderScoreboard() {
     const ppLast = pp.last;
     html += `
     <div class="card" style="margin-top:8px">
-      <div class="card-header pp-zone-header">&#128680; The PP Zone &mdash; Pray for These Players</div>
+      <div class="card-header pp-zone-header">&#128680; The Danger Zone &mdash; Pray for These Players</div>
       <div class="card-body" style="padding:0">
         <div class="alert alert-red" style="margin:12px 12px 0;border-radius:5px">
           Bottom 5 on the leaderboard. Last place earns a punishment. You know who you are.
+          <div style="font-size:.78em;opacity:.75;font-style:italic;margin-top:3px">If results stand as of right now &mdash; plenty of golf left to play.</div>
         </div>
         <div style="margin-top:8px">`;
     bottom5.forEach((p, i) => {
