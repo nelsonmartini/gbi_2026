@@ -874,10 +874,17 @@ function save() {
   S._cid = CLIENT_ID;                                    // stamp so we can ignore our own echoes
   localStorage.setItem('gbi2026v1', JSON.stringify(S));
   if (fbReady()) {
-    _ref.set(S).catch(e => {
-      console.warn('Sync error:', e);
-      showErrorBanner('⚠️ SAVE FAILED — did NOT reach Firebase: ' + (e.code || '') + ' ' + (e.message || e));
-    });
+    // _ref.set() can throw SYNCHRONOUSLY (e.g. an undefined value anywhere in S) —
+    // that happens before it ever returns a promise, so .catch() alone can't see it.
+    try {
+      _ref.set(S).catch(e => {
+        console.warn('Sync error:', e);
+        showErrorBanner('⚠️ SAVE FAILED (async) — did NOT reach Firebase: ' + (e.code || '') + ' ' + (e.message || e));
+      });
+    } catch(e) {
+      console.warn('Sync error (sync throw):', e);
+      showErrorBanner('⚠️ SAVE FAILED (sync) — did NOT reach Firebase: ' + (e.message || e));
+    }
   }
   const t = document.getElementById('toast');
   t.textContent = fbReady() ? '✓ Saved & Synced' : '✓ Saved (offline)';
