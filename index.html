@@ -2399,23 +2399,19 @@ function renderDayTable(day) {
   const pp = ppPlayers();
   let html = `<table><thead><tr>
     <th>Rank</th><th>Player</th><th class="hide-phone">Team</th>
-    <th class="c hide-phone">4-Man</th><th class="c hide-phone">Match W</th><th class="c hide-phone">Rank</th><th class="c hide-phone">Payouts</th>
-    <th class="c">Holes</th><th class="c">Total</th><th class="c">$</th>
+    <th class="c">4-Man</th><th class="c">2-Man</th><th class="c">Holes</th><th class="c">Total</th>
   </tr></thead><tbody>`;
   let rk=1,prev=null;
   rows.forEach((p,i)=>{
     if (p.dp.total!==prev) rk=i+1;
-    const holesWon = SC.payoutPts ? Math.round(p.dp.payout / SC.payoutPts) : 0;
+    const twoMan = p.dp.matchWin + p.dp.matchRank;
     html+=`<tr${rk<=3?' class="winner"':''}>
       <td><span class="rank${rk<=3?' gold':''}">${rk}</span></td>
       <td><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}</strong></td><td class="hide-phone">${tBadge(p.team)}</td>
-      <td class="c hide-phone">${fmt(p.dp.fourMan)}</td>
-      <td class="c hide-phone">${fmt(p.dp.matchWin)}</td>
-      <td class="c hide-phone">${fmt(p.dp.matchRank)}</td>
-      <td class="c hide-phone">${fmt(p.dp.payout)}</td>
-      <td class="c">${holesWon || '—'}</td>
+      <td class="c">${fmt(p.dp.fourMan)}</td>
+      <td class="c">${fmt(twoMan)}</td>
+      <td class="c">${fmt(p.dp.payout)}</td>
       <td class="c">${ppPts(p.name,pp,p.dp.total)}</td>
-      <td class="c money">${fmtM(p.dp.money)}</td>
     </tr>`;
     prev=p.dp.total;
   });
