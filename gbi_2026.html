@@ -2662,9 +2662,14 @@ function renderMonies() {
       <div style="color:#666;font-size:.8em;margin-top:6px">→ ${teamPlayers}</div>`;
   }
 
+  const potExpanded = _collapsed['monies_pottracker'] === false;
   html += `<div class="card" style="margin-bottom:10px">
-    <div class="card-header">🏆 Pot Tracker</div>
-    <div class="card-body">
+    <div class="card-header" style="cursor:pointer" onclick="_collapsed['monies_pottracker']=_collapsed['monies_pottracker']===false?true:false;renderMonies()">
+      <span>🏆 Pot Tracker</span>
+      <span style="font-size:.78em;font-weight:normal">${potExpanded ? '&#9650; Hide' : '&#9660; Show'}</span>
+    </div>`;
+  if (potExpanded) {
+  html += `<div class="card-body">
 
     <div style="margin-bottom:18px">
       <div style="font-weight:bold;margin-bottom:4px">🎖️ Individual Finish Prizes &mdash; $${700 + totalRollover}</div>
@@ -2714,7 +2719,9 @@ function renderMonies() {
       </div>`;
     }).join('')}
 
-    </div></div>`;
+    </div>`;
+  }
+  html += `</div>`;
 
   // ── Player Winnings Table — scoreboard order, money columns only ──
   const mc = v => v ? `<strong class="money">$${v}</strong>` : `<span style="color:#ddd">—</span>`;
@@ -3015,11 +3022,6 @@ function renderBodeMatrixTable() {
 }
 function renderBodeMatrix() {
   return `
-      <div class="alert alert-info" style="margin-bottom:12px">
-        ${_matrixUnlocked
-          ? '<strong>Editing unlocked.</strong> Tap any Skill, Vibes, or Bode Grade cell to update it &mdash; changes save and sync immediately.'
-          : 'Pre-tournament ratings used for Vegas odds, the Draft Room, and player profiles. <strong>Bode Grade</strong> = overall GBI performance history &nbsp;&middot;&nbsp; <strong>Skill</strong> and <strong>Vibes</strong> out of 10.'}
-      </div>
       ${renderBodeMatrixScatter()}
       ${renderBodeMatrixTable()}`;
 }
