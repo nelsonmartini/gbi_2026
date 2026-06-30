@@ -903,6 +903,12 @@ function initFB() {
 
 async function signInAnon() {
   if (!_auth) return;
+  // Anonymous sessions carry no meaningful identity worth persisting across loads —
+  // skipping IndexedDB/localStorage-backed persistence avoids a known Firebase/Safari
+  // quirk ("attempt to get records from database without an in-progress transaction")
+  // that IndexedDB-based auth persistence can throw, especially after backgrounding
+  // the tab or clearing site data. Re-authenticating fresh each load is instant anyway.
+  try { await _auth.setPersistence('none'); } catch(e) { console.warn('setPersistence failed:', e); }
   try { await _auth.signInAnonymously(); }
   catch(e) { console.warn('Anonymous sign-in failed:', e); }
 }
@@ -3330,7 +3336,11 @@ window.addEventListener('error', e => {
   showErrorBanner('⚠️ JS ERROR: ' + e.message + ' (' + (e.filename||'') + ':' + e.lineno + ':' + e.colno + ')');
 });
 window.addEventListener('unhandledrejection', e => {
-  showErrorBanner('⚠️ PROMISE ERROR: ' + (e.reason?.message || e.reason));
+  const msg = e.reason?.message || String(e.reason || '');
+  // Known-benign Firebase/Safari IndexedDB quirk (auth session persistence getting
+  // disrupted by backgrounding or clearing site data) — not an app bug, not actionable.
+  if (msg.includes('in-progress transaction')) return;
+  showErrorBanner('⚠️ PROMISE ERROR: ' + msg);
 });
 
 /* ═══════════════════════════════════════════════════════
