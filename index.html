@@ -1577,7 +1577,7 @@ function renderScoreboard() {
   } else {
     // Standard table view — main standings
     const medal = rk => rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':`<span class="rank">${rk}</span>`;
-    html += `<div class="card"><div class="card-header">&#128081; Championship Standings</div><div class="card-body">`;
+    html += `<div class="card"><div class="card-header">&#127942; 2026 GBI Standings</div><div class="card-body">`;
     if (!anyScores) {
       html += `<div class="empty"><div class="eicon">&#127948;</div>No scores entered yet &mdash; head to Day 1 to get started!</div>`;
     } else {
@@ -2625,9 +2625,14 @@ function renderMonies() {
     { label: '🎖️ Individual Prizes',  pot: 700 + totalRollover,   claimed: finishClaimed,                      color: '#c8a800'      },
     { label: '🏆 Team Championship',  pot: 500,                   claimed: teamClaimed,                        color: '#1a4a8a'      },
   ];
+  const poolExpanded = _collapsed['monies_pool'] === false;
   html += `<div class="card" style="margin-bottom:10px">
-    <div class="card-header">💰 Total Prize Pool — $${GRAND_TOTAL}</div>
-    <div class="card-body" style="padding:12px 16px">
+    <div class="card-header" style="cursor:pointer" onclick="_collapsed['monies_pool']=_collapsed['monies_pool']===false?true:false;renderMonies()">
+      <span>💰 Total Prize Pool — $${GRAND_TOTAL}</span>
+      <span style="font-size:.78em;font-weight:normal">${poolExpanded ? '&#9650; Hide' : '&#9660; Show'}</span>
+    </div>`;
+  if (poolExpanded) {
+  html += `<div class="card-body" style="padding:12px 16px">
       ${pctBar(totalDistributed, GRAND_TOTAL, 'var(--green)')}
       <div style="font-size:.82em;color:#888;margin-top:2px">$${totalDistributed} distributed &nbsp;&middot;&nbsp; $${GRAND_TOTAL - totalDistributed} still in play</div>
       <details style="margin-top:6px">
@@ -2650,8 +2655,9 @@ function renderMonies() {
           }).join('')}
         </table>
       </details>
-    </div>
-  </div>`;
+    </div>`;
+  }
+  html += `</div>`;
 
   // ── Pot Tracker ──
   const detailsSummary = `<summary style="font-size:.8em;color:var(--green);cursor:pointer;list-style:none;display:inline-block;margin-top:5px;padding:2px 8px;border:1px solid var(--green);border-radius:10px">Details</summary>`;
