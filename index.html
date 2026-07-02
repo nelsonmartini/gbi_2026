@@ -2307,10 +2307,15 @@ function renderDay(day) {
     const s2 = m.score2 !== '' && m.score2 !== null ? parseFloat(m.score2) : null;
     let winLabel = '';
     if (s1!==null && s2!==null && !isNaN(s1) && !isNaN(s2)) {
-      const winner = s1 < s2 ? esc(S.teams.t1.name) : s2 < s1 ? esc(S.teams.t2.name) : null;
-      winLabel = winner
-        ? `<span class="hi">&#10003; ${winner} wins &nbsp;&middot;&nbsp; <strong>+${fmt(sc.matchWin)} pts</strong></span>`
-        : `<span class="hi">Tied &nbsp;&middot;&nbsp; <strong>+${fmt(sc.matchTie)} pts</strong> each</span>`;
+      if (s1 < s2) {
+        const c = S.teams.t1.color;
+        winLabel = `<span style="background:${esc(c)};color:${contrastColor(c)};border-radius:10px;padding:2px 10px;font-size:.82em;font-weight:bold">&#10003; ${esc(S.teams.t1.name)} wins</span>`;
+      } else if (s2 < s1) {
+        const c = S.teams.t2.color;
+        winLabel = `<span style="background:${esc(c)};color:${contrastColor(c)};border-radius:10px;padding:2px 10px;font-size:.82em;font-weight:bold">&#10003; ${esc(S.teams.t2.name)} wins</span>`;
+      } else {
+        winLabel = `<span style="background:var(--gold);color:var(--green-dark);border-radius:10px;padding:2px 10px;font-size:.82em;font-weight:bold">&#61; Tied</span>`;
+      }
     }
 
     // Builds a team-filtered, dedup-safe select for one player slot
