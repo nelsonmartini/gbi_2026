@@ -2309,8 +2309,8 @@ function renderDay(day) {
     if (s1!==null && s2!==null && !isNaN(s1) && !isNaN(s2)) {
       const winner = s1 < s2 ? esc(S.teams.t1.name) : s2 < s1 ? esc(S.teams.t2.name) : null;
       winLabel = winner
-        ? `<span class="hi">&#10003; ${winner} wins</span>`
-        : `<span class="hi">Tied</span>`;
+        ? `<span class="hi">&#10003; ${winner} wins &nbsp;&middot;&nbsp; <strong>+${fmt(sc.matchWin)} pts</strong></span>`
+        : `<span class="hi">Tied &nbsp;&middot;&nbsp; <strong>+${fmt(sc.matchTie)} pts</strong> each</span>`;
     }
 
     // Builds a team-filtered, dedup-safe select for one player slot
