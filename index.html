@@ -2302,11 +2302,11 @@ function renderDay(day) {
   }
 
   const matchAvatar = name => {
-    if (!name) return '';
+    if (!name) return '<div style="width:34px;height:34px;flex-shrink:0"></div>';
     const pm = PLAYER_META[name];
-    if (pm && pm.avatar) return `<img src="${esc(pm.avatar)}" alt="${esc(name)}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;margin-top:5px;display:block;border:2px solid var(--border)" />`;
+    if (pm && pm.avatar) return `<img src="${esc(pm.avatar)}" alt="${esc(name)}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--border)" />`;
     const t = teamOf(name); const tc = t ? S.teams[t].color : '#999';
-    return `<div style="width:34px;height:34px;border-radius:50%;background:${tc};color:${contrastColor(tc)};display:flex;align-items:center;justify-content:center;font-size:.7em;font-weight:bold;margin-top:5px;border:2px solid var(--border)">${initials(name)}</div>`;
+    return `<div style="width:34px;height:34px;border-radius:50%;background:${tc};color:${contrastColor(tc)};display:flex;align-items:center;justify-content:center;font-size:.7em;font-weight:bold;flex-shrink:0;border:2px solid var(--border)">${initials(name)}</div>`;
   };
 
   S[day].matches.forEach((m,mi) => {
@@ -2357,10 +2357,12 @@ function renderDay(day) {
       <div class="match-side${win1?' match-winner':''}">
         <div class="ms-header" style="background:${esc(S.teams.t1.color)};color:${contrastColor(S.teams.t1.color)}">${win1?'&#127942; ':''}${esc(S.teams.t1.name)}</div>
         <div class="form-group">
-          <label>Player 1</label>${makeMSlot('p1a', m.p1a, matchT1Pool)}${matchAvatar(m.p1a)}
+          <label>Player 1</label>
+          <div style="display:flex;align-items:center;gap:6px">${matchAvatar(m.p1a)}<div style="flex:1;min-width:0">${makeMSlot('p1a', m.p1a, matchT1Pool)}</div></div>
         </div>
         <div class="form-group">
-          <label>Player 2</label>${makeMSlot('p1b', m.p1b, matchT1Pool)}${matchAvatar(m.p1b)}
+          <label>Player 2</label>
+          <div style="display:flex;align-items:center;gap:6px">${matchAvatar(m.p1b)}<div style="flex:1;min-width:0">${makeMSlot('p1b', m.p1b, matchT1Pool)}</div></div>
         </div>
         <div class="form-group">
           <label>Score (vs par)</label>
@@ -2376,10 +2378,12 @@ function renderDay(day) {
       <div class="match-side${win2?' match-winner':''}">
         <div class="ms-header" style="background:${esc(S.teams.t2.color)};color:${contrastColor(S.teams.t2.color)}">${win2?'&#127942; ':''}${esc(S.teams.t2.name)}</div>
         <div class="form-group">
-          <label>Player 1</label>${makeMSlot('p2a', m.p2a, matchT2Pool)}${matchAvatar(m.p2a)}
+          <label>Player 1</label>
+          <div style="display:flex;align-items:center;gap:6px">${matchAvatar(m.p2a)}<div style="flex:1;min-width:0">${makeMSlot('p2a', m.p2a, matchT2Pool)}</div></div>
         </div>
         <div class="form-group">
-          <label>Player 2</label>${makeMSlot('p2b', m.p2b, matchT2Pool)}${matchAvatar(m.p2b)}
+          <label>Player 2</label>
+          <div style="display:flex;align-items:center;gap:6px">${matchAvatar(m.p2b)}<div style="flex:1;min-width:0">${makeMSlot('p2b', m.p2b, matchT2Pool)}</div></div>
         </div>
         <div class="form-group">
           <label>Score (vs par)</label>
