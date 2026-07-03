@@ -2301,6 +2301,14 @@ function renderDay(day) {
     html += `<div class="alert alert-red">⚠️ Teams are not fully assigned. Go to <strong>Draft and Rosters</strong> and assign all players before setting up matches.</div>`;
   }
 
+  const matchAvatar = name => {
+    if (!name) return '';
+    const pm = PLAYER_META[name];
+    if (pm && pm.avatar) return `<img src="${esc(pm.avatar)}" alt="${esc(name)}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;margin-top:5px;display:block;border:2px solid var(--border)" />`;
+    const t = teamOf(name); const tc = t ? S.teams[t].color : '#999';
+    return `<div style="width:34px;height:34px;border-radius:50%;background:${tc};color:${contrastColor(tc)};display:flex;align-items:center;justify-content:center;font-size:.7em;font-weight:bold;margin-top:5px;border:2px solid var(--border)">${initials(name)}</div>`;
+  };
+
   S[day].matches.forEach((m,mi) => {
     const r = mrs[mi];
     const s1 = m.score1 !== '' && m.score1 !== null ? parseFloat(m.score1) : null;
@@ -2349,10 +2357,10 @@ function renderDay(day) {
       <div class="match-side${win1?' match-winner':''}">
         <div class="ms-header" style="background:${esc(S.teams.t1.color)};color:${contrastColor(S.teams.t1.color)}">${win1?'&#127942; ':''}${esc(S.teams.t1.name)}</div>
         <div class="form-group">
-          <label>Player 1</label>${makeMSlot('p1a', m.p1a, matchT1Pool)}
+          <label>Player 1</label>${makeMSlot('p1a', m.p1a, matchT1Pool)}${matchAvatar(m.p1a)}
         </div>
         <div class="form-group">
-          <label>Player 2</label>${makeMSlot('p1b', m.p1b, matchT1Pool)}
+          <label>Player 2</label>${makeMSlot('p1b', m.p1b, matchT1Pool)}${matchAvatar(m.p1b)}
         </div>
         <div class="form-group">
           <label>Score (vs par)</label>
@@ -2368,10 +2376,10 @@ function renderDay(day) {
       <div class="match-side${win2?' match-winner':''}">
         <div class="ms-header" style="background:${esc(S.teams.t2.color)};color:${contrastColor(S.teams.t2.color)}">${win2?'&#127942; ':''}${esc(S.teams.t2.name)}</div>
         <div class="form-group">
-          <label>Player 1</label>${makeMSlot('p2a', m.p2a, matchT2Pool)}
+          <label>Player 1</label>${makeMSlot('p2a', m.p2a, matchT2Pool)}${matchAvatar(m.p2a)}
         </div>
         <div class="form-group">
-          <label>Player 2</label>${makeMSlot('p2b', m.p2b, matchT2Pool)}
+          <label>Player 2</label>${makeMSlot('p2b', m.p2b, matchT2Pool)}${matchAvatar(m.p2b)}
         </div>
         <div class="form-group">
           <label>Score (vs par)</label>
