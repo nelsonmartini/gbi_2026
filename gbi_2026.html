@@ -2246,11 +2246,18 @@ function renderDay(day) {
       const badge = tm
         ? `<span class="tb" style="background:${esc(tm.color)};color:${contrastColor(tm.color)};display:inline-block;margin-top:4px">${esc(tm.name)}</span>`
         : `<span style="display:inline-block;height:22px;margin-top:4px"></span>`;
+      const pm = cur ? PLAYER_META[cur] : null;
+      const gAvatarStyle = 'width:34px;height:34px;border-radius:50%;flex-shrink:0;border:2px solid var(--border);cursor:pointer';
+      const gAvatar = cur
+        ? (pm && pm.avatar
+          ? `<img src="${esc(pm.avatar)}" alt="${esc(cur)}" onclick="showProfile('${jsq(cur)}')" style="${gAvatarStyle};object-fit:cover" />`
+          : (() => { const t2=teamOf(cur); const c2=t2?S.teams[t2].color:'#999'; return `<div onclick="showProfile('${jsq(cur)}')" style="${gAvatarStyle};background:${c2};color:${contrastColor(c2)};display:flex;align-items:center;justify-content:center;font-size:.7em;font-weight:bold">${initials(cur)}</div>`; })())
+        : `<div style="width:34px;height:34px;flex-shrink:0"></div>`;
       return `<div class="form-group">
           <label>Player ${pi+1}</label>
-          <select ${locked ? 'disabled' : `onchange="setGroupPlayer('${day}',${gi},${pi},this.value)"`}>
+          <div style="display:flex;align-items:center;gap:6px">${gAvatar}<div style="flex:1;min-width:0"><select ${locked ? 'disabled' : `onchange="setGroupPlayer('${day}',${gi},${pi},this.value)"`}>
             <option value="">— Select —</option>${opts}
-          </select>
+          </select></div></div>
           ${badge}
         </div>`;
     };
@@ -2304,9 +2311,10 @@ function renderDay(day) {
   const matchAvatar = name => {
     if (!name) return '<div style="width:34px;height:34px;flex-shrink:0"></div>';
     const pm = PLAYER_META[name];
-    if (pm && pm.avatar) return `<img src="${esc(pm.avatar)}" alt="${esc(name)}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--border)" />`;
+    const baseStyle = 'width:34px;height:34px;border-radius:50%;flex-shrink:0;border:2px solid var(--border);cursor:pointer';
+    if (pm && pm.avatar) return `<img src="${esc(pm.avatar)}" alt="${esc(name)}" onclick="showProfile('${jsq(name)}')" style="${baseStyle};object-fit:cover" />`;
     const t = teamOf(name); const tc = t ? S.teams[t].color : '#999';
-    return `<div style="width:34px;height:34px;border-radius:50%;background:${tc};color:${contrastColor(tc)};display:flex;align-items:center;justify-content:center;font-size:.7em;font-weight:bold;flex-shrink:0;border:2px solid var(--border)">${initials(name)}</div>`;
+    return `<div onclick="showProfile('${jsq(name)}')" style="${baseStyle};background:${tc};color:${contrastColor(tc)};display:flex;align-items:center;justify-content:center;font-size:.7em;font-weight:bold">${initials(name)}</div>`;
   };
 
   S[day].matches.forEach((m,mi) => {
