@@ -2118,6 +2118,10 @@ function updateTabLockBadges() {
     const oc = btn.getAttribute('onclick');
     if (oc === "tab('day1')") btn.innerHTML = '&#9971; Day 1' + (S.locks?.day1 ? ' &#128274;' : '');
     if (oc === "tab('day2')") btn.innerHTML = '&#9971; Day 2' + (S.locks?.day2 ? ' &#128274;' : '');
+    if (oc === "tab('payouts')") {
+      const anyLocked = S.locks?.payouts_day1 || S.locks?.payouts_day2;
+      btn.innerHTML = '💰 Hole Payouts' + (anyLocked ? ' &#128274;' : '');
+    }
   });
 }
 
@@ -2154,6 +2158,7 @@ function lockPayouts(day) {
   S.locks['payouts_' + day] = true;
   save();
   renderPayouts();
+  updateTabLockBadges();
 }
 function unlockPayouts(day) {
   const label = day === 'day1' ? 'Day 1' : 'Day 2';
@@ -2164,6 +2169,7 @@ function unlockPayouts(day) {
   S.locks['payouts_' + day] = false;
   save();
   renderPayouts();
+  updateTabLockBadges();
 }
 
 // Hard guarantee against duplicate player picks — enforced at the data layer, not
