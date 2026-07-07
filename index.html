@@ -2119,8 +2119,8 @@ function updateTabLockBadges() {
     if (oc === "tab('day1')") btn.innerHTML = '&#9971; Day 1' + (S.locks?.day1 ? ' &#128274;' : '');
     if (oc === "tab('day2')") btn.innerHTML = '&#9971; Day 2' + (S.locks?.day2 ? ' &#128274;' : '');
     if (oc === "tab('payouts')") {
-      const anyLocked = S.locks?.payouts_day1 || S.locks?.payouts_day2;
-      btn.innerHTML = '💰 Hole Payouts' + (anyLocked ? ' &#128274;' : '');
+      const n = (S.locks?.payouts_day1 ? 1 : 0) + (S.locks?.payouts_day2 ? 1 : 0);
+      btn.innerHTML = '💰 Hole Payouts' + (n > 0 ? ` &#128274; (${n} of 2)` : '');
     }
     if (oc === "tab('monies')") {
       const allLocked = S.locks?.day1 && S.locks?.day2 && S.locks?.payouts_day1 && S.locks?.payouts_day2;
