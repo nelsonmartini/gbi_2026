@@ -815,7 +815,7 @@ function defaultState() {
     roster: PLAYERS.map(n => ({ name: n, team: null })),
     day1: defaultDayState(),
     day2: defaultDayState(),
-    locks: { day1: false, day2: false },
+    locks: { day1: false, day2: false, payouts_day1: false, payouts_day2: false },
     draft: { active: false, complete: false, picks: [], currentPick: 0, timerStart: null, timerDuration: 180, paused: false, pausedRemaining: null },
     ratings: JSON.parse(JSON.stringify(DEFAULT_RATINGS))
   };
@@ -2143,6 +2143,27 @@ function unlockDay(day) {
   updateTabLockBadges();
 }
 
+function lockPayouts(day) {
+  const label = day === 'day1' ? 'Day 1' : 'Day 2';
+  const pin = prompt(`Enter commissioner PIN to lock ${label} Hole Payouts:`);
+  if (pin === null) return;
+  if (pin.trim().toUpperCase() !== ADMIN_PIN.toUpperCase()) { alert('Incorrect PIN.'); return; }
+  if (!S.locks) S.locks = {};
+  S.locks['payouts_' + day] = true;
+  save();
+  renderPayouts();
+}
+function unlockPayouts(day) {
+  const label = day === 'day1' ? 'Day 1' : 'Day 2';
+  const pin = prompt(`Enter commissioner PIN to unlock ${label} Hole Payouts:`);
+  if (pin === null) return;
+  if (pin.trim().toUpperCase() !== ADMIN_PIN.toUpperCase()) { alert('Incorrect PIN.'); return; }
+  if (!S.locks) S.locks = {};
+  S.locks['payouts_' + day] = false;
+  save();
+  renderPayouts();
+}
+
 // Hard guarantee against duplicate player picks — enforced at the data layer, not
 // just by hiding <option>s in the dropdown. Rejects the write outright (with a clear
 // alert) if that name is already used elsewhere in this day's 4-Man groups, no matter
@@ -2473,7 +2494,7 @@ function renderPayouts() {
   const d2won = S.day2.payouts.filter(p=>p.cat!=='NP'&&p.winner).length;
 
   function holeTable(day, label) {
-    const dayLocked = !!(S.locks && S.locks[day]);
+    const dayLocked = !!(S.locks && S.locks['payouts_' + day]);
     const won = day==='day1'?d1won:d2won;
     const key = 'payouts_' + day;
     const expanded = _collapsed[key] === false;
@@ -2506,11 +2527,11 @@ function renderPayouts() {
     t += `</tbody></table>`;
     t += dayLocked
       ? `<div style="display:flex;align-items:center;justify-content:space-between;background:#fff3cd;border-top:1px solid #e6c84a;padding:10px 14px;margin-top:8px;border-radius:0 0 6px 6px">
-          <span style="font-weight:bold;color:#7a5a00;font-size:.9em">&#128274; ${label} is locked</span>
-          <button class="btn btn-sm" style="background:#7a1a1a;color:white;font-size:.8em" onclick="unlockDay('${day}');renderPayouts()">Unlock</button>
+          <span style="font-weight:bold;color:#7a5a00;font-size:.9em">&#128274; ${label} payouts are locked</span>
+          <button class="btn btn-sm" style="background:#7a1a1a;color:white;font-size:.8em" onclick="unlockPayouts('${day}')">Unlock</button>
          </div>`
       : `<div style="display:flex;justify-content:flex-end;padding:10px 14px;border-top:1px solid var(--border);margin-top:8px">
-          <button class="btn btn-sm" style="background:var(--green);color:white;font-size:.8em" onclick="lockDay('${day}');renderPayouts()">&#128274; Lock ${label}</button>
+          <button class="btn btn-sm" style="background:var(--green);color:white;font-size:.8em" onclick="lockPayouts('${day}')">&#128274; Lock ${label}</button>
          </div>`;
     t += `</div>`;
     }
@@ -2583,8 +2604,8 @@ function renderMonies() {
   const unclaimedHole = holeDays.day1.unclaimed + holeDays.day2.unclaimed;
   const totalHolePot = claimedHole + unclaimedHole || 800;
 
-  const d1rollover = (S.locks?.day1) ? holeDays.day1.unclaimed : 0;
-  const d2rollover = (S.locks?.day2) ? holeDays.day2.unclaimed : 0;
+  const d1rollover = (S.locks?.payouts_day1) ? holeDays.day1.unclaimed : 0;
+  const d2rollover = (S.locks?.payouts_day2) ? holeDays.day2.unclaimed : 0;
   const totalRollover = d1rollover + d2rollover;
 
   // Unclaimed hole money rolls to individual prizes: 60% / 30% / 10%
@@ -2733,7 +2754,7 @@ function renderMonies() {
     ${['day1','day2'].map(day => {
       const hd = holeDays[day];
       const roll = day === 'day1' ? d1rollover : d2rollover;
-      const dayLocked = !!(S.locks?.[day]);
+      const dayLocked = !!(S.locks?.['payouts_' + day]);
       const dayLabel = day === 'day1' ? 'Day 1 Hole Payouts' : 'Day 2 Hole Payouts';
       const allocated = hd.claimed + roll;
       const claimedPct = Math.round((hd.claimed / 400) * 100);
