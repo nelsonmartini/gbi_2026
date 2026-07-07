@@ -1,4 +1,4 @@
-const CACHE = 'gbi2026-v45';
+const CACHE = 'gbi2026-v46';
 const ASSETS = [
   '/', '/index.html', '/gbi-logo.jpg', '/manifest.json',
   'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js',
