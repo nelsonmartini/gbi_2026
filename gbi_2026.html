@@ -2226,7 +2226,7 @@ function renderDay(day) {
     <span style="font-size:.8em;color:var(--green);border:1px solid var(--green);padding:2px 10px;border-radius:12px">${_collapsed[day+'_four']===false?'&#9650; Hide':'&#9660; Show'}</span>
   </div>`;
   if (_collapsed[day+'_four'] === false) {
-  html += `<div class="alert alert-info">Five groups of 4 players. Enter each group&rsquo;s score vs par (e.g. <strong>-5</strong>). Points: 1st=${sc.fourMan[0]}, 2nd=${sc.fourMan[1]}, 3rd=${sc.fourMan[2]}, 4th=${sc.fourMan[3]}, 5th=${sc.fourMan[4]}. Ties average the tied positions.</div>`;
+  html += `<details style="margin-bottom:8px"><summary style="font-size:.8em;color:var(--gray);cursor:pointer;list-style:none;display:inline-block;padding:2px 10px;border:1px solid var(--border);border-radius:10px">&#9432; Scoring details</summary><div class="alert alert-info" style="margin-top:6px">Five groups of 4 players. Enter each group&rsquo;s score vs par (e.g. <strong>-5</strong>). Points: 1st=${sc.fourMan[0]}, 2nd=${sc.fourMan[1]}, 3rd=${sc.fourMan[2]}, 4th=${sc.fourMan[3]}, 5th=${sc.fourMan[4]}. Ties average the tied positions.</div></details>`;
 
   // 4-Man groups — build set of all already-chosen players for this day
   const usedInDay = new Set(S[day].groups.flatMap(g => g.players.filter(p => p !== '')));
@@ -2296,7 +2296,7 @@ function renderDay(day) {
     <span style="font-size:.8em;color:var(--green);border:1px solid var(--green);padding:2px 10px;border-radius:12px">${_collapsed[day+'_match']===false?'&#9650; Hide':'&#9660; Show'}</span>
   </div>`;
   if (_collapsed[day+'_match'] === false) {
-  html += `<div class="alert alert-info">Five matches: one pair from each team. Win = +${sc.matchWin} pts, Tie = +${sc.matchTie} pts per player. Plus rank points among all 10 pairs (lower score ranks higher).</div>`;
+  html += `<details style="margin-bottom:8px"><summary style="font-size:.8em;color:var(--gray);cursor:pointer;list-style:none;display:inline-block;padding:2px 10px;border:1px solid var(--border);border-radius:10px">&#9432; Scoring details</summary><div class="alert alert-info" style="margin-top:6px">Five matches: one pair from each team. Win = +${sc.matchWin} pts, Tie = +${sc.matchTie} pts per player. Plus rank points among all 10 pairs (lower score ranks higher).</div></details>`;
 
   // 2v2 matches — teams locked from roster, no duplicate picks across all 5 matches
   const usedInMatches = new Set(
