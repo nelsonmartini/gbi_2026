@@ -1577,7 +1577,9 @@ function renderScoreboard() {
   } else {
     // Standard table view — main standings
     const medal = rk => rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':`<span class="rank">${rk}</span>`;
-    html += `<div class="card"><div class="card-header">&#127942; 2026 GBI Standings</div><div class="card-body">`;
+    const allLocked = !!(S.locks?.day1 && S.locks?.day2 && S.locks?.payouts_day1 && S.locks?.payouts_day2);
+    const finalBadge = allLocked ? ` <span style="background:var(--gold);color:var(--green-dark);border-radius:8px;padding:2px 10px;font-size:.78em;font-weight:bold;letter-spacing:.06em;font-family:'Cinzel',serif">FINAL</span>` : '';
+    html += `<div class="card"><div class="card-header">&#127942; 2026 GBI Standings${finalBadge}</div><div class="card-body">`;
     if (!anyScores) {
       html += `<div class="empty"><div class="eicon">&#127948;</div>No scores entered yet &mdash; head to Day 1 to get started!</div>`;
     } else {
@@ -2582,6 +2584,8 @@ function renderMonies() {
   const anyScores = all.some(p => p.total > 0);
   const tt = teamTotals();
   const mdl = rk => rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':`<span class="rank">${rk}</span>`;
+  const allLocked = !!(S.locks?.day1 && S.locks?.day2 && S.locks?.payouts_day1 && S.locks?.payouts_day2);
+  const finalBadge = allLocked ? ` <span style="background:var(--gold);color:var(--green-dark);border-radius:8px;padding:2px 10px;font-size:.78em;font-weight:bold;letter-spacing:.06em;font-family:'Cinzel',serif">FINAL</span>` : '';
 
   // Ranked standings (same logic as scoreboard)
   let rkc = 1, prevTot = null;
@@ -2786,7 +2790,7 @@ function renderMonies() {
   const mc = v => v ? `<strong class="money">$${v}</strong>` : `<span style="color:#ddd">—</span>`;
 
   html += `<div class="card">
-    <div class="card-header">💵 Player Winnings</div>
+    <div class="card-header">💵 Player Winnings${finalBadge}</div>
     <div class="card-body" style="padding:0">
       <div class="table-scroll">
       <table class="sb-table" style="width:100%"><thead><tr>
