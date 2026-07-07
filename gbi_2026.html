@@ -2253,11 +2253,9 @@ function renderDay(day) {
           ? `<img src="${esc(pm.avatar)}" alt="${esc(cur)}" onclick="showProfile('${jsq(cur)}')" style="${gAvatarStyle};object-fit:cover" />`
           : (() => { const t2=teamOf(cur); const c2=t2?S.teams[t2].color:'#999'; return `<div onclick="showProfile('${jsq(cur)}')" style="${gAvatarStyle};background:${c2};color:${contrastColor(c2)};display:flex;align-items:center;justify-content:center;font-size:.7em;font-weight:bold">${initials(cur)}</div>`; })())
         : `<div style="width:34px;height:34px;flex-shrink:0"></div>`;
-      const captainBadge = pi === 0
-        ? `<span title="Captain" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--green-dark);color:var(--gold);font-size:.72em;font-weight:bold;font-family:'Cinzel',Georgia,serif;margin-left:5px;vertical-align:middle;flex-shrink:0">C</span>`
-        : '';
-      return `<div class="form-group">
-          <label style="display:flex;align-items:center">Player ${pi+1}${captainBadge}</label>
+      const isCapt = pi === 0;
+      return `<div class="form-group"${isCapt ? ' style="background:rgba(200,168,0,.1);border-radius:6px"' : ''}>
+          <label>${isCapt ? `<strong style="color:var(--gold-dark)">Player 1 &mdash; C</strong>` : `Player ${pi+1}`}</label>
           <div style="display:flex;align-items:center;gap:6px">${gAvatar}<div style="flex:1;min-width:0"><select ${locked ? 'disabled' : `onchange="setGroupPlayer('${day}',${gi},${pi},this.value)"`}>
             <option value="">— Select —</option>${opts}
           </select></div></div>
