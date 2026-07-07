@@ -2122,6 +2122,10 @@ function updateTabLockBadges() {
       const anyLocked = S.locks?.payouts_day1 || S.locks?.payouts_day2;
       btn.innerHTML = '💰 Hole Payouts' + (anyLocked ? ' &#128274;' : '');
     }
+    if (oc === "tab('monies')") {
+      const allLocked = S.locks?.day1 && S.locks?.day2 && S.locks?.payouts_day1 && S.locks?.payouts_day2;
+      btn.innerHTML = '💵 Monies' + (allLocked ? ' &#128274;' : '');
+    }
   });
 }
 
@@ -2508,7 +2512,7 @@ function renderPayouts() {
     const expanded = _collapsed[key] === false;
     let t = `<div class="card">
       <div class="card-header" style="cursor:pointer" onclick="_collapsed['${key}']=_collapsed['${key}']===false?true:false;renderPayouts()">
-        <span>${label} <span class="badge-gold" style="font-size:.82em">${won}/20 assigned &nbsp;|&nbsp; $${won*20} of $400</span></span>
+        <span>${label}${dayLocked ? ' &#128274;' : ''} <span class="badge-gold" style="font-size:.82em">${won}/20 assigned &nbsp;|&nbsp; $${won*20} of $400</span></span>
         <span style="font-size:.78em;white-space:nowrap">${expanded ? '&#9650; Hide' : '&#9660; Show'}</span>
       </div>`;
     if (expanded) {
@@ -2550,7 +2554,7 @@ function renderPayouts() {
   const leaderRows = Object.entries(totals).filter(([n,s])=>s.wins>0).sort((a,b)=>b[1].money-a[1].money);
 
   let html = `
-  <div class="alert alert-gold"><strong>Hole Payouts</strong> — $20 per hole, 40 total payout holes (20 per day). Total hole payout pot: <strong>$800</strong>. Categories: Long Drive (LD), Closest to Pin (C2P), Longest Putt (LP).</div>
+  <details style="margin-bottom:8px"><summary style="font-size:.8em;color:var(--gray);cursor:pointer;list-style:none;display:inline-block;padding:2px 10px;border:1px solid var(--border);border-radius:10px">&#9432; How hole payouts work</summary><div class="alert alert-gold" style="margin-top:6px"><strong>Hole Payouts</strong> — $20 per hole, 40 total payout holes (20 per day). Total hole payout pot: <strong>$800</strong>. Categories: Long Drive (LD), Closest to Pin (C2P), Longest Putt (LP).</div></details>
 
   <div class="two-col">
     ${holeTable('day1','📅 Day 1 Hole Payouts')}
