@@ -1204,10 +1204,17 @@ function showProfile(name) {
   const pp = ppPlayers();
   const inPP = hasScores && pp.set.has(name);
   const isLastPlace = inPP && pp.lastSet.has(name);
+  const allLocked = !!(S.locks?.day1 && S.locks?.day2 && S.locks?.payouts_day1 && S.locks?.payouts_day2);
+  const is2026Champ = allLocked && myPts > 0 && rank26 === 1;
+  const is2026PP    = allLocked && isLastPlace && myPts > 0;
 
   const champBadge = champYears.length
     ? `<div style="margin-top:7px">${champYears.map(y => `<span style="background:rgba(255,255,255,.22);border-radius:12px;padding:2px 9px;font-size:.78em;margin-right:4px">&#127942; GBI Champion ${y}</span>`).join('')}</div>` : '';
-  const ppTag    = (inPP && myPts > 0) ? ` <span style="background:rgba(220,50,50,.3);border-radius:10px;padding:1px 8px;font-size:.78em">${isLastPlace ? '&#127814;' : '&#9888;&#65039;'} Danger Zone</span>` : '';
+  const champ2026Tag = is2026Champ
+    ? `<div style="margin-top:8px"><span style="background:var(--gold);color:var(--green-dark);border-radius:12px;padding:4px 14px;font-size:.9em;font-weight:bold;font-family:'Cinzel',serif;letter-spacing:.04em">&#127942; 2026 GBI Champion</span></div>` : '';
+  const pp2026Tag = is2026PP
+    ? `<div style="margin-top:6px"><span style="background:rgba(139,26,26,.7);border-radius:12px;padding:3px 12px;font-size:.85em;font-weight:bold">&#127814; 2026 Peter Putter</span></div>` : '';
+  const ppTag    = (!allLocked && inPP && myPts > 0) ? ` <span style="background:rgba(220,50,50,.3);border-radius:10px;padding:1px 8px;font-size:.78em">${isLastPlace ? '&#127814;' : '&#9888;&#65039;'} Danger Zone</span>` : '';
   const ppDisclaimer = ppTag ? `<div style="font-size:.66em;opacity:.65;font-style:italic;margin-top:3px">If results stand as of right now</div>` : '';
   const rookieTag = (!m.prev && !m.note) ? ` <span style="background:rgba(255,255,255,.2);border-radius:10px;padding:1px 8px;font-size:.78em">&#127381; Rookie</span>` : '';
   const ppChampTag = m.peterPutter ? `<div style="margin-top:5px"><span style="background:rgba(120,20,20,.5);border-radius:12px;padding:2px 10px;font-size:.8em">&#127814; Reigning Peter Putter 2025</span></div>` : '';
@@ -1229,9 +1236,16 @@ function showProfile(name) {
 
   let body = `
   <div class="pm-section">
-    <div class="pm-sec-title"><span style="display:inline-block;width:7px;height:7px;background:#e53e3e;border-radius:50%;margin-right:5px;vertical-align:middle"></span>Current Position</div>
+    <div class="pm-sec-title">
+      ${allLocked
+        ? `<span style="color:var(--green);margin-right:4px">&#10003;</span>Final Position`
+        : `<span style="display:inline-block;width:7px;height:7px;background:#e53e3e;border-radius:50%;margin-right:5px;vertical-align:middle"></span>Current Position`}
+    </div>
     <div class="pm-stat-row">
-      <div class="pm-stat"><div class="pm-stat-val">${myPts > 0 ? '#'+rank26 : '&mdash;'}</div><div class="pm-stat-lbl">Current Rank</div></div>
+      <div class="pm-stat">
+        <div class="pm-stat-val">${myPts > 0 ? (rank26===2?'&#129352;':rank26===3?'&#129353;':'') + '#'+rank26 : '&mdash;'}</div>
+        <div class="pm-stat-lbl">${allLocked ? 'Final Rank' : 'Current Rank'}</div>
+      </div>
       <div class="pm-stat"><div class="pm-stat-val">${myPts > 0 ? fmt(myPts) : '&mdash;'}</div><div class="pm-stat-lbl">Total Pts</div></div>
       <div class="pm-stat"><div class="pm-stat-val">${st.money > 0 ? '$'+st.money : '&mdash;'}</div><div class="pm-stat-lbl">$ Earned</div></div>
     </div>
@@ -1297,7 +1311,7 @@ function showProfile(name) {
             ${ppDisclaimer}
           </div>
         </div>
-        ${champBadge}${ppChampTag}
+        ${champ2026Tag}${pp2026Tag}${champBadge}${ppChampTag}
       </div>
       <div class="pm-body">${body}</div>
     </div>`;
@@ -1480,6 +1494,7 @@ function renderScoreboard() {
   const anyScores = all.some(p => p.total > 0);
   const pp = ppPlayers();
   const unassigned = S.roster.filter(p => !p.team).length;
+  const allLocked = !!(S.locks?.day1 && S.locks?.day2 && S.locks?.payouts_day1 && S.locks?.payouts_day2);
 
   let html = '';
 
@@ -1509,6 +1524,41 @@ function renderScoreboard() {
           <div class="cd-unit"><div class="cd-num">${pad(s)}</div><div class="cd-label">Secs</div></div>
         </div>
         <div class="cd-sub">Friday, September 18, 2026 &nbsp;&middot;&nbsp; 8:30 AM &nbsp;&middot;&nbsp; General Burnside Island GC, Somerset KY</div>
+      </div>
+    </div>`;
+  }
+
+  // Champion banner — appears where the countdown was, once all 4 locks are in
+  if (allLocked && anyScores) {
+    const topPts = all[0].total;
+    const champs = all.filter(p => p.total === topPts);
+    const teamChamp = tt.t1.total > tt.t2.total ? tt.t1 : tt.t2.total > tt.t1.total ? tt.t2 : null;
+    const teamChampKey = tt.t1.total > tt.t2.total ? 't1' : tt.t2.total > tt.t1.total ? 't2' : null;
+    const teamChampColor = teamChampKey ? S.teams[teamChampKey].color : '#4a5568';
+    const champCards = champs.map(p => {
+      const pm = PLAYER_META[p.name];
+      const t = p.team ? S.teams[p.team] : null;
+      const tc = t ? t.color : '#4a5568';
+      const avatarEl = pm && pm.avatar
+        ? `<img src="${esc(pm.avatar)}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);box-shadow:0 2px 12px rgba(0,0,0,.4);margin-bottom:8px" />`
+        : `<div style="width:72px;height:72px;border-radius:50%;background:${tc};color:${contrastColor(tc)};display:flex;align-items:center;justify-content:center;font-size:1.2em;font-weight:bold;border:3px solid var(--gold);margin-bottom:8px">${initials(p.name)}</div>`;
+      return `<div style="text-align:center;padding:0 12px">
+        ${avatarEl}
+        <div style="font-size:1.4em;font-weight:bold;font-family:'Cinzel',serif;color:var(--gold);letter-spacing:.05em">${flag(p.name)} ${esc(p.name)}</div>
+        <div style="font-size:.9em;color:rgba(255,255,255,.8);margin-top:2px">${fmt(p.total)} pts ${t ? `&middot; ${esc(t.name)}` : ''}</div>
+      </div>`;
+    }).join('<div style="color:var(--gold);font-family:Cinzel;padding:0 8px;align-self:center">&amp;</div>');
+    html += `
+    <div class="card" style="background:linear-gradient(135deg,#0d2a0d,#1a4a1a);border:2px solid var(--gold);margin-bottom:12px">
+      <div class="card-body" style="padding:20px 16px">
+        <div style="font-size:.72em;color:var(--gold-light);letter-spacing:.18em;text-transform:uppercase;font-family:'Cinzel',serif;text-align:center;margin-bottom:14px">&#127942; GBI 2026 Champion</div>
+        <div style="display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:8px">${champCards}</div>
+        ${teamChamp ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(200,168,0,.3);text-align:center">
+          <div style="font-size:.66em;color:var(--gold-light);letter-spacing:.14em;text-transform:uppercase;font-family:'Cinzel',serif;margin-bottom:6px">&#127942; Team Champions</div>
+          <span style="background:${esc(teamChampColor)};color:${contrastColor(teamChampColor)};border-radius:10px;padding:4px 18px;font-size:1em;font-weight:bold;font-family:'Cinzel',serif">${esc(teamChamp.name)}</span>
+          <div style="font-size:.72em;color:rgba(255,255,255,.5);margin-top:4px">${fmt(teamChamp.total)} total pts</div>
+        </div>` : ''}
+        <div style="text-align:center;font-size:.68em;color:rgba(255,255,255,.45);margin-top:12px;font-style:italic;letter-spacing:.06em">OFFICIAL FINAL RESULTS</div>
       </div>
     </div>`;
   }
@@ -1577,7 +1627,6 @@ function renderScoreboard() {
   } else {
     // Standard table view — main standings
     const medal = rk => rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':`<span class="rank">${rk}</span>`;
-    const allLocked = !!(S.locks?.day1 && S.locks?.day2 && S.locks?.payouts_day1 && S.locks?.payouts_day2);
     const finalBadge = allLocked ? ` <span style="background:var(--gold);color:var(--green-dark);border-radius:8px;padding:2px 10px;font-size:.78em;font-weight:bold;letter-spacing:.06em;font-family:'Cinzel',serif">FINAL</span>` : '';
     html += `<div class="card"><div class="card-header">&#127942; 2026 GBI Standings${finalBadge}</div><div class="card-body">`;
     if (!anyScores) {
@@ -1620,22 +1669,25 @@ function renderScoreboard() {
       'Has not told family yet.',
     ];
     const bottomGroup = [...all].filter(p => pp.set.has(p.name)).sort((a,b) => a.total - b.total);
+    const dzHeader = allLocked ? '&#127814; 2026 Peter Putter &mdash; Official' : '&#128680; The Danger Zone &mdash; Pray for These Players';
+    const dzAlert = allLocked
+      ? `<div class="alert alert-red" style="margin:12px 12px 0;border-radius:5px">&#127814; <strong>${esc(bottomGroup[0]?.name || '')} is the official 2026 Peter Putter.</strong> Results are locked and final.</div>`
+      : `<div class="alert alert-red" style="margin:12px 12px 0;border-radius:5px">Bottom 5 on the leaderboard (ties included). Last place earns a punishment. You know who you are.<div style="font-size:.78em;opacity:.75;font-style:italic;margin-top:3px">If results stand as of right now &mdash; plenty of golf left to play.</div></div>`;
     html += `
     <div class="card" style="margin-top:8px">
-      <div class="card-header pp-zone-header">&#128680; The Danger Zone &mdash; Pray for These Players</div>
+      <div class="card-header pp-zone-header">${dzHeader}</div>
       <div class="card-body" style="padding:0">
-        <div class="alert alert-red" style="margin:12px 12px 0;border-radius:5px">
-          Bottom 5 on the leaderboard (ties included). Last place earns a punishment. You know who you are.
-          <div style="font-size:.78em;opacity:.75;font-style:italic;margin-top:3px">If results stand as of right now &mdash; plenty of golf left to play.</div>
-        </div>
+        ${dzAlert}
         <div style="margin-top:8px">`;
     bottomGroup.forEach((p, i) => {
+      const isLast = pp.lastSet.has(p.name);
+      const rowMsg = allLocked && isLast ? '&#127814; 2026 Peter Putter' : msgs[i % msgs.length];
       html += `<div class="pp-row">
-        <div class="pp-rank">${pp.lastSet.has(p.name)?'&#127814;':'&#9888;&#65039;'}</div>
+        <div class="pp-rank">${isLast?'&#127814;':'&#9888;&#65039;'}</div>
         <div class="pp-name"><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span> ${tBadge(p.team)}</div>
         <div style="text-align:right">
           <div class="pp-pts">${fmt(p.total)} pts</div>
-          <div class="pp-msg">${msgs[i % msgs.length]}</div>
+          <div class="pp-msg">${rowMsg}</div>
         </div>
       </div>`;
     });
