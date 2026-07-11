@@ -1532,9 +1532,7 @@ function renderScoreboard() {
   if (allLocked && anyScores) {
     const topPts = all[0].total;
     const champs = all.filter(p => p.total === topPts);
-    const teamChamp = tt.t1.total > tt.t2.total ? tt.t1 : tt.t2.total > tt.t1.total ? tt.t2 : null;
     const teamChampKey = tt.t1.total > tt.t2.total ? 't1' : tt.t2.total > tt.t1.total ? 't2' : null;
-    const teamChampColor = teamChampKey ? S.teams[teamChampKey].color : '#4a5568';
     const champCards = champs.map(p => {
       const pm = PLAYER_META[p.name];
       const t = p.team ? S.teams[p.team] : null;
@@ -1553,11 +1551,6 @@ function renderScoreboard() {
       <div class="card-body" style="padding:20px 16px">
         <div style="font-size:.72em;color:var(--gold-light);letter-spacing:.18em;text-transform:uppercase;font-family:'Cinzel',serif;text-align:center;margin-bottom:14px">&#127942; GBI 2026 Champion</div>
         <div style="display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:8px">${champCards}</div>
-        ${teamChamp ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(200,168,0,.3);text-align:center">
-          <div style="font-size:.66em;color:var(--gold-light);letter-spacing:.14em;text-transform:uppercase;font-family:'Cinzel',serif;margin-bottom:6px">&#127942; Team Champions</div>
-          <span style="background:${esc(teamChampColor)};color:${contrastColor(teamChampColor)};border-radius:10px;padding:4px 18px;font-size:1em;font-weight:bold;font-family:'Cinzel',serif">${esc(teamChamp.name)}</span>
-          <div style="font-size:.72em;color:rgba(255,255,255,.5);margin-top:4px">${fmt(teamChamp.total)} total pts</div>
-        </div>` : ''}
         <div style="text-align:center;font-size:.68em;color:rgba(255,255,255,.45);margin-top:12px;font-style:italic;letter-spacing:.06em">OFFICIAL FINAL RESULTS</div>
       </div>
     </div>`;
@@ -1571,7 +1564,7 @@ function renderScoreboard() {
   html += `
   <div class="team-compact-banner">
     <div class="tcb-side" style="background:${t1col};color:${contrastColor(t1col)}">
-      <div class="tcb-name">${esc(tt.t1.name)}</div>
+      <div class="tcb-name">${esc(tt.t1.name)}${allLocked && teamChampKey==='t1' ? ' &#127942;' : ''}</div>
       <div class="tcb-score">${fmt(tt.t1.total)}</div>
     </div>
     <div class="tcb-mid">
@@ -1579,7 +1572,7 @@ function renderScoreboard() {
       <div class="tcb-margin">${midText}</div>
     </div>
     <div class="tcb-side" style="background:${t2col};color:${contrastColor(t2col)}">
-      <div class="tcb-name">${esc(tt.t2.name)}</div>
+      <div class="tcb-name">${esc(tt.t2.name)}${allLocked && teamChampKey==='t2' ? ' &#127942;' : ''}</div>
       <div class="tcb-score">${fmt(tt.t2.total)}</div>
     </div>
   </div>`;
