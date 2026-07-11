@@ -1495,6 +1495,7 @@ function renderScoreboard() {
   const pp = ppPlayers();
   const unassigned = S.roster.filter(p => !p.team).length;
   const allLocked = !!(S.locks?.day1 && S.locks?.day2 && S.locks?.payouts_day1 && S.locks?.payouts_day2);
+  const teamChampKey = tt.t1.total > tt.t2.total ? 't1' : tt.t2.total > tt.t1.total ? 't2' : null;
 
   let html = '';
 
@@ -1532,7 +1533,6 @@ function renderScoreboard() {
   if (allLocked && anyScores) {
     const topPts = all[0].total;
     const champs = all.filter(p => p.total === topPts);
-    const teamChampKey = tt.t1.total > tt.t2.total ? 't1' : tt.t2.total > tt.t1.total ? 't2' : null;
     const champCards = champs.map(p => {
       const pm = PLAYER_META[p.name];
       const t = p.team ? S.teams[p.team] : null;
