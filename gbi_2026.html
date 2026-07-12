@@ -1159,6 +1159,7 @@ function playerStats(name) {
   });
   st.total = st.d1.total + st.d2.total;
   st.money = st.d1.money + st.d2.money;
+  st.scoreToPar = playerScoreToPar(name);
   return st;
 }
 
@@ -1197,9 +1198,9 @@ function showProfile(name) {
   const gradeColor = { A:'#16a34a', B:'#2563eb', C:'#d97706', D:'#ea580c', F:'#dc2626' };
 
   const st = playerStats(name);
-  const allStats = PLAYERS.map(n => playerStats(n)).sort((a,b) => b.total - a.total);
+  const allStats = allPlayerStats();
   const myPts = st.total;
-  const rank26 = allStats.filter(s => s.total > myPts).length + 1;
+  const rank26 = allStats.findIndex(s => s.name === name) + 1;
   const hasScores = allStats.some(s => s.total > 0);
   const pp = ppPlayers();
   const inPP = hasScores && pp.set.has(name);
@@ -1219,20 +1220,83 @@ function showProfile(name) {
   const rookieTag = (!m.prev && !m.note) ? ` <span style="background:rgba(255,255,255,.2);border-radius:10px;padding:1px 8px;font-size:.78em">&#127381; Rookie</span>` : '';
   const ppChampTag = m.peterPutter ? `<div style="margin-top:5px"><span style="background:rgba(120,20,20,.5);border-radius:12px;padding:2px 10px;font-size:.8em">&#127814; Reigning Peter Putter 2025</span></div>` : '';
 
-  function dayLine(day) {
-    const dk = day === 'day1' ? 'd1' : 'd2';
-    const ds = st[dk];
-    if (!hasScores || ds.total === 0) return `<span style="color:#bbb">No scores yet</span>`;
-    const parts = [];
-    if (ds.fourMan)   parts.push(`4-Man ${fmt(ds.fourMan)}pts`);
-    if (ds.matchWin)  parts.push(`Match W +${fmt(ds.matchWin)}`);
-    else if (ds.matchRank) parts.push(`Match ${fmt(ds.matchRank)}pts`);
-    if (ds.payout)    parts.push(`&#9971; ${ds.payout / SC.payoutPts | 0} hole win${ds.payout/SC.payoutPts>1?'s':''}`);
-    if (ds.money)     parts.push(`$${ds.money}`);
-    return parts.join(' &middot; ') || '&mdash;';
-  }
-
   const medal25 = p => p.rank===1?'&#129351;':p.rank===2?'&#129352;':p.rank===3?'&#129353;':'';
+
+  function daySection(day) {
+    const dk = day === 'day1' ? 'd1' : 'd2';
+    const label = day === 'day1' ? 'Day 1' : 'Day 2';
+    const ds = st[dk];
+    if (!hasScores || ds.total === 0) {
+      return `<div class="pm-section">
+        <div class="pm-sec-title">&#128197; ${label}</div>
+        <div style="color:#bbb;font-style:italic;font-size:.88em;padding:4px 0">No scores entered</div>
+      </div>`;
+    }
+    // 4-Man row
+    let fmRow = '';
+    const fmScores = S[day].groups.map(g => g.score);
+    const fmRanks = rank(fmScores);
+    S[day].groups.forEach((g, gi) => {
+      if (g.players.includes(name)) {
+        const fmScore = g.score !== '' && !isNaN(parseFloat(g.score)) ? parseFloat(g.score) : null;
+        const fmRk = fmRanks[gi];
+        fmRow = `<tr>
+          <td style="padding:5px 0 3px;color:#999;font-size:.8em;width:72px;vertical-align:top">4-Man</td>
+          <td style="padding:5px 0 3px">
+            ${fmScore !== null ? `<span>${fmtPar(fmScore)}</span> &middot; ` : ''}${fmRk ? `<strong>${ordinal(fmRk)} of 5</strong>` : '<span style="color:#aaa">&mdash;</span>'} &middot; <span style="color:var(--green);font-weight:600">${fmt(ds.fourMan)} pts</span>
+          </td>
+        </tr>`;
+      }
+    });
+    // 2-Man match row
+    let matchRow = '';
+    const mrs = matchResults(day);
+    S[day].matches.forEach((m, mi) => {
+      const isSide1 = [m.p1a, m.p1b].includes(name);
+      const isSide2 = [m.p2a, m.p2b].includes(name);
+      if (!isSide1 && !isSide2) return;
+      const r = mrs[mi];
+      const side = isSide1 ? 'p1' : 'p2';
+      const myScore = isSide1 ? m.score1 : m.score2;
+      const opScore = isSide1 ? m.score2 : m.score1;
+      const myParsed = myScore !== '' && myScore !== null && !isNaN(parseFloat(myScore)) ? parseFloat(myScore) : null;
+      const opParsed = opScore !== '' && opScore !== null && !isNaN(parseFloat(opScore)) ? parseFloat(opScore) : null;
+      const winPts = r[side].win, rankPts = r[side].rankPts, matchRk = r[side].rank;
+      let badge = '';
+      if (myParsed !== null && opParsed !== null) {
+        if (winPts === SC[day].matchWin)      badge = `<span style="background:#16a34a;color:#fff;padding:1px 7px;border-radius:8px;font-size:.8em;font-weight:bold">WON</span>`;
+        else if (winPts === SC[day].matchTie) badge = `<span style="background:var(--gold);color:#333;padding:1px 7px;border-radius:8px;font-size:.8em;font-weight:bold">TIE</span>`;
+        else                                  badge = `<span style="background:#dc2626;color:#fff;padding:1px 7px;border-radius:8px;font-size:.8em;font-weight:bold">LOST</span>`;
+      }
+      const totalMatchPts = winPts + rankPts;
+      const ptsBreak = winPts > 0 && rankPts > 0 ? ` <span style="color:#aaa;font-size:.78em">(${fmt(winPts)}+${fmt(rankPts)})</span>` : '';
+      matchRow = `<tr>
+        <td style="padding:5px 0 3px;color:#999;font-size:.8em;width:72px;vertical-align:top">2-Man</td>
+        <td style="padding:5px 0 3px">
+          ${myParsed !== null ? `<span>${fmtPar(myParsed)}</span> &middot; ` : ''}${badge ? badge + ' &middot; ' : ''}${matchRk ? `<span style="color:#888;font-size:.82em">${ordinal(matchRk)} of 10</span> &middot; ` : ''}<span style="color:var(--green);font-weight:600">${fmt(totalMatchPts)} pts</span>${ptsBreak}
+        </td>
+      </tr>`;
+    });
+    // Hole payouts row
+    const myPayouts = S[day].payouts.filter(p => p.cat !== 'NP' && p.winner === name);
+    let payoutRow = '';
+    if (myPayouts.length > 0) {
+      const holeList = myPayouts.map(p => `Hole&nbsp;${p.hole}&nbsp;<span class="cat cat-${p.cat}">${p.cat}</span>`).join(' &middot; ');
+      payoutRow = `<tr>
+        <td style="padding:5px 0 3px;color:#999;font-size:.8em;vertical-align:top">&#9971; Holes</td>
+        <td style="padding:5px 0 3px">${holeList}<br><span style="color:var(--green);font-weight:600">${myPayouts.length} win${myPayouts.length>1?'s':''} &middot; $${myPayouts.length * SC.payoutMoney} &middot; ${fmt(ds.payout)} pts</span></td>
+      </tr>`;
+    } else {
+      payoutRow = `<tr>
+        <td style="padding:5px 0 3px;color:#999;font-size:.8em">&#9971; Holes</td>
+        <td style="padding:5px 0 3px;color:#bbb;font-style:italic;font-size:.88em">No wins</td>
+      </tr>`;
+    }
+    return `<div class="pm-section">
+      <div class="pm-sec-title">&#128197; ${label} &mdash; <span style="color:var(--green)">${fmt(ds.total)} pts</span>${ds.money ? ` &middot; $${ds.money}` : ''}</div>
+      <table style="width:100%;border-collapse:collapse">${fmRow}${matchRow}${payoutRow}</table>
+    </div>`;
+  }
 
   let body = `
   <div class="pm-section">
@@ -1249,11 +1313,9 @@ function showProfile(name) {
       <div class="pm-stat"><div class="pm-stat-val">${myPts > 0 ? fmt(myPts) : '&mdash;'}</div><div class="pm-stat-lbl">Total Pts</div></div>
       <div class="pm-stat"><div class="pm-stat-val">${st.money > 0 ? '$'+st.money : '&mdash;'}</div><div class="pm-stat-lbl">$ Earned</div></div>
     </div>
-    <div class="pm-day-row">
-      <div><strong>Day 1:</strong> ${dayLine('day1')}</div>
-      <div><strong>Day 2:</strong> ${dayLine('day2')}</div>
-    </div>
-  </div>`;
+  </div>
+  ${daySection('day1')}
+  ${daySection('day2')}`;
 
   if (rt.skill !== null) {
     const gc = gradeColor[rt.grade] || '#888';
@@ -1290,11 +1352,8 @@ function showProfile(name) {
   </div>`;
   }
 
-  body += `
-  <div class="pm-section">
-    <div class="pm-sec-title">&#127922; Vegas Odds to Win GBI 2026</div>
-    <div style="font-size:1.7em;font-weight:bold;color:var(--green);font-family:'Cinzel',serif">${odds[name]}</div>
-    <div style="font-size:.72em;color:#aaa;margin-top:2px">Calculated from skill rating, 2025 finish &amp; vibes score</div>
+  body += `<div style="text-align:center;color:#bbb;font-size:.72em;padding:6px 16px 10px;border-top:1px solid #e5e7eb;margin-top:4px">
+    &#127922; Pre-tournament Vegas odds: <strong style="color:#999">${odds[name]}</strong> &middot; Skill, 2025 finish &amp; vibes
   </div>`;
 
   const pmText = contrastColor(tColor);
@@ -1325,7 +1384,31 @@ function closeProfile() {
 }
 
 function allPlayerStats() {
-  return PLAYERS.map(n => playerStats(n)).sort((a,b) => b.total - a.total || a.name.localeCompare(b.name));
+  const tt = teamTotals();
+  const winTeam = tt.t1.total > tt.t2.total ? 't1' : tt.t2.total > tt.t1.total ? 't2' : null;
+  return PLAYERS.map(n => playerStats(n)).sort((a, b) => {
+    if (b.total !== a.total) return b.total - a.total;
+    // 2. Score to par (lower = better; null = no scores yet, sort to bottom)
+    const spa = a.scoreToPar, spb = b.scoreToPar;
+    if (spa !== null && spb !== null && spa !== spb) return spa - spb;
+    if (spa === null && spb !== null) return 1;
+    if (spa !== null && spb === null) return -1;
+    // 3. Hole payout wins (more = better)
+    const aw = (a.d1.payout + a.d2.payout) / SC.payoutPts;
+    const bw = (b.d1.payout + b.d2.payout) / SC.payoutPts;
+    if (bw !== aw) return bw - aw;
+    // 4. Won any match (yes > no)
+    const am = (a.d1.matchWin + a.d2.matchWin) > 0 ? 1 : 0;
+    const bm = (b.d1.matchWin + b.d2.matchWin) > 0 ? 1 : 0;
+    if (bm !== am) return bm - am;
+    // 5. On the winning team (yes > no)
+    if (winTeam) {
+      const at = a.team === winTeam ? 1 : 0;
+      const bt = b.team === winTeam ? 1 : 0;
+      if (bt !== at) return bt - at;
+    }
+    return a.name.localeCompare(b.name);
+  });
 }
 
 function teamTotals() {
@@ -1364,18 +1447,15 @@ function safeTeamColor(hex) { return hexLum(hex) > 0.85 ? '#161616' : hex; }
 
 // Returns {set: bottom-5 names, last: dead-last name} when scores exist
 function ppPlayers() {
-  const all = allPlayerStats();
+  const all = allPlayerStats(); // sorted best→worst with full tiebreakers
   if (!all.some(p => p.total > 0)) return { set: new Set(), lastSet: new Set(), last: null };
-  const sorted = [...all].sort((a,b) => a.total - b.total);
-  // Bottom 5 by position, but ties at that boundary expand the group — nobody tied
-  // with the nominal 5th-worst score gets unfairly left out.
-  const thresholdScore = sorted[Math.min(4, sorted.length - 1)].total;
-  const bottomGroup = sorted.filter(p => p.total <= thresholdScore);
-  // Same logic for "last place" — if multiple players are tied for dead last,
-  // all of them are equally in last place, not just whichever sorted first.
-  const minScore = sorted[0].total;
-  const lastSet = new Set(sorted.filter(p => p.total === minScore).map(p => p.name));
-  return { set: new Set(bottomGroup.map(p => p.name)), lastSet, last: sorted[0].name };
+  // Danger zone threshold: bottom 5 by total pts — any tie at that boundary expands the group
+  const byTotal = [...all].sort((a,b) => a.total - b.total);
+  const thresholdScore = byTotal[Math.min(4, byTotal.length - 1)].total;
+  const bottomGroup = byTotal.filter(p => p.total <= thresholdScore);
+  // Definitive last place: last entry after full tiebreaker sort (all[all.length-1] is the worst)
+  const last = all[all.length - 1];
+  return { set: new Set(bottomGroup.map(p => p.name)), lastSet: new Set([last.name]), last: last.name };
 }
 // 🍆 for dead last, ⚠️ for the other bottom 4
 function ppBadge(name, pp) {
