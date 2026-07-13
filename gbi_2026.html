@@ -1232,24 +1232,18 @@ function showProfile(name) {
         <div style="color:#bbb;font-style:italic;font-size:.88em;padding:4px 0">No scores entered</div>
       </div>`;
     }
-    // 4-Man row
-    let fmRow = '';
+    // 4-Man detail
+    let fmScore = null, fmRk = null;
     const fmScores = S[day].groups.map(g => g.score);
     const fmRanks = rank(fmScores);
     S[day].groups.forEach((g, gi) => {
       if (g.players.includes(name)) {
-        const fmScore = g.score !== '' && !isNaN(parseFloat(g.score)) ? parseFloat(g.score) : null;
-        const fmRk = fmRanks[gi];
-        fmRow = `<tr>
-          <td style="padding:5px 0 3px;color:#999;font-size:.8em;width:72px;vertical-align:top">4-Man</td>
-          <td style="padding:5px 0 3px">
-            ${fmScore !== null ? `<span>${fmtPar(fmScore)}</span> &middot; ` : ''}${fmRk ? `<strong>${ordinal(fmRk)} of 5</strong>` : '<span style="color:#aaa">&mdash;</span>'} &middot; <span style="color:var(--green);font-weight:600">${fmt(ds.fourMan)} pts</span>
-          </td>
-        </tr>`;
+        fmScore = g.score !== '' && !isNaN(parseFloat(g.score)) ? parseFloat(g.score) : null;
+        fmRk = fmRanks[gi];
       }
     });
-    // 2-Man match row
-    let matchRow = '';
+    // 2-Man match detail
+    let mScore = null, mBadge = '', mRk = null, mWinPts = 0, mRankPts = 0;
     const mrs = matchResults(day);
     S[day].matches.forEach((m, mi) => {
       const isSide1 = [m.p1a, m.p1b].includes(name);
@@ -1257,44 +1251,60 @@ function showProfile(name) {
       if (!isSide1 && !isSide2) return;
       const r = mrs[mi];
       const side = isSide1 ? 'p1' : 'p2';
-      const myScore = isSide1 ? m.score1 : m.score2;
-      const opScore = isSide1 ? m.score2 : m.score1;
-      const myParsed = myScore !== '' && myScore !== null && !isNaN(parseFloat(myScore)) ? parseFloat(myScore) : null;
-      const opParsed = opScore !== '' && opScore !== null && !isNaN(parseFloat(opScore)) ? parseFloat(opScore) : null;
-      const winPts = r[side].win, rankPts = r[side].rankPts, matchRk = r[side].rank;
-      let badge = '';
+      const myRaw = isSide1 ? m.score1 : m.score2;
+      const opRaw = isSide1 ? m.score2 : m.score1;
+      const myParsed = myRaw !== '' && myRaw !== null && !isNaN(parseFloat(myRaw)) ? parseFloat(myRaw) : null;
+      const opParsed = opRaw !== '' && opRaw !== null && !isNaN(parseFloat(opRaw)) ? parseFloat(opRaw) : null;
+      mScore = myParsed; mWinPts = r[side].win; mRankPts = r[side].rankPts; mRk = r[side].rank;
       if (myParsed !== null && opParsed !== null) {
-        if (winPts === SC[day].matchWin)      badge = `<span style="background:#16a34a;color:#fff;padding:1px 7px;border-radius:8px;font-size:.8em;font-weight:bold">WON</span>`;
-        else if (winPts === SC[day].matchTie) badge = `<span style="background:var(--gold);color:#333;padding:1px 7px;border-radius:8px;font-size:.8em;font-weight:bold">TIE</span>`;
-        else                                  badge = `<span style="background:#dc2626;color:#fff;padding:1px 7px;border-radius:8px;font-size:.8em;font-weight:bold">LOST</span>`;
+        if (mWinPts === SC[day].matchWin)      mBadge = `<span style="background:#16a34a;color:#fff;padding:1px 6px;border-radius:8px;font-size:.8em;font-weight:bold">WON</span>`;
+        else if (mWinPts === SC[day].matchTie) mBadge = `<span style="background:var(--gold);color:#333;padding:1px 6px;border-radius:8px;font-size:.8em;font-weight:bold">TIE</span>`;
+        else                                   mBadge = `<span style="background:#dc2626;color:#fff;padding:1px 6px;border-radius:8px;font-size:.8em;font-weight:bold">LOST</span>`;
       }
-      const totalMatchPts = winPts + rankPts;
-      const ptsBreak = winPts > 0 && rankPts > 0 ? ` <span style="color:#aaa;font-size:.78em">(${fmt(winPts)}+${fmt(rankPts)})</span>` : '';
-      matchRow = `<tr>
-        <td style="padding:5px 0 3px;color:#999;font-size:.8em;width:72px;vertical-align:top">2-Man</td>
-        <td style="padding:5px 0 3px">
-          ${myParsed !== null ? `<span>${fmtPar(myParsed)}</span> &middot; ` : ''}${badge ? badge + ' &middot; ' : ''}${matchRk ? `<span style="color:#888;font-size:.82em">${ordinal(matchRk)} of 10</span> &middot; ` : ''}<span style="color:var(--green);font-weight:600">${fmt(totalMatchPts)} pts</span>${ptsBreak}
-        </td>
-      </tr>`;
     });
-    // Hole payouts row
+    const totalMatchPts = mWinPts + mRankPts;
+    const mPtsBreak = mWinPts > 0 && mRankPts > 0 ? ` <span style="color:#aaa;font-size:.78em">(${fmt(mWinPts)}+${fmt(mRankPts)})</span>` : '';
+    // Hole payouts detail
     const myPayouts = S[day].payouts.filter(p => p.cat !== 'NP' && p.winner === name);
-    let payoutRow = '';
-    if (myPayouts.length > 0) {
-      const holeList = myPayouts.map(p => `Hole&nbsp;${p.hole}&nbsp;<span class="cat cat-${p.cat}">${p.cat}</span>`).join(' &middot; ');
-      payoutRow = `<tr>
-        <td style="padding:5px 0 3px;color:#999;font-size:.8em;vertical-align:top">&#9971; Holes</td>
-        <td style="padding:5px 0 3px">${holeList}<br><span style="color:var(--green);font-weight:600">${myPayouts.length} win${myPayouts.length>1?'s':''} &middot; $${myPayouts.length * SC.payoutMoney} &middot; ${fmt(ds.payout)} pts</span></td>
-      </tr>`;
-    } else {
-      payoutRow = `<tr>
-        <td style="padding:5px 0 3px;color:#999;font-size:.8em">&#9971; Holes</td>
-        <td style="padding:5px 0 3px;color:#bbb;font-style:italic;font-size:.88em">No wins</td>
-      </tr>`;
-    }
+    const holeFinish = myPayouts.length
+      ? myPayouts.map(p => `H${p.hole}&nbsp;<span class="cat cat-${p.cat}">${p.cat}</span>`).join(' ')
+      : `<span style="color:#bbb;font-style:italic">None</span>`;
+    const holePts = myPayouts.length
+      ? `<span style="color:var(--green);font-weight:600">${fmt(ds.payout)}&nbsp;pts &middot; $${myPayouts.length * SC.payoutMoney}</span>`
+      : `<span style="color:#bbb">&mdash;</span>`;
+    const th = `style="padding:2px 8px 5px 0;font-weight:normal;color:#aaa;font-size:.76em;text-align:left;border-bottom:1px solid #eee;white-space:nowrap"`;
+    const td = `style="padding:5px 8px 4px 0;vertical-align:top;font-size:.87em"`;
+    const tdL = `style="padding:5px 8px 4px 0;vertical-align:top;font-size:.8em;color:#999;white-space:nowrap;width:68px"`;
     return `<div class="pm-section">
       <div class="pm-sec-title">&#128197; ${label} &mdash; <span style="color:var(--green)">${fmt(ds.total)} pts</span>${ds.money ? ` &middot; $${ds.money}` : ''}</div>
-      <table style="width:100%;border-collapse:collapse">${fmRow}${matchRow}${payoutRow}</table>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr>
+          <th ${th}></th>
+          <th ${th}>Score</th>
+          <th ${th}>Finish</th>
+          <th ${th}>Points</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td ${tdL}>4-Man</td>
+            <td ${td}>${fmScore !== null ? fmtPar(fmScore) : '&mdash;'}</td>
+            <td ${td}>${fmRk ? ordinal(fmRk) + ' of 5' : '&mdash;'}</td>
+            <td ${td}>${ds.fourMan ? `<span style="color:var(--green);font-weight:600">${fmt(ds.fourMan)}</span>` : '&mdash;'}</td>
+          </tr>
+          <tr>
+            <td ${tdL}>2-Man</td>
+            <td ${td}>${mScore !== null ? fmtPar(mScore) : '&mdash;'}</td>
+            <td ${td}>${mBadge}${mRk ? ` <span style="color:#888;font-size:.85em">${ordinal(mRk)} of 10</span>` : ''}</td>
+            <td ${td}><span style="color:var(--green);font-weight:600">${fmt(totalMatchPts)}</span>${mPtsBreak}</td>
+          </tr>
+          <tr>
+            <td ${tdL}>&#9971; Holes</td>
+            <td ${td}>&mdash;</td>
+            <td ${td}>${holeFinish}</td>
+            <td ${td}>${holePts}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>`;
   }
 
@@ -1712,10 +1722,9 @@ function renderScoreboard() {
         <th class="c">To Par</th>
         <th class="c">$</th>
       </tr></thead><tbody>`;
-      let rk=1, prev=null;
       all.forEach((p,i) => {
-        if (p.total !== prev) rk = i+1;
-        const par = playerScoreToPar(p.name);
+        const rk = i + 1;
+        const par = p.scoreToPar;
         const parClass = par===null?'':par<0?' style="color:var(--green);font-weight:bold"':par>0?' style="color:#b03030;font-weight:bold"':' style="font-weight:bold"';
         html += `<tr${rk<=3?' class="winner"':''}>
           <td class="c" style="font-size:1.2em">${medal(rk)}</td>
@@ -1725,7 +1734,6 @@ function renderScoreboard() {
           <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
           <td class="c"><strong class="money">${fmtM(p.money)}</strong></td>
         </tr>`;
-        prev = p.total;
       });
       html += `</tbody></table>`;
     }
@@ -1741,10 +1749,11 @@ function renderScoreboard() {
       'Checking flights home early.',
       'Has not told family yet.',
     ];
-    const bottomGroup = [...all].filter(p => pp.set.has(p.name)).sort((a,b) => a.total - b.total);
+    // Reverse allPlayerStats order so worst (Peter Putter) appears first in the list
+    const bottomGroup = [...all].filter(p => pp.set.has(p.name)).reverse();
     const dzHeader = allLocked ? '&#127814; 2026 Peter Putter &mdash; Official' : '&#128680; The Danger Zone &mdash; Pray for These Players';
     const dzAlert = allLocked
-      ? `<div class="alert alert-red" style="margin:12px 12px 0;border-radius:5px">&#127814; <strong>${esc(bottomGroup[0]?.name || '')} is the official 2026 Peter Putter.</strong> Results are locked and final.</div>`
+      ? `<div class="alert alert-red" style="margin:12px 12px 0;border-radius:5px">&#127814; <strong>${esc(pp.last || '')} is the official 2026 Peter Putter.</strong> Results are locked and final.</div>`
       : `<div class="alert alert-red" style="margin:12px 12px 0;border-radius:5px">Bottom 5 on the leaderboard (ties included). Last place earns a punishment. You know who you are.<div style="font-size:.78em;opacity:.75;font-style:italic;margin-top:3px">If results stand as of right now &mdash; plenty of golf left to play.</div></div>`;
     html += `
     <div class="card" style="margin-top:8px">
