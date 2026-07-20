@@ -2732,13 +2732,7 @@ function renderMonies() {
   const finalBadge = allLocked ? ` <span style="background:var(--gold);color:var(--green-dark);border-radius:8px;padding:2px 10px;font-size:.78em;font-weight:bold;letter-spacing:.06em;font-family:'Cinzel',serif">FINAL</span>` : '';
 
   // Ranked standings (same logic as scoreboard)
-  let rkc = 1, prevTot = null;
-  const ranked = [];
-  all.forEach((p, i) => {
-    if (p.total !== prevTot) rkc = i + 1;
-    ranked.push({ ...p, rk: rkc });
-    prevTot = p.total;
-  });
+  const ranked = all.map((p, i) => ({ ...p, rk: i + 1 }));
 
   // Hole payouts — computed first so rollover is available everywhere below
   const holeDays = { day1: { claimed: 0, unclaimed: 0 }, day2: { claimed: 0, unclaimed: 0 } };
@@ -2815,10 +2809,10 @@ function renderMonies() {
 
   // ── Grand Total Banner ──
   const potRows = [
-    { label: '📅 Day 1 Hole Payouts', pot: 400,                   claimed: holeDays.day1.claimed + d1rollover, color: 'var(--green)' },
-    { label: '📅 Day 2 Hole Payouts', pot: 400,                   claimed: holeDays.day2.claimed + d2rollover, color: 'var(--green)' },
-    { label: '🎖️ Individual Prizes',  pot: 700 + totalRollover,   claimed: finishClaimed,                      color: '#c8a800'      },
-    { label: '🏆 Team Championship',  pot: 500,                   claimed: teamClaimed,                        color: '#1a4a8a'      },
+    { label: '📅 Day 1 Hole Payouts', pot: 400 - d1rollover,    claimed: holeDays.day1.claimed, color: 'var(--green)' },
+    { label: '📅 Day 2 Hole Payouts', pot: 400 - d2rollover,    claimed: holeDays.day2.claimed, color: 'var(--green)' },
+    { label: '🎖️ Individual Prizes',  pot: 700 + totalRollover, claimed: finishClaimed,         color: '#c8a800'      },
+    { label: '🏆 Team Championship',  pot: 500,                  claimed: teamClaimed,           color: '#1a4a8a'      },
   ];
   const poolExpanded = _collapsed['monies_pool'] === false;
   html += `<div class="card" style="margin-bottom:10px">
@@ -2912,15 +2906,15 @@ function renderMonies() {
         <table style="font-size:.85em;border-collapse:collapse;width:100%;max-width:380px;margin-top:6px">
           <tr><td style="padding:3px 8px 3px 0;color:#666">💵 Paid to players</td><td class="money" style="text-align:right">$${hd.claimed}</td><td style="color:#aaa;font-size:.85em;padding-left:8px">${claimedPct}% of pot</td></tr>
           ${roll > 0
-            ? `<tr><td style="padding:3px 8px 3px 0;color:#1a7a1a">🏆 Rolled → team &#128274;</td><td class="money" style="text-align:right">$${roll}</td><td style="color:#aaa;font-size:.85em;padding-left:8px">${rollPct}% of pot</td></tr>`
+            ? `<tr><td style="padding:3px 8px 3px 0;color:#1a7a1a">&#8617; Rolled &rarr; Individual Prizes</td><td class="money" style="text-align:right">$${roll}</td><td style="color:#aaa;font-size:.85em;padding-left:8px">${rollPct}% of pot</td></tr>`
             : hd.unclaimed > 0
               ? `<tr><td style="padding:3px 8px 3px 0;color:#b07000">⏳ Pending (unclaimed)</td><td style="text-align:right;color:#b07000">$${hd.unclaimed}</td><td style="color:#aaa;font-size:.85em;padding-left:8px">${pendingPct}% of pot</td></tr>`
               : ''}
           <tr style="border-top:1px solid var(--border)"><td style="padding:5px 8px 3px 0;color:#666">Total accounted</td><td style="text-align:right"><strong>$${allocated}</strong></td><td style="color:#aaa;font-size:.85em;padding-left:8px">${claimedPct + rollPct}%</td></tr>
         </table>`;
       return `<div${day === 'day1' ? ' style="margin-bottom:18px"' : ''}>
-        <div style="font-weight:bold;margin-bottom:4px">⛳ ${dayLabel} &mdash; $400</div>
-        ${pctBar(allocated, 400, 'var(--green)')}
+        <div style="font-weight:bold;margin-bottom:4px">⛳ ${dayLabel} &mdash; $${400 - roll}${roll > 0 ? ` <span style="color:#1a7a1a;font-size:.82em">&#8617; $${roll} rolled to prizes</span>` : ''}</div>
+        ${pctBar(hd.claimed, Math.max(400 - roll, 1), 'var(--green)')}
         <details style="margin-top:2px">${detailsSummary}${detailRows}
         </details>
       </div>`;
