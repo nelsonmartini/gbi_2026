@@ -1208,6 +1208,7 @@ function showProfile(name) {
   const allLocked = !!(S.locks?.day1 && S.locks?.day2 && S.locks?.payouts_day1 && S.locks?.payouts_day2);
   const is2026Champ = allLocked && myPts > 0 && rank26 === 1;
   const is2026PP    = allLocked && isLastPlace && myPts > 0;
+  const is2026MM    = allLocked && rank26 === 10 && myPts > 0;
 
   const champBadge = champYears.length
     ? `<div style="margin-top:7px">${champYears.map(y => `<span style="background:rgba(255,255,255,.22);border-radius:12px;padding:2px 9px;font-size:.78em;margin-right:4px">&#127942; GBI Champion ${y}</span>`).join('')}</div>` : '';
@@ -1215,6 +1216,8 @@ function showProfile(name) {
     ? `<div style="margin-top:8px"><span style="background:var(--gold);color:var(--green-dark);border-radius:12px;padding:4px 14px;font-size:.9em;font-weight:bold;font-family:'Cinzel',serif;letter-spacing:.04em">&#127942; 2026 GBI Champion</span></div>` : '';
   const pp2026Tag = is2026PP
     ? `<div style="margin-top:6px"><span style="background:rgba(139,26,26,.7);border-radius:12px;padding:3px 12px;font-size:.85em;font-weight:bold">&#127814; 2026 Peter Putter</span></div>` : '';
+  const mm2026Tag = is2026MM
+    ? `<div style="margin-top:6px"><span style="background:rgba(22,100,60,.75);border-radius:12px;padding:3px 12px;font-size:.85em;font-weight:bold">&#127919; 2026 Middle Man</span></div>` : '';
   const ppTag    = (!allLocked && inPP && myPts > 0) ? ` <span style="background:rgba(220,50,50,.3);border-radius:10px;padding:1px 8px;font-size:.78em">${isLastPlace ? '&#127814;' : '&#9888;&#65039;'} Danger Zone</span>` : '';
   const ppDisclaimer = ppTag ? `<div style="font-size:.66em;opacity:.65;font-style:italic;margin-top:3px">If results stand as of right now</div>` : '';
   const rookieTag = (!m.prev && !m.note) ? ` <span style="background:rgba(255,255,255,.2);border-radius:10px;padding:1px 8px;font-size:.78em">&#127381; Rookie</span>` : '';
@@ -1380,7 +1383,7 @@ function showProfile(name) {
             ${ppDisclaimer}
           </div>
         </div>
-        ${champ2026Tag}${pp2026Tag}${champBadge}${ppChampTag}
+        ${champ2026Tag}${pp2026Tag}${mm2026Tag}${champBadge}${ppChampTag}
       </div>
       <div class="pm-body">${body}</div>
     </div>`;
@@ -1698,7 +1701,7 @@ function renderScoreboard() {
         const tcol = p.team ? S.teams[p.team].color : '#aaa';
         html += `<div class="bb-row${rk<=3?' bb-top':''}">
           <div class="bb-pos${rk<=3?' bb-gold':''}">${rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':ordinal(rk)}</div>
-          <div class="bb-name" style="border-left-color:${tcol}"><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}</div>
+          <div class="bb-name" style="border-left-color:${tcol}"><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}${rk===10&&anyScores?' <span style="font-size:.78em">&#127919;</span>':''}</div>
           <div class="bb-pts">${fmt(p.total)}</div>
           <div class="bb-par ${parCls}">${parStr}</div>
         </div>`;
@@ -1728,7 +1731,7 @@ function renderScoreboard() {
         const parClass = par===null?'':par<0?' style="color:var(--green);font-weight:bold"':par>0?' style="color:#b03030;font-weight:bold"':' style="font-weight:bold"';
         html += `<tr${rk<=3?' class="winner"':''}>
           <td class="c" style="font-size:1.2em">${medal(rk)}</td>
-          <td style="font-size:1.2em"><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}</strong></td>
+          <td style="font-size:1.2em"><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}${rk===10&&anyScores?' <span style="font-size:.78em">&#127919;</span>':''}</strong></td>
           <td class="hide-mobile">${tBadge(p.team)}</td>
           <td class="c">${ppPts(p.name,pp,p.total)}</td>
           <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
