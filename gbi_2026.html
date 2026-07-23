@@ -2727,7 +2727,7 @@ function renderMonies() {
   const all = allPlayerStats();
   const anyScores = all.some(p => p.total > 0);
   const tt = teamTotals();
-  const mdl = rk => rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':`<span class="rank">${rk}</span>`;
+  const mdl = rk => rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':rk===10?'&#127919;':`<span class="rank">${rk}</span>`;
   const allLocked = !!(S.locks?.day1 && S.locks?.day2 && S.locks?.payouts_day1 && S.locks?.payouts_day2);
   const finalBadge = allLocked ? ` <span style="background:var(--gold);color:var(--green-dark);border-radius:8px;padding:2px 10px;font-size:.78em;font-weight:bold;letter-spacing:.06em;font-family:'Cinzel',serif">FINAL</span>` : '';
 
@@ -2750,11 +2750,11 @@ function renderMonies() {
   const d2rollover = (S.locks?.payouts_day2) ? holeDays.day2.unclaimed : 0;
   const totalRollover = d1rollover + d2rollover;
 
-  // Unclaimed hole money rolls to individual prizes: 60% / 30% / 10%
+  // Unclaimed hole money rolls to individual prizes: 60% / 30% / 10% (top 3 only — Middle Man is flat)
   const roll1 = Math.round(totalRollover * 0.6);
   const roll2 = Math.round(totalRollover * 0.3);
   const roll3 = totalRollover - roll1 - roll2;
-  const PRIZE_AMOUNTS = [400 + roll1, 200 + roll2, 100 + roll3];
+  const PRIZE_AMOUNTS = [400 + roll1, 250 + roll2, 150 + roll3];
 
   function finishPrize(name) {
     if (!anyScores) return 0;
@@ -2766,6 +2766,8 @@ function renderMonies() {
       for (let i = 0; i < tied.length && (pos + i - 1) < 3; i++) pool += PRIZE_AMOUNTS[pos + i - 1];
       return Math.round(pool / tied.length);
     }
+    // 🎯 Middle Man Award — 10th place, flat $100, no rollover share
+    if (ranked.find(p => p.rk === 10 && p.name === name)) return 100;
     return 0;
   }
 
@@ -2780,15 +2782,16 @@ function renderMonies() {
   }
 
   // Pot totals for tracker bars
-  const finishClaimed = anyScores ? PRIZE_AMOUNTS.reduce((sum, amt, i) => {
+  const middleManClaimed = anyScores ? 100 : 0;
+  const finishClaimed = (anyScores ? PRIZE_AMOUNTS.reduce((sum, amt, i) => {
     const pos = i + 1;
     const tied = ranked.filter(p => p.rk === pos);
     return tied.length ? sum + amt : sum;
-  }, 0) : 0;
+  }, 0) : 0) + middleManClaimed;
   const teamBaseClaimed = (anyScores && leadTeamKey) ? 500 : 0;
   const teamClaimed = teamBaseClaimed;
   const totalDistributed = claimedHole + finishClaimed + teamClaimed;
-  const GRAND_TOTAL = 2000;
+  const GRAND_TOTAL = 2200;
 
   function pctBar(claimed, total, color) {
     const pct = total > 0 ? Math.round((claimed / total) * 100) : 0;
@@ -2811,7 +2814,7 @@ function renderMonies() {
   const potRows = [
     { label: '📅 Day 1 Hole Payouts', pot: 400 - d1rollover,    claimed: holeDays.day1.claimed, color: 'var(--green)' },
     { label: '📅 Day 2 Hole Payouts', pot: 400 - d2rollover,    claimed: holeDays.day2.claimed, color: 'var(--green)' },
-    { label: '🎖️ Individual Prizes',  pot: 700 + totalRollover, claimed: finishClaimed,         color: '#c8a800'      },
+    { label: '🎖️ Individual Prizes',  pot: 900 + totalRollover, claimed: finishClaimed,         color: '#c8a800'      },
     { label: '🏆 Team Championship',  pot: 500,                  claimed: teamClaimed,           color: '#1a4a8a'      },
   ];
   const poolExpanded = _collapsed['monies_pool'] === false;
@@ -2873,14 +2876,15 @@ function renderMonies() {
   html += `<div class="card-body">
 
     <div style="margin-bottom:18px">
-      <div style="font-weight:bold;margin-bottom:4px">🎖️ Individual Finish Prizes &mdash; $${700 + totalRollover}</div>
-      ${pctBar(finishClaimed, 700 + totalRollover, '#c8a800')}
+      <div style="font-weight:bold;margin-bottom:4px">🎖️ Individual Finish Prizes &mdash; $${900 + totalRollover}</div>
+      ${pctBar(finishClaimed, 900 + totalRollover, '#c8a800')}
       <details style="margin-top:2px">${detailsSummary}
         <table style="width:100%;max-width:500px;margin-top:8px;font-size:.88em;border-collapse:collapse"><tbody>
           <tr><td style="width:28px">🥇</td><td style="width:70px"><strong class="money">$${PRIZE_AMOUNTS[0]}</strong>${roll1>0?`<span style="color:#1a7a1a;font-size:.8em"> (+$${roll1})</span>`:''}</td><td>${posNames(1)}</td></tr>
           <tr><td>🥈</td><td><strong class="money">$${PRIZE_AMOUNTS[1]}</strong>${roll2>0?`<span style="color:#1a7a1a;font-size:.8em"> (+$${roll2})</span>`:''}</td><td>${posNames(2)}</td></tr>
           <tr><td>🥉</td><td><strong class="money">$${PRIZE_AMOUNTS[2]}</strong>${roll3>0?`<span style="color:#1a7a1a;font-size:.8em"> (+$${roll3})</span>`:''}</td><td>${posNames(3)}</td></tr>
-          ${totalRollover > 0 ? `<tr style="border-top:1px solid var(--border)"><td colspan="3" style="padding-top:6px;color:#1a7a1a;font-size:.82em">⛳ $${totalRollover} rolled from unclaimed hole payouts (60/30/10%)</td></tr>` : ''}
+          <tr><td>&#127919;</td><td><strong class="money">$100</strong></td><td>${posNames(10)} <em style="color:#888;font-size:.82em">10th &mdash; Middle Man</em></td></tr>
+          ${totalRollover > 0 ? `<tr style="border-top:1px solid var(--border)"><td colspan="3" style="padding-top:6px;color:#1a7a1a;font-size:.82em">⛳ $${totalRollover} rolled from unclaimed hole payouts (60/30/10% to top 3 only)</td></tr>` : ''}
         </tbody></table>
       </details>
     </div>
@@ -2940,15 +2944,14 @@ function renderMonies() {
         <th class="c">💰 Total</th>
       </tr></thead><tbody>`;
 
-  let prevRk = null, dispRk = 1;
   ranked.forEach((p, i) => {
-    if (p.total !== prevRk) dispRk = i + 1;
-    prevRk = p.total;
+    const dispRk = i + 1;
     const fm = finishPrize(p.name);
     const tm = teamPrize(p.name);
     const holeMoney = p.d1.money + p.d2.money;
     const totalWon = holeMoney + fm + tm;
-    html += `<tr${dispRk <= 3 ? ' class="winner"' : ''}>
+    const rowClass = dispRk <= 3 ? ' class="winner"' : dispRk === 10 ? ' style="background:#f0fdf4"' : '';
+    html += `<tr${rowClass}>
       <td class="c" style="font-size:1.2em">${mdl(dispRk)}</td>
       <td style="font-size:1.2em"><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span></strong></td>
       <td class="c">${mc(holeMoney)}</td>
@@ -2971,7 +2974,7 @@ function renderFormat() {
     <div class="card-header">📋 GBI 2026 Tournament Format</div>
     <div class="card-body">
       <div class="alert alert-gold">
-        <strong>Total Pot: $2,000</strong> &nbsp;|&nbsp; Buy-in: $100/player &nbsp;|&nbsp; 20 Players &nbsp;|&nbsp; 2 Teams of 10
+        <strong>Total Pot: $2,200</strong> &nbsp;|&nbsp; Buy-in: $110/player &nbsp;|&nbsp; 20 Players &nbsp;|&nbsp; 2 Teams of 10
       </div>
 
       <div class="two-col">
@@ -2991,11 +2994,12 @@ function renderFormat() {
             <thead><tr><th>Category</th><th>Prize</th></tr></thead>
             <tbody>
               <tr><td>🥇 Player 1st Place</td><td class="money">$400</td></tr>
-              <tr><td>🥈 Player 2nd Place</td><td class="money">$200</td></tr>
-              <tr><td>🥉 Player 3rd Place</td><td class="money">$100</td></tr>
+              <tr><td>🥈 Player 2nd Place</td><td class="money">$250</td></tr>
+              <tr><td>🥉 Player 3rd Place</td><td class="money">$150</td></tr>
+              <tr><td>🎯 Middle Man (10th Place)</td><td class="money">$100</td></tr>
               <tr><td>Team Champions ($50 × 10)</td><td class="money">$500</td></tr>
               <tr><td>Hole Payouts (40 holes × $20)</td><td class="money">$800</td></tr>
-              <tr style="font-weight:bold"><td>Total</td><td class="money">$2,000</td></tr>
+              <tr style="font-weight:bold"><td>Total</td><td class="money">$2,200</td></tr>
             </tbody>
           </table>
         </div>
