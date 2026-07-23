@@ -2754,7 +2754,7 @@ function renderMonies() {
   const roll1 = Math.round(totalRollover * 0.6);
   const roll2 = Math.round(totalRollover * 0.3);
   const roll3 = totalRollover - roll1 - roll2;
-  const PRIZE_AMOUNTS = [400 + roll1, 250 + roll2, 150 + roll3];
+  const PRIZE_AMOUNTS = [460 + roll1, 230 + roll2, 110 + roll3];
 
   function finishPrize(name) {
     if (!anyScores) return 0;
@@ -2993,9 +2993,9 @@ function renderFormat() {
           <table class="fmt-table">
             <thead><tr><th>Category</th><th>Prize</th></tr></thead>
             <tbody>
-              <tr><td>🥇 Player 1st Place</td><td class="money">$400</td></tr>
-              <tr><td>🥈 Player 2nd Place</td><td class="money">$250</td></tr>
-              <tr><td>🥉 Player 3rd Place</td><td class="money">$150</td></tr>
+              <tr><td>🥇 Player 1st Place</td><td class="money">$460</td></tr>
+              <tr><td>🥈 Player 2nd Place</td><td class="money">$230</td></tr>
+              <tr><td>🥉 Player 3rd Place</td><td class="money">$110</td></tr>
               <tr><td>🎯 Middle Man (10th Place)</td><td class="money">$100</td></tr>
               <tr><td>Team Champions ($50 × 10)</td><td class="money">$500</td></tr>
               <tr><td>Hole Payouts (40 holes × $20)</td><td class="money">$800</td></tr>
