@@ -1218,6 +1218,10 @@ function showProfile(name) {
     ? `<div style="margin-top:6px"><span style="background:rgba(139,26,26,.7);border-radius:12px;padding:3px 12px;font-size:.85em;font-weight:bold">&#127814; 2026 Peter Putter</span></div>` : '';
   const mm2026Tag = is2026MM
     ? `<div style="margin-top:6px"><span style="background:rgba(22,100,60,.75);border-radius:12px;padding:3px 12px;font-size:.85em;font-weight:bold">&#127919; 2026 Middle Man</span></div>` : '';
+  const sups = allLocked && myPts > 0 ? computeSuperlatives() : {};
+  const supTags = Object.values(sups).filter(s => s.res?.winners?.has(name)).map(s =>
+    `<div style="margin-top:5px"><span style="background:rgba(55,50,120,.65);border-radius:12px;padding:3px 11px;font-size:.82em;font-weight:bold">${s.emoji} ${s.label}</span></div>`
+  ).join('');
   const ppTag    = (!allLocked && inPP && myPts > 0) ? ` <span style="background:rgba(220,50,50,.3);border-radius:10px;padding:1px 8px;font-size:.78em">${isLastPlace ? '&#127814;' : '&#9888;&#65039;'} Danger Zone</span>` : '';
   const ppDisclaimer = ppTag ? `<div style="font-size:.66em;opacity:.65;font-style:italic;margin-top:3px">If results stand as of right now</div>` : '';
   const rookieTag = (!m.prev && !m.note) ? ` <span style="background:rgba(255,255,255,.2);border-radius:10px;padding:1px 8px;font-size:.78em">&#127381; Rookie</span>` : '';
@@ -1383,7 +1387,7 @@ function showProfile(name) {
             ${ppDisclaimer}
           </div>
         </div>
-        ${champ2026Tag}${pp2026Tag}${mm2026Tag}${champBadge}${ppChampTag}
+        ${champ2026Tag}${pp2026Tag}${mm2026Tag}${supTags}${champBadge}${ppChampTag}
       </div>
       <div class="pm-body">${body}</div>
     </div>`;
@@ -1422,6 +1426,28 @@ function allPlayerStats() {
     }
     return a.name.localeCompare(b.name);
   });
+}
+
+function computeSuperlatives() {
+  const all = PLAYERS.map(n => playerStats(n)).filter(p => p.total > 0);
+  if (all.length < 2) return {};
+  const maxBy = fn => {
+    const vals = all.map(fn); const best = Math.max(...vals);
+    if (best <= 0) return null;
+    return { val: best, winners: new Set(all.filter((_,i) => vals[i] === best).map(p => p.name)) };
+  };
+  const minBy = fn => {
+    const vals = all.map(fn); const best = Math.min(...vals);
+    return { val: best, winners: new Set(all.filter((_,i) => vals[i] === best).map(p => p.name)) };
+  };
+  return {
+    holeKing:     { label:'Hole King',       emoji:'&#128081;', res: maxBy(p => p.d1.payout + p.d2.payout) },
+    rocketman:    { label:'Day 2 Rocketman', emoji:'&#128640;', res: maxBy(p => p.d2.total - p.d1.total) },
+    collapse:     { label:'The Collapse',    emoji:'&#128128;', res: minBy(p => p.d2.total - p.d1.total) },
+    consistent:   { label:'Mr. Consistent', emoji:'&#128208;', res: minBy(p => Math.abs(p.d2.total - p.d1.total)) },
+    matchDog:     { label:'Match Dog',       emoji:'&#128054;', res: maxBy(p => p.d1.matchWin + p.d2.matchWin) },
+    scrambleKing: { label:'Scramble King',   emoji:'&#127948;&#65039;', res: maxBy(p => p.d1.fourMan + p.d2.fourMan) },
+  };
 }
 
 function teamTotals() {
@@ -3497,6 +3523,34 @@ function renderAnalytics() {
   }
   return sec;
   });
+
+  /* ── SECTION 5: Tournament Awards ── */
+  const allLocked26 = !!(S.locks?.day1 && S.locks?.day2 && S.locks?.payouts_day1 && S.locks?.payouts_day2);
+  if (allLocked26 && anyScores) {
+    html += analyticsCard('analytics_awards', '&#127914; 2026 Tournament Awards', () => {
+      const sups26 = computeSuperlatives();
+      const posAwards = [
+        { label:'GBI Champion',  emoji:'&#127942;', winners: all26.filter((_,i)=>i===0).map(p=>p.name) },
+        { label:'Middle Man',    emoji:'&#127919;', winners: all26.filter((_,i)=>i===9).map(p=>p.name) },
+        { label:'Peter Putter',  emoji:'&#127814;', winners: all26.filter((_,i)=>i===all26.length-1).map(p=>p.name) },
+      ];
+      const statAwards = Object.values(sups26).map(s => ({
+        label: s.label, emoji: s.emoji, winners: s.res ? [...s.res.winners] : []
+      })).filter(a => a.winners.length > 0);
+      const allAwards = [...posAwards, ...statAwards];
+      let sec = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">`;
+      allAwards.forEach(a => {
+        const winnersHtml = a.winners.map(n => `<div style="font-weight:bold;font-size:.95em">${flag(n)} <span class="plink" onclick="showProfile('${jsq(n)}')">${esc(n)}</span></div>`).join('');
+        sec += `<div style="background:rgba(255,255,255,.55);border-radius:10px;padding:12px 14px;border:1px solid rgba(0,0,0,.08)">
+          <div style="font-size:1.5em;margin-bottom:4px">${a.emoji}</div>
+          <div style="font-size:.75em;color:var(--gray);font-weight:bold;letter-spacing:.04em;text-transform:uppercase;margin-bottom:5px">${esc(a.label)}</div>
+          ${winnersHtml}
+        </div>`;
+      });
+      sec += `</div>`;
+      return sec;
+    });
+  }
 
   /* ── SECTION 6: 2025 Historical (compact reference) ── */
   const sorted25 = [...withPrev].sort((a,b) => PLAYER_META[a].prev.rank - PLAYER_META[b].prev.rank);
