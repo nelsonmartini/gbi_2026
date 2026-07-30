@@ -3103,31 +3103,6 @@ function renderFormat() {
   </div>
 
   <div class="card">
-    <div class="card-header" style="background:#1a3a6a">🔥 Live Sync Setup (Firebase)</div>
-    <div class="card-body">
-      <div class="alert alert-info" style="margin-bottom:14px">
-        Complete these steps once to enable real-time sync across all phones and laptops.
-        Everyone who opens the link will see the same live scores — no refresh needed.
-      </div>
-      <ol style="padding-left:20px;line-height:2.4;font-size:.92em">
-        <li>Go to <strong>console.firebase.google.com</strong> and sign in with a Google account.</li>
-        <li>Click <strong>Add project</strong>, name it (e.g. <em>gbi-2026</em>), skip Analytics, click <strong>Create project</strong>.</li>
-        <li>In the left sidebar click <strong>Build → Realtime Database</strong>, then <strong>Create Database</strong>.</li>
-        <li>Choose <em>United States</em> location, select <strong>Start in test mode</strong>, click <strong>Enable</strong>.</li>
-        <li>In the left sidebar click <strong>Project settings</strong> (gear icon), scroll to <em>Your apps</em>, click the <strong>&lt;/&gt;</strong> Web icon.</li>
-        <li>Register the app (any nickname), <strong>skip</strong> Firebase Hosting, click <strong>Continue to console</strong>.</li>
-        <li>You'll see a <code>firebaseConfig</code> snippet. Copy the values into the <code>const FB = { … }</code> block near the top of <strong>gbi_2026.html</strong> (open it in Notepad or VS Code).</li>
-        <li>Save the file and re-open it in your browser. The header should show <span style="color:var(--green);font-weight:bold">● Live</span>.</li>
-        <li>Host the file on <strong>Netlify Drop</strong> (drag &amp; drop at <em>netlify.com/drop</em>) or <strong>GitHub Pages</strong> to share a link. Anyone who opens it will sync in real time.</li>
-      </ol>
-      <div class="alert alert-gold" style="margin-top:12px">
-        <strong>Note:</strong> Test mode rules expire after 30 days. Before tournament day go to
-        <em>Realtime Database → Rules</em> and set both <code>".read"</code> and <code>".write"</code> to <code>true</code> to keep access open.
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
     <div class="card-header" style="background:#7a2a2a">⚠️ Admin: Reset All Tournament Data</div>
     <div class="card-body">
       <p style="margin-bottom:12px;color:#666;font-size:.9em">Clears all scores, team assignments, and payout winners. This <strong>cannot be undone</strong>.</p>
