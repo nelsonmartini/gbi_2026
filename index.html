@@ -2357,6 +2357,7 @@ function unlockPayouts(day) {
 // alert) if that name is already used elsewhere in this day's 4-Man groups, no matter
 // what the UI was showing at the moment of selection (stale render, race, anything).
 function setGroupPlayer(day, gi, pi, value) {
+  closeProfile();
   if (value) {
     const dupe = S[day].groups.some((g, gIdx) =>
       g.players.some((p, pIdx) => p === value && !(gIdx === gi && pIdx === pi))
@@ -2375,6 +2376,7 @@ function setGroupPlayer(day, gi, pi, value) {
 // Same hard guarantee for the 2v2 matches — rejects if that name is already used in
 // any other match slot today (including the other slot of the same match).
 function setMatchPlayer(day, mi, field, value) {
+  closeProfile();
   if (value) {
     const dupe = S[day].matches.some((m, mIdx) =>
       ['p1a', 'p1b', 'p2a', 'p2b'].some(f => m[f] === value && !(mIdx === mi && f === field))
