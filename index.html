@@ -1721,7 +1721,6 @@ function renderScoreboard() {
   }
 
   // Day 1 + Day 2 mini-tables — below PP Zone, start collapsed
-  const medal = rk => rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':`<span class="rank">${rk}</span>`;
   html += `<div class="two-col" style="margin-top:8px">`;
   ['day1','day2'].forEach((day,di) => {
     const label = di===0?'Day 1':'Day 2';
