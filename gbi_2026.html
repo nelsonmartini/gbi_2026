@@ -463,48 +463,6 @@ tr.winner { background: #fffce8 !important; }
 .tcb-vs    { font-weight: bold; color: var(--green-dark); font-size: 1em; }
 .tcb-margin { font-size: .68em; color: var(--gray); font-style: italic; text-align: center; line-height: 1.3; }
 
-/* ─── BIG BOARD ─── */
-.big-board {
-  background: #f7f4ec; border: 3px solid #1a3a1a;
-  border-radius: 4px; overflow: hidden;
-  font-family: 'Cinzel', Georgia, serif;
-  box-shadow: 0 4px 20px rgba(0,0,0,.25);
-}
-.bb-title-bar {
-  background: var(--gold); padding: 13px 20px; text-align: center;
-  border-bottom: 3px solid #1a3a1a;
-}
-.bb-tournament { color: #1a3a1a; font-size: 1.1em; font-weight: 900; letter-spacing: 5px; text-transform: uppercase; }
-.bb-year       { color: rgba(0,0,0,.45); font-size: .72em; letter-spacing: 3px; margin-top: 3px; }
-.bb-cols {
-  display: grid; grid-template-columns: 52px 1fr 72px 72px;
-  padding: 7px 16px; background: var(--green);
-  border-bottom: 2px solid #1a3a1a;
-  font-size: .68em; color: rgba(255,255,255,.85);
-  letter-spacing: 1.5px; text-transform: uppercase;
-}
-.bb-cols .c { text-align: center; }
-.bb-row {
-  display: grid; grid-template-columns: 52px 1fr 72px 72px;
-  align-items: center; padding: 10px 16px;
-  border-bottom: 1px solid #d4c9a8;
-}
-.bb-row:nth-child(even) { background: #f0ece0; }
-.bb-row.bb-top { background: #fdf8e8 !important; border-left: 4px solid var(--gold); }
-.bb-pos      { font-size: .85em; color: #666; }
-.bb-pos.bb-gold { color: var(--gold-dark); font-weight: 700; }
-.bb-name     { font-size: .9em; font-weight: 600; color: #111; padding-left: 10px; border-left: 4px solid transparent; }
-.bb-pts      { font-size: 1.5em; font-weight: 900; text-align: center; color: #111; font-family: 'Cinzel', Georgia, serif; line-height: 1; }
-.bb-par      { font-size: .8em; text-align: center; line-height: 1.3; }
-.bb-par.under { color: #cc0000; font-weight: 700; }
-.bb-par.even  { color: #222; font-weight: 600; }
-.bb-par.over  { color: #888; }
-.bb-par.none  { color: #ccc; }
-.bb-view-btn { display: flex; justify-content: flex-end; margin-bottom: 12px; }
-@media(max-width:520px) {
-  .bb-cols, .bb-row { grid-template-columns: 38px 1fr 60px 60px; padding-left: 10px; padding-right: 10px; }
-}
-
 /* ─── MATCH ARENA (2v2 redesign) ─── */
 .match-arena {
   display: grid; grid-template-columns: 1fr 38px 1fr;
@@ -864,7 +822,6 @@ const FB = {
 };
 const FB_PATH   = 'gbi2026/state';
 const CLIENT_ID = Math.random().toString(36).slice(2);  // unique per browser tab
-let _bigBoard = false;
 let _draftBigScreen = false;
 let _matrixUnlocked = false;
 let _collapsed = {};
@@ -1696,78 +1653,36 @@ function renderScoreboard() {
     </div>
   </div>`;
 
-  // View toggle
-  html += `<div class="bb-view-btn">
-    <button class="btn btn-green btn-sm" onclick="_bigBoard=!_bigBoard;renderScoreboard()">
-      ${_bigBoard ? '&#128203; Table View' : '&#127942; Big Board'}
-    </button>
-  </div>`;
-
-  if (_bigBoard) {
-    // Augusta-style big board
-    html += `
-    <div class="big-board">
-      <div class="bb-title-bar">
-        <div class="bb-tournament">Garland Bend Invitational</div>
-        <div class="bb-year">2026 &mdash; Official Leaderboard</div>
-      </div>
-      <div class="bb-cols">
-        <div>Pos</div><div>Player</div>
-        <div class="c">Pts</div><div class="c">Score</div>
-      </div>`;
-    if (!anyScores) {
-      html += `<div style="text-align:center;padding:48px 20px;color:#aaa;font-family:Georgia,serif;font-style:italic">No scores entered yet</div>`;
-    } else {
-      let rk = 1, prev = null;
-      all.forEach((p, i) => {
-        if (p.total !== prev) rk = i + 1;
-        const par = playerScoreToPar(p.name);
-        const parStr = par === null ? '&mdash;' : fmtPar(par);
-        const parCls = par === null ? 'none' : par < 0 ? 'under' : par === 0 ? 'even' : 'over';
-        const tcol = p.team ? S.teams[p.team].color : '#aaa';
-        html += `<div class="bb-row${rk<=3?' bb-top':''}">
-          <div class="bb-pos${rk<=3?' bb-gold':''}">${rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':ordinal(rk)}</div>
-          <div class="bb-name" style="border-left-color:${tcol}"><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}${rk===10&&anyScores?' <span style="font-size:.78em">&#127919;</span>':''}</div>
-          <div class="bb-pts">${fmt(p.total)}</div>
-          <div class="bb-par ${parCls}">${parStr}</div>
-        </div>`;
-        prev = p.total;
-      });
-    }
-    html += `</div>`;
-
+  // Standard table view — main standings
+  const medal = rk => rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':`<span class="rank">${rk}</span>`;
+  const finalBadge = allLocked ? ` <span style="background:var(--gold);color:var(--green-dark);border-radius:8px;padding:2px 10px;font-size:.78em;font-weight:bold;letter-spacing:.06em;font-family:'Cinzel',serif">FINAL</span>` : '';
+  html += `<div class="card"><div class="card-header">&#127942; 2026 GBI Standings${finalBadge}</div><div class="card-body">`;
+  if (!anyScores) {
+    html += `<div class="empty"><div class="eicon">&#127948;</div>No scores entered yet &mdash; head to Day 1 to get started!</div>`;
   } else {
-    // Standard table view — main standings
-    const medal = rk => rk===1?'&#128081;':rk===2?'&#129352;':rk===3?'&#129353;':`<span class="rank">${rk}</span>`;
-    const finalBadge = allLocked ? ` <span style="background:var(--gold);color:var(--green-dark);border-radius:8px;padding:2px 10px;font-size:.78em;font-weight:bold;letter-spacing:.06em;font-family:'Cinzel',serif">FINAL</span>` : '';
-    html += `<div class="card"><div class="card-header">&#127942; 2026 GBI Standings${finalBadge}</div><div class="card-body">`;
-    if (!anyScores) {
-      html += `<div class="empty"><div class="eicon">&#127948;</div>No scores entered yet &mdash; head to Day 1 to get started!</div>`;
-    } else {
-      html += `<table class="sb-table"><thead><tr>
-        <th class="c" style="width:36px"></th><th>Player</th>
-        <th class="hide-mobile">Team</th>
-        <th class="c">Pts</th>
-        <th class="c">To Par</th>
-        <th class="c">$</th>
-      </tr></thead><tbody>`;
-      all.forEach((p,i) => {
-        const rk = i + 1;
-        const par = p.scoreToPar;
-        const parClass = par===null?'':par<0?' style="color:var(--green);font-weight:bold"':par>0?' style="color:#b03030;font-weight:bold"':' style="font-weight:bold"';
-        html += `<tr${rk<=3?' class="winner"':''}>
-          <td class="c" style="font-size:1.2em">${medal(rk)}</td>
-          <td style="font-size:1.2em"><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}${rk===10&&anyScores?' <span style="font-size:.78em">&#127919;</span>':''}</strong></td>
-          <td class="hide-mobile">${tBadge(p.team)}</td>
-          <td class="c">${ppPts(p.name,pp,p.total)}</td>
-          <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
-          <td class="c"><strong class="money">${fmtM(p.money)}</strong></td>
-        </tr>`;
-      });
-      html += `</tbody></table>`;
-    }
-    html += `</div></div>`;
+    html += `<table class="sb-table"><thead><tr>
+      <th class="c" style="width:36px"></th><th>Player</th>
+      <th class="hide-mobile">Team</th>
+      <th class="c">Pts</th>
+      <th class="c">To Par</th>
+      <th class="c">$</th>
+    </tr></thead><tbody>`;
+    all.forEach((p,i) => {
+      const rk = i + 1;
+      const par = p.scoreToPar;
+      const parClass = par===null?'':par<0?' style="color:var(--green);font-weight:bold"':par>0?' style="color:#b03030;font-weight:bold"':' style="font-weight:bold"';
+      html += `<tr${rk<=3?' class="winner"':''}>
+        <td class="c" style="font-size:1.2em">${medal(rk)}</td>
+        <td style="font-size:1.2em"><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span>${ppBadge(p.name,pp)}${rk===10&&anyScores?' <span style="font-size:.78em">&#127919;</span>':''}</strong></td>
+        <td class="hide-mobile">${tBadge(p.team)}</td>
+        <td class="c">${ppPts(p.name,pp,p.total)}</td>
+        <td class="c"><span${parClass}>${fmtPar(par)}</span></td>
+        <td class="c"><strong class="money">${fmtM(p.money)}</strong></td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
   }
+  html += `</div></div>`;
 
   // Danger Zone — bottom 5 when scores exist, expanded to include anyone tied at that boundary
   if (anyScores) {
