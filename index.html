@@ -1885,6 +1885,14 @@ function resetDraft() {
 
 function toggleDraftRoster(tk) { _draftRosters[tk] = !_draftRosters[tk]; renderRoster(); }
 
+function catFromGrade(name) {
+  const g = rating(name).grade;
+  if (g === 'A') return 'bigdawg';
+  if (g === 'B') return 'straight';
+  if (g === 'C') return 'shotmaker';
+  return 'mystery'; // D, F, or no grade
+}
+
 function pauseDraft() {
   if (!S.draft?.active || S.draft.paused) return;
   const elapsed = Math.floor((Date.now() - (S.draft.timerStart || Date.now())) / 1000);
@@ -2006,7 +2014,7 @@ function renderDraftRoom() {
   };
   const available = [...PLAYERS]
     .filter(n => !draftedNames.has(n))
-    .filter(n => !_draftCat || PLAYER_META[n].cat === _draftCat)
+    .filter(n => !_draftCat || catFromGrade(n) === _draftCat)
     .sort((a, b) => (PLAYER_META[b].skill || 0) - (PLAYER_META[a].skill || 0));
 
   const playerCards = available.map(name => {
@@ -2085,7 +2093,7 @@ function renderDraftRoom() {
       <div style="${S.draft.paused ? 'opacity:.5;pointer-events:none;' : ''}">
       ${Object.entries(DRAFT_CATS).map(([key, c]) => {
         const catAvail = [...PLAYERS]
-          .filter(n => PLAYER_META[n].cat === key)
+          .filter(n => catFromGrade(n) === key)
           .sort((a,b) => (rating(b).skill||0) - (rating(a).skill||0));
         const remaining = catAvail.filter(n => !draftedNames.has(n)).length;
         const allGone = remaining === 0;
