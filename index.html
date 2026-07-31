@@ -1760,12 +1760,14 @@ function renderScoreboard() {
 /* ═══════════════════════════════════════════════════════
    DRAFT ROOM
 ═══════════════════════════════════════════════════════ */
-const DRAFT_CATS = {
-  bigdawg:   { label: '🐾 Big Dawgs',       sub: 'Ball bombers' },
-  straight:  { label: '🎯 Straight & Narrow', sub: 'Boring? Cashing.' },
-  shotmaker: { label: '🪄 Shot Makers',      sub: 'No fairway needed' },
-  mystery:   { label: '🎲 Mystery Box',      sub: 'Who knows?' },
-};
+const DRAFT_GRADES = [
+  { grade:'A', label:'Grade A', sub:'The Elite',    color:'#16a34a' },
+  { grade:'B', label:'Grade B', sub:'The Reliable', color:'#2563eb' },
+  { grade:'C', label:'Grade C', sub:'The Field',    color:'#d97706' },
+  { grade:'D', label:'Grade D', sub:'Long Shots',   color:'#ea580c' },
+  { grade:'F', label:'Grade F', sub:'God Speed',    color:'#dc2626' },
+  { grade:null,label:'Unrated', sub:'Mystery',      color:'#888'    },
+];
 
 function setDraftCat(cat) {
   _draftCat = cat;
@@ -1852,6 +1854,7 @@ function showPickRoast(playerName, grade) {
 
 function makePick(playerName) {
   if (!S.draft?.active || S.draft.complete) return;
+  if (!Array.isArray(S.draft.picks)) S.draft.picks = [];
   const pickIdx = S.draft.currentPick;
   const team = draftSnakeTeam(pickIdx);
   const rp = S.roster.find(r => r.name === playerName);
@@ -1885,13 +1888,6 @@ function resetDraft() {
 
 function toggleDraftRoster(tk) { _draftRosters[tk] = !_draftRosters[tk]; renderRoster(); }
 
-function catFromGrade(name) {
-  const g = rating(name).grade;
-  if (g === 'A') return 'bigdawg';
-  if (g === 'B') return 'straight';
-  if (g === 'C') return 'shotmaker';
-  return 'mystery'; // D, F, or no grade
-}
 
 function pauseDraft() {
   if (!S.draft?.active || S.draft.paused) return;
@@ -2012,29 +2008,6 @@ function renderDraftRoom() {
     catLabel:  bs ? '1.3em'  : '1em',
     catSub:    bs ? '.95em'  : '.75em',
   };
-  const available = [...PLAYERS]
-    .filter(n => !draftedNames.has(n))
-    .filter(n => !_draftCat || catFromGrade(n) === _draftCat)
-    .sort((a, b) => (PLAYER_META[b].skill || 0) - (PLAYER_META[a].skill || 0));
-
-  const playerCards = available.map(name => {
-    const m = PLAYER_META[name];
-    const gc = gradeColor[m.grade] || '#888';
-    const rank25 = m.prev ? `#${m.prev.rank} '25` : '&#127381; Rookie';
-    return `<div class="dp-card">
-      <div class="dp-name">${flag(name)} <strong>${esc(name)}</strong>${ppChampBadge(name)}<br><span style="font-size:.72em;color:#888">${rank25}</span></div>
-      <div class="dp-stats">
-        <span title="Skill">&#9889; ${m.skill ?? '—'}</span>
-        <span title="Vibes">&#10024; ${m.vibes ?? '—'}</span>
-        <span style="background:${gc};color:white;border-radius:4px;padding:1px 5px">${m.grade ?? '—'}</span>
-        <span style="color:var(--green)">${odds[name]}</span>
-      </div>
-      <button class="dp-pick-btn" style="background:${esc(tColor)};color:${headText};border:${onLight ? '2px solid #161616' : 'none'};width:100%;letter-spacing:.08em" onclick="makePick('${jsq(name)}')">
-        DRAFT
-      </button>
-    </div>`;
-  }).join('');
-
   const nextLabel = nextTeam ? `Up next: <strong>${esc(S.teams[nextTeam].name)}</strong>` : '';
 
   return `<div style="text-align:right;margin-bottom:8px">
@@ -2091,18 +2064,17 @@ function renderDraftRoom() {
         }).join('')}
       <div style="font-size:.65em;color:#aaa;text-align:center;margin:-4px 0 10px">▲▼ tap team to see roster</div>
       <div style="${S.draft.paused ? 'opacity:.5;pointer-events:none;' : ''}">
-      ${Object.entries(DRAFT_CATS).map(([key, c]) => {
-        const catAvail = [...PLAYERS]
-          .filter(n => catFromGrade(n) === key)
+      ${DRAFT_GRADES.map(tier => {
+        const tierPlayers = [...PLAYERS]
+          .filter(n => (rating(n).grade || null) === tier.grade)
           .sort((a,b) => (rating(b).skill||0) - (rating(a).skill||0));
-        const remaining = catAvail.filter(n => !draftedNames.has(n)).length;
+        if (!tierPlayers.length) return '';
+        const remaining = tierPlayers.filter(n => !draftedNames.has(n)).length;
         const allGone = remaining === 0;
-        const cards = catAvail.map(name => {
-          const drafted = draftedNames.has(name);
-          if (drafted) return '';
+        const cards = tierPlayers.map(name => {
+          if (draftedNames.has(name)) return '';
           const m = PLAYER_META[name];
           const r = rating(name);
-          const gc = gradeColor[r.grade] || '#888';
           const rank25 = m.prev ? `#${m.prev.rank} '25` : (m.note ? 'N/A' : '&#127381;');
           return `<div class="dp-card" style="padding:${bsz.cardPad}">
             <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:5px">
@@ -2112,16 +2084,16 @@ function renderDraftRoom() {
             ${bs ? '' : `<div class="dp-stats">
               <span title="Skill">&#9889; ${r.skill ?? '—'}</span>
               <span title="Vibes">&#10024; ${r.vibes ?? '—'}</span>
-              <span style="background:${gc};color:white;border-radius:4px;padding:1px 5px">${r.grade ?? '—'}</span>
+              <span style="background:${tier.color};color:white;border-radius:4px;padding:1px 5px">${r.grade ?? '—'}</span>
               <span style="color:var(--green)">${odds[name]}</span>
             </div>`}
             <button class="dp-pick-btn" style="background:${esc(tColor)};color:${headText};border:${onLight ? '2px solid #161616' : 'none'};width:100%;font-size:${bsz.btnFont};padding:${bsz.btnPad}" onclick="makePick('${jsq(name)}')">DRAFT</button>
           </div>`;
         }).filter(Boolean).join('');
         return `<div style="margin-bottom:16px">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;padding-bottom:5px;border-bottom:2px solid var(--border)">
-            <span style="font-size:${bsz.catLabel};font-weight:bold">${c.label}</span>
-            <span style="font-size:${bsz.catSub};color:#888;font-style:italic">${c.sub}</span>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;padding-bottom:5px;border-bottom:3px solid ${tier.color}">
+            <span style="background:${tier.color};color:white;border-radius:6px;padding:2px 10px;font-size:${bsz.catLabel};font-weight:bold">${tier.label}</span>
+            <span style="font-size:${bsz.catSub};color:#888;font-style:italic">${tier.sub}</span>
             <span style="margin-left:auto;font-size:${bsz.catSub};font-weight:bold;color:${allGone?'var(--green)':'#555'}">${allGone ? '✓ All drafted' : `${remaining} left`}</span>
           </div>
           ${allGone ? `<div style="color:#aaa;font-size:.82em;font-style:italic;padding:6px 0">All players drafted ✓</div>` : `<div class="dp-grid" style="grid-template-columns:repeat(auto-fill,minmax(${bsz.gridMin},1fr));gap:${bsz.gridGap}">${cards}</div>`}
