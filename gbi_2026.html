@@ -1791,41 +1791,57 @@ function startDraft() {
 
 const PICK_ROASTS = {
   A: [
-    'Bold move. Don\'t get cocky.',
-    'Ooh, smart. We see you.',
-    'That\'s actually a good pick. Gross.',
-    'Okay okay okay. Respect.',
-    'Big brain energy. For now.',
+    'Say hello to my little friend!',
+    'Show me the money!',
+    'That\'s a bingo!',
+    'I feel the need — the need for speed!',
+    'It\'s in the hole!',
+    'I am inevitable.',
+    'I\'ll be back.',
+    'You magnificent bastard!',
   ],
   B: [
-    'Solid. Nobody\'s impressed but nobody\'s mad.',
-    'Fine. Whatever.',
-    'He\'ll do. Probably.',
-    'The safe pick. How boring.',
-    'Could be worse. Could be better.',
+    'That\'ll do, pig. That\'ll do.',
+    'Not great, not terrible.',
+    'So I got that goin\' for me, which is nice.',
+    'I\'ll have what she\'s having.',
+    'I\'m not even mad. That\'s amazing.',
+    'Yippee-ki-yay.',
+    'Just keep swimming.',
+    'Life is like a box of chocolates.',
   ],
   C: [
-    'Yikes. Thoughts and prayers.',
-    'Interesting... choice.',
-    'That\'s certainly a decision.',
-    'We\'re rooting for you. Weakly.',
-    'Sure, why not. It\'s just points.',
+    'You\'re killing me, Smalls.',
+    'Help me help you.',
+    'What we\'ve got here is a failure to communicate.',
+    'I\'m not even supposed to be here today!',
+    'May the odds be ever in your favor.',
+    'I have a bad feeling about this.',
+    'Pain don\'t hurt.',
+    'We\'re gonna need a bigger boat.',
   ],
   D: [
-    'What are you doing??',
-    'He owes you an apology already.',
-    'This is why we can\'t have nice things.',
-    'Did you even look at his stats?',
-    'Someone talk to this person.',
+    'What is your major malfunction, numbnuts?!',
+    'Are you not entertained?!',
+    'I\'m in a glass case of emotion!',
+    'Big mistake. Big. HUGE.',
+    'Are you serious, Clark?',
+    'This is not \'Nam. There are rules.',
+    'Somebody stop me!',
+    'Nobody expects the Spanish Inquisition!',
   ],
   F: [
-    'WHAT THE HELL',
-    'This guy sucks.',
-    'Bold strategy, Cotton.',
-    'We\'ll remember this.',
-    'Sir, this is a golf tournament.',
-    'The course is already laughing.',
-    'He wanted to be picked last. Congrats.',
+    'Bold strategy, Cotton. Let\'s see if it pays off.',
+    'Houston, we have a problem.',
+    'I immediately regret this decision.',
+    'The price is wrong, bitch.',
+    'Go fuck yourself, San Diego.',
+    'I\'ve made a huge mistake.',
+    'Milk was a bad choice.',
+    'Game over, man! Game over!',
+    'You\'re gonna die, clown!',
+    'You\'ll get nothing and like it!',
+    'Sweet Jesus, take the wheel.',
   ],
 };
 
@@ -2048,7 +2064,10 @@ function renderDraftRoom() {
               ? `<img src="${esc(m.avatar)}" title="${esc(p.player)}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid ${tc}">`
               : `<div title="${esc(p.player)}" style="width:32px;height:32px;border-radius:50%;background:${tc};color:${tt};display:flex;align-items:center;justify-content:center;font-size:.55em;font-weight:bold">${initials(p.player)}</div>`;
           }).join('');
-          const names = picks.map(p=>`<div style="font-size:.82em;padding:2px 0;border-bottom:1px solid #f0ece0">${flag(p.player)} ${esc(p.player)}</div>`).join('');
+          const names = picks.map(p=>{
+            const rnd = Math.ceil(p.pick / 2);
+            return `<div style="font-size:.82em;padding:3px 0;border-bottom:1px solid #f0ece0;display:flex;align-items:center;gap:7px"><span style="font-size:.68em;color:#aaa;font-weight:bold;min-width:22px;flex-shrink:0">R${rnd}</span>${flag(p.player)} ${esc(p.player)}</div>`;
+          }).join('');
           return `<div style="flex:1;min-width:0;border-radius:8px;overflow:hidden;border:2px solid ${tc};margin-bottom:10px">
             <div onclick="toggleDraftRoster('${tk}')" style="background:${tc};color:${tt};padding:7px 11px;font-weight:bold;font-size:.82em;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none">
               <span>${esc(S.teams[tk].name)}</span>
