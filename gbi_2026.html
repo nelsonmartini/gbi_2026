@@ -2072,13 +2072,18 @@ function renderDraftRoom() {
               <span>${esc(S.teams[tk].name)}</span><span style="opacity:.8">${picks.length}/10</span>
             </div>
             <div style="padding:${bs?'10px 14px':'7px 10px'};background:white">
-              <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:${picks.length?'7px':'0'}">${pills||'<span style="color:#bbb;font-size:.72em">No picks yet</span>'}</div>
-              ${picks.length ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px">${chips}</div>
-              <div style="color:#555;line-height:1.6">${names}</div>` : ''}
+              ${picks.length ? `
+              <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px">${chips}</div>
+              <div style="color:#333;line-height:1.8;margin-bottom:6px">${names}</div>
+              <div style="display:flex;gap:3px;flex-wrap:wrap">${pills}</div>` :
+              `<span style="color:#bbb;font-size:.78em">No picks yet</span>`}
             </div>
           </div>`;
         };
-        return `<div style="display:flex;gap:10px;margin-bottom:14px">${teamPanel('t1')}${teamPanel('t2')}</div>`;
+        return `<div>
+          <div style="font-size:.7em;color:#999;letter-spacing:.08em;text-transform:uppercase;font-weight:bold;margin-bottom:6px">Team Rosters</div>
+          <div style="display:flex;gap:10px;margin-bottom:14px">${teamPanel('t1')}${teamPanel('t2')}</div>
+        </div>`;
       })()}
       <div style="${S.draft.paused ? 'opacity:.5;pointer-events:none;' : ''}">
       ${Object.entries(DRAFT_CATS).map(([key, c]) => {
