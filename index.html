@@ -824,6 +824,7 @@ const FB = {
 const FB_PATH   = 'gbi2026/state';
 const CLIENT_ID = Math.random().toString(36).slice(2);  // unique per browser tab
 let _draftBigScreen = false;
+let _draftRosters = { t1: false, t2: false };
 let _matrixUnlocked = false;
 let _collapsed = {};
 // Stays false until the real Firebase data (or localStorage fallback) has actually
@@ -1882,6 +1883,8 @@ function resetDraft() {
   renderRoster();
 }
 
+function toggleDraftRoster(tk) { _draftRosters[tk] = !_draftRosters[tk]; renderRoster(); }
+
 function pauseDraft() {
   if (!S.draft?.active || S.draft.paused) return;
   const elapsed = Math.floor((Date.now() - (S.draft.timerStart || Date.now())) / 1000);
@@ -2048,43 +2051,37 @@ function renderDraftRoom() {
     </div>
     ${S.draft.paused ? `<div style="background:rgba(0,0,0,.15);color:white;text-align:center;padding:6px;font-size:.85em;font-weight:bold;letter-spacing:.05em">⏸ CLOCK PAUSED</div>` : ''}
     <div class="card-body" style="padding:${bs?'18px':'12px'}">
-      ${(() => {
-        const gradeOrder = ['A','B','C','D','F'];
-        const teamCol = tk => S.teams[tk].color;
-        const teamTxt = tk => contrastColor(teamCol(tk));
-        const teamPanel = tk => {
+      ${['t1','t2'].map(tk => {
           const picks = (draft.picks||[]).filter(p=>p.team===tk);
-          const tc = teamCol(tk), tt = teamTxt(tk);
+          const tc = S.teams[tk].color, tt = contrastColor(tc);
+          const open = _draftRosters[tk];
+          const gradeOrder = ['A','B','C','D','F'];
           const grades = {};
           picks.forEach(p => { const g = rating(p.player).grade||'?'; grades[g]=(grades[g]||0)+1; });
           const pills = gradeOrder.filter(g=>grades[g]).map(g=>
-            `<span style="background:${gradeColor[g]};color:white;border-radius:4px;padding:1px 7px;font-size:.72em;font-weight:bold">${g}:${grades[g]}</span>`
-          ).join('');
+            `<span style="background:${gradeColor[g]};color:white;border-radius:4px;padding:1px 6px;font-size:.7em;font-weight:bold">${g}:${grades[g]}</span>`
+          ).join(' ');
           const chips = picks.map(p => {
             const m = PLAYER_META[p.player];
             return m.avatar
-              ? `<img src="${esc(m.avatar)}" title="${esc(p.player)}" style="width:${bs?'44px':'30px'};height:${bs?'44px':'30px'};border-radius:50%;object-fit:cover;border:2px solid ${tc}" />`
-              : `<div title="${esc(p.player)}" style="width:${bs?'44px':'30px'};height:${bs?'44px':'30px'};border-radius:50%;background:${tc};color:${tt};display:flex;align-items:center;justify-content:center;font-size:${bs?'.65em':'.55em'};font-weight:bold">${initials(p.player)}</div>`;
+              ? `<img src="${esc(m.avatar)}" title="${esc(p.player)}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid ${tc}">`
+              : `<div title="${esc(p.player)}" style="width:32px;height:32px;border-radius:50%;background:${tc};color:${tt};display:flex;align-items:center;justify-content:center;font-size:.55em;font-weight:bold">${initials(p.player)}</div>`;
           }).join('');
-          const names = picks.map(p=>`<span style="font-size:${bs?'.85em':'.72em'};white-space:nowrap">${esc(p.player)}</span>`).join('<span style="color:#ccc"> · </span>');
-          return `<div style="flex:1;min-width:0;border-radius:8px;overflow:hidden;border:2px solid ${tc}">
-            <div style="background:${tc};color:${tt};padding:${bs?'8px 14px':'5px 10px'};font-weight:bold;font-size:${bs?'1em':'.8em'};display:flex;justify-content:space-between;align-items:center">
-              <span>${esc(S.teams[tk].name)}</span><span style="opacity:.8">${picks.length}/10</span>
+          const names = picks.map(p=>`<div style="font-size:.82em;padding:2px 0;border-bottom:1px solid #f0ece0">${flag(p.player)} ${esc(p.player)}</div>`).join('');
+          return `<div style="flex:1;min-width:0;border-radius:8px;overflow:hidden;border:2px solid ${tc};margin-bottom:10px">
+            <div onclick="toggleDraftRoster('${tk}')" style="background:${tc};color:${tt};padding:7px 11px;font-weight:bold;font-size:.82em;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none">
+              <span>${esc(S.teams[tk].name)}</span>
+              <span style="opacity:.85">${picks.length}/10 ${open ? '▲' : '▼'}</span>
             </div>
-            <div style="padding:${bs?'10px 14px':'7px 10px'};background:white">
-              ${picks.length ? `
-              <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px">${chips}</div>
-              <div style="color:#333;line-height:1.8;margin-bottom:6px">${names}</div>
-              <div style="display:flex;gap:3px;flex-wrap:wrap">${pills}</div>` :
-              `<span style="color:#bbb;font-size:.78em">No picks yet</span>`}
-            </div>
+            ${open ? `<div style="padding:8px 10px;background:white">
+              ${picks.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">${chips}</div>
+              <div style="margin-bottom:6px">${names}</div>
+              <div style="display:flex;gap:4px;flex-wrap:wrap">${pills}</div>`
+              : `<div style="color:#bbb;font-size:.8em;padding:4px 0">No picks yet</div>`}
+            </div>` : ''}
           </div>`;
-        };
-        return `<div>
-          <div style="font-size:.7em;color:#999;letter-spacing:.08em;text-transform:uppercase;font-weight:bold;margin-bottom:6px">Team Rosters</div>
-          <div style="display:flex;gap:10px;margin-bottom:14px">${teamPanel('t1')}${teamPanel('t2')}</div>
-        </div>`;
-      })()}
+        }).join('')}
+      <div style="font-size:.65em;color:#aaa;text-align:center;margin:-4px 0 10px">▲▼ tap team to see roster</div>
       <div style="${S.draft.paused ? 'opacity:.5;pointer-events:none;' : ''}">
       ${Object.entries(DRAFT_CATS).map(([key, c]) => {
         const catAvail = [...PLAYERS]
