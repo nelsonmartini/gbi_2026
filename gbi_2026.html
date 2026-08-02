@@ -1781,8 +1781,15 @@ function draftSnakeTeam(pickIdx) {
 
 function startDraft() {
   const t1 = esc(S.teams.t1.name), t2 = esc(S.teams.t2.name);
-  if (!confirm(`Start the GBI 2026 Draft?\n\n${t1} picks first. Snake order. Commissioner controls all 20 picks.\n\nThis will clear current team assignments.`)) return;
+  const t1cap = S.teams.t1?.captain || '', t2cap = S.teams.t2?.captain || '';
+  const capCount = [t1cap, t2cap].filter(Boolean).length;
+  const picks = 20 - capCount;
+  const capNote = capCount ? `\n\nCaptains pre-assigned: ${[t1cap&&`${t1} → ${t1cap}`,t2cap&&`${t2} → ${t2cap}`].filter(Boolean).join(', ')}` : '';
+  if (!confirm(`Start the GBI 2026 Draft?\n\n${t1} picks 1st. Snake order. ${picks} picks total.${capNote}\n\nThis will clear current team assignments (captains kept).`)) return;
+  // Clear all roster assignments, then re-apply captains
   S.roster.forEach(p => p.team = null);
+  if (t1cap) { const rp = S.roster.find(r => r.name === t1cap); if (rp) rp.team = 't1'; }
+  if (t2cap) { const rp = S.roster.find(r => r.name === t2cap); if (rp) rp.team = 't2'; }
   S.draft = { active: true, complete: false, picks: [], currentPick: 0, timerStart: Date.now(), timerDuration: 180 };
   save();
   renderRoster();
@@ -1879,7 +1886,8 @@ function makePick(playerName) {
   S.draft.picks.push({ pick: pickIdx + 1, team, player: playerName });
   S.draft.currentPick++;
   showPickRoast(playerName, grade);
-  if (S.draft.currentPick >= 20) {
+  const _capCount = [S.teams.t1?.captain, S.teams.t2?.captain].filter(Boolean).length;
+  if (S.draft.currentPick >= 20 - _capCount) {
     S.draft.complete = true;
     S.draft.active = false;
     clearInterval(_draftTimer); _draftTimer = null;
@@ -1894,8 +1902,10 @@ function makePick(playerName) {
 function resetDraft() {
   const pin = prompt('Enter commissioner PIN to reset draft:');
   if (!pin || pin.trim().toUpperCase() !== ADMIN_PIN.toUpperCase()) { alert('Incorrect PIN.'); return; }
-  if (!confirm('Reset the draft? All team assignments will be cleared.')) return;
+  if (!confirm('Reset the draft? All picks and captain assignments will be cleared.')) return;
   S.roster.forEach(p => p.team = null);
+  S.teams.t1.captain = '';
+  S.teams.t2.captain = '';
   S.draft = { active: false, complete: false, picks: [], currentPick: 0, timerStart: null, timerDuration: 180, paused: false, pausedRemaining: null };
   save();
   clearInterval(_draftTimer); _draftTimer = null;
@@ -1903,6 +1913,81 @@ function resetDraft() {
 }
 
 function toggleDraftRoster(tk) { _draftRosters[tk] = !_draftRosters[tk]; renderRoster(); }
+
+function setCaptain(tk, playerName) {
+  const otherTk = tk === 't1' ? 't2' : 't1';
+  if (playerName && (S.teams[otherTk]?.captain || '') === playerName) {
+    alert(`${playerName} is already captain of the other team.`);
+    renderRoster(); return;
+  }
+  const old = S.teams[tk]?.captain || '';
+  if (old) { const rp = S.roster.find(r => r.name === old); if (rp && rp.team === tk) rp.team = null; }
+  S.teams[tk].captain = playerName || '';
+  if (playerName) { const rp = S.roster.find(r => r.name === playerName); if (rp) rp.team = tk; }
+  save();
+  renderRoster();
+}
+
+function captainSelectorHTML() {
+  return ['t1','t2'].map(tk => {
+    const otherTk = tk === 't1' ? 't2' : 't1';
+    const tc = S.teams[tk].color, tt = contrastColor(tc);
+    const cap = S.teams[tk]?.captain || '';
+    const otherCap = S.teams[otherTk]?.captain || '';
+    const opts = PLAYERS.filter(n => n !== otherCap)
+      .map(n => `<option value="${esc(n)}" ${n===cap?'selected':''}>${flag(n)} ${esc(n)}</option>`).join('');
+    const pm = cap ? PLAYER_META[cap] : null;
+    const capAv = cap
+      ? (pm?.avatar
+        ? `<img src="${esc(pm.avatar)}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid ${tc};flex-shrink:0">`
+        : `<div style="width:30px;height:30px;border-radius:50%;background:${tc};color:${tt};display:flex;align-items:center;justify-content:center;font-size:.55em;font-weight:bold;flex-shrink:0">${initials(cap)}</div>`)
+      : '';
+    const capDisplay = cap
+      ? `<div style="display:flex;align-items:center;gap:7px;margin-top:7px;padding:5px 8px;background:#f5f0e8;border-radius:6px">${capAv}<span style="font-size:.82em;font-weight:bold">&#128081; ${flag(cap)} ${esc(cap)}</span></div>`
+      : `<div style="margin-top:6px;font-size:.73em;color:#aaa;font-style:italic">No captain set — will enter as a regular draft pick</div>`;
+    return `<div style="flex:1;min-width:0">
+      <div style="background:${tc};color:${tt};font-size:.78em;font-weight:bold;padding:6px 10px;border-radius:6px 6px 0 0;letter-spacing:.04em">${esc(S.teams[tk].name)} &mdash; Team Captain</div>
+      <div style="border:2px solid ${tc};border-top:none;padding:8px 10px;border-radius:0 0 6px 6px;background:white">
+        <select onchange="setCaptain('${tk}',this.value)" style="width:100%;font-size:.85em">
+          <option value="">&#8212; No captain &#8212;</option>${opts}
+        </select>
+        ${capDisplay}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function buildRosterTable(draft) {
+  const t1c = S.teams.t1?.captain || '', t2c = S.teams.t2?.captain || '';
+  const t1color = S.teams.t1.color, t2color = S.teams.t2.color;
+  const t1text = contrastColor(t1color), t2text = contrastColor(t2color);
+  const picks = draft.picks || [];
+  const totalRounds = Math.ceil(picks.length / 2);
+  const cell = name => {
+    if (!name) return '<span style="color:#ccc;font-size:.82em">&mdash;</span>';
+    const pm = PLAYER_META[name];
+    const av = pm?.avatar ? `<img src="${esc(pm.avatar)}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0">` : '';
+    return `<div style="display:flex;align-items:center;gap:5px">${av}<span style="font-size:.85em">${flag(name)} ${esc(name)}</span></div>`;
+  };
+  let rows = '';
+  if (t1c || t2c) {
+    rows += `<tr style="background:#fffbea"><td style="text-align:center;font-size:.82em;padding:6px 4px">&#128081;</td><td style="padding:5px 10px">${cell(t1c)}</td><td style="padding:5px 10px">${cell(t2c)}</td></tr>`;
+  }
+  for (let r = 0; r < totalRounds; r++) {
+    const pa = picks[r * 2], pb = picks[r * 2 + 1];
+    const t1pk = pa?.team === 't1' ? pa : pb?.team === 't1' ? pb : null;
+    const t2pk = pa?.team === 't2' ? pa : pb?.team === 't2' ? pb : null;
+    rows += `<tr style="background:${r%2===0?'white':'#fafaf8'}"><td style="text-align:center;font-size:.72em;color:#aaa;font-weight:bold;padding:6px 4px">R${r+1}</td><td style="padding:5px 10px">${cell(t1pk?.player||'')}</td><td style="padding:5px 10px">${cell(t2pk?.player||'')}</td></tr>`;
+  }
+  return `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
+    <thead><tr>
+      <th style="width:38px;background:#f0ece0;padding:7px 4px"></th>
+      <th style="background:${t1color};color:${t1text};padding:7px 12px;font-size:.85em;text-align:left">${esc(S.teams.t1.name)}</th>
+      <th style="background:${t2color};color:${t2text};padding:7px 12px;font-size:.85em;text-align:left">${esc(S.teams.t2.name)}</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
 
 
 function pauseDraft() {
@@ -1967,12 +2052,17 @@ function renderDraftRoom() {
   const gradeColor = { A:'#16a34a', B:'#2563eb', C:'#d97706', D:'#ea580c', F:'#dc2626' };
 
   if (!draft.active && !draft.complete) {
+    const t1c = S.teams.t1?.captain || '', t2c = S.teams.t2?.captain || '';
+    const captainCount = [t1c, t2c].filter(Boolean).length;
+    const draftablePicks = 20 - captainCount;
     return `<div class="card" style="margin-bottom:12px">
-      <div class="card-header" style="background:#1a3a5c">🏈 Draft Room</div>
-      <div class="card-body" style="text-align:center;padding:24px 16px">
-        <div style="font-size:1em;color:#555;margin-bottom:4px">Snake draft &nbsp;·&nbsp; 20 players &nbsp;·&nbsp; 2 teams of 10</div>
-        <div style="font-size:.82em;color:#888;margin-bottom:18px">${esc(S.teams.t1.name)} picks 1st &nbsp;·&nbsp; Commissioner controls all picks</div>
-        <button class="btn btn-green" style="font-size:1em;padding:10px 28px" onclick="startDraft()">🏈 Start Draft</button>
+      <div class="card-header" style="background:#1a3a5c">&#127944; Draft Room</div>
+      <div class="card-body" style="padding:16px">
+        <div style="font-size:.88em;color:#555;margin-bottom:12px;text-align:center">Snake draft &nbsp;&middot;&nbsp; ${draftablePicks} picks &nbsp;&middot;&nbsp; ${esc(S.teams.t1.name)} picks 1st</div>
+        <div style="display:flex;gap:10px;margin-bottom:14px">${captainSelectorHTML()}</div>
+        <div style="text-align:center">
+          <button class="btn btn-green" style="font-size:1em;padding:10px 28px" onclick="startDraft()">&#127944; Start Draft</button>
+        </div>
       </div>
     </div>`;
   }
@@ -1981,11 +2071,8 @@ function renderDraftRoom() {
     return `<div class="card" style="margin-bottom:12px;border:2px solid var(--green)">
       <div class="card-header" style="background:var(--green)">&#9989; Draft Complete &mdash; Teams Are Set</div>
       <div class="card-body">
-        <div style="font-size:.88em;color:#555;margin-bottom:10px">All 20 players drafted. Scroll down to see final team assignments.</div>
-        <details><summary style="font-size:.82em;color:var(--green);cursor:pointer;list-style:none;display:inline-block;padding:2px 10px;border:1px solid var(--green);border-radius:10px">View Draft Board</summary>
-          ${buildDraftBoard(draft)}
-        </details>
-        <div style="margin-top:12px">
+        <div style="margin-bottom:14px">${buildRosterTable(draft)}</div>
+        <div style="text-align:right">
           <button class="btn" style="background:#7a1a1a;color:white;font-size:.82em" onclick="resetDraft()">&#8635; Reset Draft</button>
         </div>
       </div>
@@ -2003,7 +2090,9 @@ function renderDraftRoom() {
   const ovWeak = onLight ? 'rgba(0,0,0,.08)' : 'rgba(255,255,255,.15)';
   const ovBorderStrong = onLight ? 'rgba(0,0,0,.35)' : 'rgba(255,255,255,.5)';
   const ovBorderWeak = onLight ? 'rgba(0,0,0,.25)' : 'rgba(255,255,255,.4)';
-  const nextTeam = pickIdx + 1 < 20 ? draftSnakeTeam(pickIdx + 1) : null;
+  const captains = new Set([S.teams.t1?.captain, S.teams.t2?.captain].filter(Boolean));
+  const totalDraftPicks = 20 - captains.size;
+  const nextTeam = pickIdx + 1 < totalDraftPicks ? draftSnakeTeam(pickIdx + 1) : null;
   const draftedNames = new Set((draft.picks || []).map(p => p.player));
 
   // Big Screen Mode — bigger fonts, less clutter, for projecting on a TV
@@ -2032,7 +2121,7 @@ function renderDraftRoom() {
   <div class="card" style="margin-bottom:12px">
     <div class="draft-header" style="background:${esc(tColor)};color:${headText};padding:${bs?'22px 28px':'14px 18px'}">
       <div>
-        <div style="font-size:${bsz.pickLabel};opacity:.85;text-transform:uppercase;letter-spacing:.06em">Pick ${pickIdx + 1} of 20</div>
+        <div style="font-size:${bsz.pickLabel};opacity:.85;text-transform:uppercase;letter-spacing:.06em">Pick ${pickIdx + 1} of ${totalDraftPicks}</div>
         <div style="font-size:${bsz.onClock};font-weight:bold;font-family:'Cinzel',serif">${tName} ON THE CLOCK</div>
         <div style="font-size:${bsz.nextLabel};opacity:.75;margin-top:2px">${nextLabel}</div>
       </div>
@@ -2050,6 +2139,7 @@ function renderDraftRoom() {
     <div class="card-body" style="padding:${bs?'18px':'12px'}">
       ${['t1','t2'].map(tk => {
           const picks = (draft.picks||[]).filter(p=>p.team===tk);
+          const cap = S.teams[tk]?.captain || '';
           const tc = S.teams[tk].color, tt = contrastColor(tc);
           const open = _draftRosters[tk];
           const gradeOrder = ['A','B','C','D','F'];
@@ -2058,24 +2148,19 @@ function renderDraftRoom() {
           const pills = gradeOrder.filter(g=>grades[g]).map(g=>
             `<span style="background:${gradeColor[g]};color:white;border-radius:4px;padding:1px 6px;font-size:.7em;font-weight:bold">${g}:${grades[g]}</span>`
           ).join(' ');
-          const chips = picks.map(p => {
-            const m = PLAYER_META[p.player];
-            return m.avatar
-              ? `<img src="${esc(m.avatar)}" title="${esc(p.player)}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid ${tc}">`
-              : `<div title="${esc(p.player)}" style="width:32px;height:32px;border-radius:50%;background:${tc};color:${tt};display:flex;align-items:center;justify-content:center;font-size:.55em;font-weight:bold">${initials(p.player)}</div>`;
-          }).join('');
-          const names = picks.map(p=>{
+          const capRow = cap ? `<div style="font-size:.82em;padding:3px 0;border-bottom:1px solid #f0ece0;display:flex;align-items:center;gap:7px;background:#fffbea"><span style="font-size:.78em;min-width:22px;flex-shrink:0">&#128081;</span>${flag(cap)} <strong>${esc(cap)}</strong></div>` : '';
+          const names = capRow + picks.map(p=>{
             const rnd = Math.ceil(p.pick / 2);
             return `<div style="font-size:.82em;padding:3px 0;border-bottom:1px solid #f0ece0;display:flex;align-items:center;gap:7px"><span style="font-size:.68em;color:#aaa;font-weight:bold;min-width:22px;flex-shrink:0">R${rnd}</span>${flag(p.player)} ${esc(p.player)}</div>`;
           }).join('');
+          const totalSlots = picks.length + (cap ? 1 : 0);
           return `<div style="flex:1;min-width:0;border-radius:8px;overflow:hidden;border:2px solid ${tc};margin-bottom:10px">
             <div onclick="toggleDraftRoster('${tk}')" style="background:${tc};color:${tt};padding:7px 11px;font-weight:bold;font-size:.82em;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none">
               <span>${esc(S.teams[tk].name)}</span>
-              <span style="opacity:.85">${picks.length}/10 ${open ? '▲' : '▼'}</span>
+              <span style="opacity:.85">${totalSlots}/10 ${open ? '▲' : '▼'}</span>
             </div>
             ${open ? `<div style="padding:8px 10px;background:white">
-              ${picks.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">${chips}</div>
-              <div style="margin-bottom:6px">${names}</div>
+              ${(totalSlots > 0) ? `<div style="margin-bottom:6px">${names}</div>
               <div style="display:flex;gap:4px;flex-wrap:wrap">${pills}</div>`
               : `<div style="color:#bbb;font-size:.8em;padding:4px 0">No picks yet</div>`}
             </div>` : ''}
@@ -2088,10 +2173,10 @@ function renderDraftRoom() {
           .filter(n => (rating(n).grade || null) === tier.grade)
           .sort((a,b) => (rating(b).skill||0) - (rating(a).skill||0));
         if (!tierPlayers.length) return '';
-        const remaining = tierPlayers.filter(n => !draftedNames.has(n)).length;
+        const remaining = tierPlayers.filter(n => !draftedNames.has(n) && !captains.has(n)).length;
         const allGone = remaining === 0;
         const cards = tierPlayers.map(name => {
-          if (draftedNames.has(name)) return '';
+          if (draftedNames.has(name) || captains.has(name)) return '';
           const m = PLAYER_META[name];
           const r = rating(name);
           const rank25 = m.prev ? `#${m.prev.rank} '25` : (m.note ? 'N/A' : '&#127381;');
