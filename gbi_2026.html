@@ -2469,29 +2469,47 @@ function renderDay(day) {
   // 4-Man groups — build set of all already-chosen players for this day
   const usedInDay = new Set(S[day].groups.flatMap(g => g.players.filter(p => p !== '')));
 
-  // Player pool panel — shows all 20 players, grays out assigned ones, hides when all filled
+  // Player pool panel — grouped by Bode grade tier, team-color ring, hides when all filled
   const _poolGrpOf = new Map();
   S[day].groups.forEach((g, gi) => { g.players.forEach(p => { if (p) _poolGrpOf.set(p, gi + 1); }); });
   if (_poolGrpOf.size < PLAYERS.length) {
-    const _gradeClr = {'A+':'#2d7a2d','A':'#3a8c3a','B+':'#1a5a9a','B':'#2666b5','C+':'#b8860b','C':'#c99a00','D+':'#c66200','D':'#d4580a','F':'#9a1a1a'};
-    const _chips = PLAYERS.map(name => {
+    const _tierClr = {'A':'#2d7a2d','B':'#1a5a9a','C':'#b8860b','D':'#c66200','F':'#9a1a1a'};
+    const _gradeRank = {'A+':0,'A':1,'B+':2,'B':3,'C+':4,'C':5,'D+':6,'D':7,'F':8};
+    const _byTier = {};
+    PLAYERS.forEach(name => {
+      const t = (rating(name).grade || 'C')[0];
+      if (!_byTier[t]) _byTier[t] = [];
+      _byTier[t].push(name);
+    });
+    const _makeChip = name => {
       const grpNum = _poolGrpOf.get(name);
       const pm = PLAYER_META[name];
-      const grade = rating(name).grade || 'C';
-      const bc = grpNum ? '#bbb' : (_gradeClr[grade] || '#999');
+      const tk = teamOf(name);
+      const ringClr = grpNum ? '#bbb' : (tk ? S.teams[tk].color : '#999');
       const sz = 'width:42px;height:42px;border-radius:50%;flex-shrink:0;';
       const img = (pm && pm.avatar)
-        ? `<img src="${esc(pm.avatar)}" style="${sz}object-fit:cover;border:2.5px solid ${bc};display:block">`
-        : `<div style="${sz}background:${grpNum ? '#ccc' : bc};color:white;display:flex;align-items:center;justify-content:center;font-size:.7em;font-weight:bold;border:2.5px solid ${bc}">${initials(name)}</div>`;
+        ? `<img src="${esc(pm.avatar)}" style="${sz}object-fit:cover;border:3px solid ${ringClr};display:block">`
+        : `<div style="${sz}background:${grpNum ? '#ccc' : (tk ? S.teams[tk].color : '#999')};color:white;display:flex;align-items:center;justify-content:center;font-size:.7em;font-weight:bold;border:3px solid ${ringClr}">${initials(name)}</div>`;
       const badge = grpNum ? `<span style="position:absolute;bottom:-1px;right:-3px;background:#555;color:#fff;border-radius:5px;font-size:.52em;font-weight:bold;padding:1px 3px;line-height:1.2">G${grpNum}</span>` : '';
       return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;opacity:${grpNum ? '0.32' : '1'};width:54px">
         <div style="position:relative">${img}${badge}</div>
         <span style="font-size:.58em;text-align:center;color:${grpNum ? '#aaa' : '#444'};line-height:1.2;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</span>
       </div>`;
+    };
+    const _sections = ['A','B','C','D','F'].filter(t => _byTier[t]).map(t => {
+      const sorted = [..._byTier[t]].sort((a,b) => {
+        const aAssigned = _poolGrpOf.has(a) ? 1 : 0, bAssigned = _poolGrpOf.has(b) ? 1 : 0;
+        if (aAssigned !== bAssigned) return aAssigned - bAssigned;
+        return (_gradeRank[rating(a).grade||'C'] - _gradeRank[rating(b).grade||'C']) || a.localeCompare(b);
+      });
+      return `<div style="margin-bottom:8px">
+        <div style="font-size:.62em;font-weight:bold;color:${_tierClr[t]};text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;padding-bottom:3px;border-bottom:1.5px solid ${_tierClr[t]}40">${t} Tier</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px 6px">${sorted.map(_makeChip).join('')}</div>
+      </div>`;
     }).join('');
     html += `<div style="background:#f9f7f2;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px">
       <div style="font-size:.72em;font-weight:bold;color:var(--green-dark);letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px">&#9971; Player Pool &mdash; ${PLAYERS.length - _poolGrpOf.size} of ${PLAYERS.length} Available</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px 6px">${_chips}</div>
+      ${_sections}
     </div>`;
   }
 
