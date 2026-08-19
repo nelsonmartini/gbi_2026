@@ -457,7 +457,7 @@ tr.winner { background: #fffce8 !important; }
   border-radius: 8px; padding: 12px 16px; text-align: center; color: white;
   box-shadow: 0 2px 8px rgba(0,0,0,.2);
 }
-.tcb-name  { font-size: .8em; letter-spacing: .5px; opacity: .8; margin-bottom: 4px; }
+.tcb-name  { font-size: 1.05em; font-weight: 700; letter-spacing: .8px; margin-bottom: 4px; font-family: 'Cinzel', serif; }
 .tcb-score { font-size: 2em; font-weight: bold; line-height: 1; }
 .tcb-mid   { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0 4px; }
 .tcb-vs    { font-weight: bold; color: var(--green-dark); font-size: 1em; }
@@ -774,7 +774,7 @@ function defaultState() {
     roster: PLAYERS.map(n => ({ name: n, team: null })),
     day1: defaultDayState(),
     day2: defaultDayState(),
-    locks: { day1: false, day2: false, payouts_day1: false, payouts_day2: false },
+    locks: { day1: false, day2: false, payouts_day1: false, payouts_day2: false, teams: false },
     draft: { active: false, complete: false, picks: [], currentPick: 0, timerStart: null, timerDuration: 180, paused: false, pausedRemaining: null },
     ratings: JSON.parse(JSON.stringify(DEFAULT_RATINGS))
   };
@@ -1442,6 +1442,8 @@ function hexLum(hex) {
 function contrastColor(hex) { return hexLum(hex) > 0.6 ? '#161616' : '#fff'; }
 // Legible version of a team color when it's used AS text/fill on the site's light cream background
 function safeTeamColor(hex) { return hexLum(hex) > 0.85 ? '#161616' : hex; }
+// Extra inline style to make very light team colors visible when used as a background fill
+function lightBg(hex) { return hexLum(hex) > 0.85 ? ';box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.22)' : ''; }
 
 // Returns {set: bottom-5 names, last: dead-last name} when scores exist
 function ppPlayers() {
@@ -2249,24 +2251,30 @@ function renderRoster() {
   </div>
 
   <div class="card">
-    <div class="card-header">⚙️ Team Names &amp; Colors</div>
+    <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+      <span>&#9881;&#65039; Team Names &amp; Colors</span>
+      <button class="btn btn-xs" onclick="toggleTeamLock()" style="background:${S.locks.teams?'#7a1a1a':'var(--green)'};color:white">
+        ${S.locks.teams ? '&#128275; Unlock Teams' : '&#128274; Lock Teams'}
+      </button>
+    </div>
     <div class="card-body">
+      ${S.locks.teams ? `<div class="alert alert-gold" style="margin-bottom:10px;font-size:.82em">&#128274; Team names and colors are locked. Unlock to make changes.</div>` : ''}
       <div class="form-row">
         <div class="form-group">
           <label>Team 1 Name</label>
-          <input type="text" value="${esc(S.teams.t1.name)}" onchange="S.teams.t1.name=this.value;save();renderRoster()" placeholder="e.g. Team Bode" />
+          <input type="text" value="${esc(S.teams.t1.name)}" ${S.locks.teams?'disabled':''} onchange="S.teams.t1.name=this.value;save();renderRoster()" placeholder="e.g. Team Bode" />
         </div>
         <div class="form-group">
           <label>Team 1 Color</label>
-          <input type="color" value="${esc(S.teams.t1.color)}" onchange="S.teams.t1.color=this.value;save();renderRoster()" style="height:36px;cursor:pointer;border-radius:5px" />
+          <input type="color" value="${esc(S.teams.t1.color)}" ${S.locks.teams?'disabled':''} onchange="S.teams.t1.color=this.value;save();renderRoster()" style="height:36px;cursor:pointer;border-radius:5px${S.locks.teams?';opacity:.5':''}" />
         </div>
         <div class="form-group">
           <label>Team 2 Name</label>
-          <input type="text" value="${esc(S.teams.t2.name)}" onchange="S.teams.t2.name=this.value;save();renderRoster()" placeholder="e.g. Team O'Hara" />
+          <input type="text" value="${esc(S.teams.t2.name)}" ${S.locks.teams?'disabled':''} onchange="S.teams.t2.name=this.value;save();renderRoster()" placeholder="e.g. Team O'Hara" />
         </div>
         <div class="form-group">
           <label>Team 2 Color</label>
-          <input type="color" value="${esc(S.teams.t2.color)}" onchange="S.teams.t2.color=this.value;save();renderRoster()" style="height:36px;cursor:pointer;border-radius:5px" />
+          <input type="color" value="${esc(S.teams.t2.color)}" ${S.locks.teams?'disabled':''} onchange="S.teams.t2.color=this.value;save();renderRoster()" style="height:36px;cursor:pointer;border-radius:5px${S.locks.teams?';opacity:.5':''}" />
         </div>
       </div>
     </div>
@@ -3209,6 +3217,14 @@ function rerenderAnalytics() {
   if (document.startViewTransition) document.startViewTransition(() => renderAnalytics());
   else renderAnalytics();
 }
+function toggleTeamLock() {
+  if (S.locks.teams) {
+    const pin = prompt('Enter site PIN to unlock team names/colors:');
+    if (!pin || pin.trim().toUpperCase() !== SITE_PIN.toUpperCase()) { alert('Incorrect PIN.'); return; }
+  }
+  S.locks.teams = !S.locks.teams;
+  save(); renderRoster();
+}
 function unlockMatrix() {
   const pin = prompt('Enter Bode Matrix PIN to unlock editing:');
   if (!pin || pin.trim().toUpperCase() !== MATRIX_PIN.toUpperCase()) { alert('Incorrect PIN.'); return; }
@@ -3443,8 +3459,8 @@ function renderAnalytics() {
           <span style="font-weight:bold;color:${safeTeamColor(t2col)}">${c.t2v>c.t1v?'&raquo; ':''}${fmt(c.t2v)} pts</span>
         </div>
         <div style="display:flex;height:11px;border-radius:5px;overflow:hidden;background:#e5e7eb">
-          <div style="width:${t1pct}%;background:${t1col};transition:width .4s"></div>
-          <div style="width:${100-t1pct}%;background:${t2col};transition:width .4s"></div>
+          <div style="width:${t1pct}%;background:${t1col};transition:width .4s${lightBg(t1col)}"></div>
+          <div style="width:${100-t1pct}%;background:${t2col};transition:width .4s${lightBg(t2col)}"></div>
         </div>
       </div>`;
     });
@@ -3466,7 +3482,7 @@ function renderAnalytics() {
       const tcol     = S.teams[tk].color;
       const tBarText = contrastColor(tcol);
       sec += `<div style="margin-bottom:22px">
-        <div style="font-weight:bold;color:${tBarText};background:${tcol};padding:7px 13px;border-radius:6px;margin-bottom:10px;font-size:.88em;letter-spacing:.3px">${tname}</div>`;
+        <div style="font-weight:bold;color:${tBarText};background:${tcol};padding:7px 13px;border-radius:6px;margin-bottom:10px;font-size:.88em;letter-spacing:.3px${lightBg(tcol)}">${tname}</div>`;
       tPlayers.forEach(p => {
         const pct = Math.round(p.total / tTotal * 100);
         sec += `
