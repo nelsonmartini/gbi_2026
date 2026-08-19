@@ -826,7 +826,6 @@ const CLIENT_ID = Math.random().toString(36).slice(2);  // unique per browser ta
 let _draftBigScreen = false;
 let _draftRosters = { t1: false, t2: false };
 let _matrixUnlocked = false;
-let _commissionerMode = sessionStorage.getItem('gbi_commissioner') === '1';
 let _collapsed = {};
 // Stays false until the real Firebase data (or localStorage fallback) has actually
 // loaded. Tabs refuse to render real, editable content while this is false — prevents
@@ -1821,20 +1820,7 @@ function showPickRoast(playerName) {
   setTimeout(() => { if (el.parentNode) el.remove(); }, 5000);
 }
 
-function enterCommissionerMode() {
-  const pin = prompt('Enter commissioner PIN to enable draft picks on this device:');
-  if (!pin || pin.trim().toUpperCase() !== ADMIN_PIN.toUpperCase()) { alert('Incorrect PIN.'); return; }
-  _commissionerMode = true;
-  sessionStorage.setItem('gbi_commissioner', '1');
-  renderRoster();
-}
-function exitCommissionerMode() {
-  _commissionerMode = false;
-  sessionStorage.removeItem('gbi_commissioner');
-  renderRoster();
-}
 function makePick(playerName) {
-  if (!_commissionerMode) { alert('Enable commissioner mode on this device to make picks.'); return; }
   if (!S.draft?.active || S.draft.complete) return;
   if (!Array.isArray(S.draft.picks)) S.draft.picks = [];
   const pickIdx = S.draft.currentPick;
@@ -2073,19 +2059,9 @@ function renderDraftRoom() {
   };
   const nextLabel = nextTeam ? `Up next: <strong>${esc(S.teams[nextTeam].name)}</strong>` : '';
 
-  const commBanner = _commissionerMode
-    ? `<div style="display:flex;align-items:center;justify-content:space-between;background:#1a4a1a;color:white;border-radius:8px;padding:8px 14px;margin-bottom:10px;font-size:.82em">
-        <span>&#128274; Commissioner mode active — picks enabled on this device</span>
-        <button class="btn btn-xs" onclick="exitCommissionerMode()" style="background:rgba(255,255,255,.2);color:white">Exit</button>
-      </div>`
-    : `<div style="display:flex;align-items:center;justify-content:space-between;background:#f5f0e8;border:1px solid var(--border);border-radius:8px;padding:8px 14px;margin-bottom:10px;font-size:.82em">
-        <span style="color:var(--gray)">&#128275; Watch-only mode — picks are disabled</span>
-        <button class="btn btn-xs" onclick="enterCommissionerMode()" style="background:var(--green);color:white">Enable Picks</button>
-      </div>`;
   return `<div style="text-align:right;margin-bottom:8px">
     <button class="btn btn-sm" onclick="_draftBigScreen=!_draftBigScreen;renderRoster()">${bs ? '&#128241; Normal View' : '&#128250; Big Screen Mode'}</button>
   </div>
-  ${commBanner}
   <div class="card" style="margin-bottom:12px">
     <div class="draft-header" style="background:${esc(tColor)};color:${headText};padding:${bs?'22px 28px':'14px 18px'}">
       <div>
@@ -2159,7 +2135,7 @@ function renderDraftRoom() {
               <span style="background:${tier.color};color:white;border-radius:4px;padding:1px 5px">${r.grade ?? '—'}</span>
               <span style="color:var(--green)">${odds[name]}</span>
             </div>`}
-            <button class="dp-pick-btn" style="background:${esc(tColor)};color:${headText};border:${onLight ? '2px solid #161616' : 'none'};width:100%;font-size:${bsz.btnFont};padding:${bsz.btnPad};opacity:${_commissionerMode?'1':'.4'};cursor:${_commissionerMode?'pointer':'not-allowed'}" onclick="makePick('${jsq(name)}')">DRAFT</button>
+            <button class="dp-pick-btn" style="background:${esc(tColor)};color:${headText};border:${onLight ? '2px solid #161616' : 'none'};width:100%;font-size:${bsz.btnFont};padding:${bsz.btnPad}" onclick="makePick('${jsq(name)}')">DRAFT</button>
           </div>`;
         }).filter(Boolean).join('');
         return `<div style="margin-bottom:16px">
