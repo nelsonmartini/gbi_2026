@@ -2215,7 +2215,7 @@ function renderRoster() {
       </div>
       <div class="card-body">
         <div class="chip-pool">
-          ${t1p.length ? t1p.map(p=>`<span class="chip t1"><span class="plink" onclick="showProfile('${jsq(p.name)}')">${esc(p.name)}</span> <span onclick="unassign('${jsq(p.name)}')" style="cursor:pointer" title="Click to unassign">✕</span></span>`).join('') : '<span style="color:#999;font-style:italic">No players assigned yet</span>'}
+          ${t1p.length ? t1p.map(p=>`<span class="chip t1"><span class="plink" onclick="showProfile('${jsq(p.name)}')">${esc(p.name)}</span>${S.locks.teams?'':` <span onclick="unassign('${jsq(p.name)}')" style="cursor:pointer" title="Click to unassign">✕</span>`}</span>`).join('') : '<span style="color:#999;font-style:italic">No players assigned yet</span>'}
         </div>
       </div>
     </div>
@@ -2225,7 +2225,7 @@ function renderRoster() {
       </div>
       <div class="card-body">
         <div class="chip-pool">
-          ${t2p.length ? t2p.map(p=>`<span class="chip t2"><span class="plink" onclick="showProfile('${jsq(p.name)}')">${esc(p.name)}</span> <span onclick="unassign('${jsq(p.name)}')" style="cursor:pointer" title="Click to unassign">✕</span></span>`).join('') : '<span style="color:#999;font-style:italic">No players assigned yet</span>'}
+          ${t2p.length ? t2p.map(p=>`<span class="chip t2"><span class="plink" onclick="showProfile('${jsq(p.name)}')">${esc(p.name)}</span>${S.locks.teams?'':` <span onclick="unassign('${jsq(p.name)}')" style="cursor:pointer" title="Click to unassign">✕</span>`}</span>`).join('') : '<span style="color:#999;font-style:italic">No players assigned yet</span>'}
         </div>
       </div>
     </div>
@@ -2238,8 +2238,8 @@ function renderRoster() {
         ${unp.length
           ? unp.map(p => `<span class="chip" style="cursor:default">
               <span class="plink" onclick="showProfile('${jsq(p.name)}')">${esc(p.name)}</span>
-              <button class="btn btn-xs btn-green" onclick="assign('${jsq(p.name)}','t1');save();renderRoster()">${esc(S.teams.t1.name.split(' ').slice(0,2).join(' '))}</button>
-              <button class="btn btn-xs" style="background:${esc(S.teams.t2.color)};color:${contrastColor(S.teams.t2.color)}" onclick="assign('${jsq(p.name)}','t2');save();renderRoster()">${esc(S.teams.t2.name.split(' ').slice(0,2).join(' '))}</button>
+              ${S.locks.teams ? '' : `<button class="btn btn-xs btn-green" onclick="assign('${jsq(p.name)}','t1');save();renderRoster()">${esc(S.teams.t1.name.split(' ').slice(0,2).join(' '))}</button>
+              <button class="btn btn-xs" style="background:${esc(S.teams.t2.color)};color:${contrastColor(S.teams.t2.color)}" onclick="assign('${jsq(p.name)}','t2');save();renderRoster()">${esc(S.teams.t2.name.split(' ').slice(0,2).join(' '))}</button>`}
             </span>`).join('')
           : '<span style="color:var(--green);font-style:italic">✓ All players assigned!</span>'}
       </div>
@@ -2259,7 +2259,7 @@ function renderRoster() {
               <td>${i+1}</td>
               <td><strong><span class="plink" onclick="showProfile('${jsq(p.name)}')">${flag(p.name)} ${esc(p.name)}</span></strong></td>
               <td>
-                <select onchange="assign('${jsq(p.name)}',this.value);save();renderRoster()">
+                <select ${S.locks.teams ? 'disabled' : `onchange="assign('${jsq(p.name)}',this.value);save();renderRoster()"`}>
                   <option value="">— Unassigned —</option>
                   <option value="t1" ${p.team==='t1'?'selected':''}>${esc(S.teams.t1.name)}</option>
                   <option value="t2" ${p.team==='t2'?'selected':''}>${esc(S.teams.t2.name)}</option>
@@ -2311,7 +2311,7 @@ function assign(name, team) {
   const p = S.roster.find(r => r.name === name);
   if (p) p.team = team || null;
 }
-function unassign(name) { assign(name, null); save(); renderRoster(); }
+function unassign(name) { if (S.locks.teams) { alert('Team assignments are locked. Unlock teams to make changes.'); return; } assign(name, null); save(); renderRoster(); }
 
 function renderPSearch(q) {
   const el = document.getElementById('psearch-results');
