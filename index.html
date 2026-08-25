@@ -3093,59 +3093,116 @@ function renderMonies() {
 ═══════════════════════════════════════════════════════ */
 function renderFormat() {
   document.getElementById('pane-format').innerHTML = `
+
+  <!-- ── WHAT IS GBI ── -->
   <div class="card">
-    <div class="card-header">📋 GBI 2026 Tournament Format</div>
+    <div class="card-header">&#9971; Welcome to GBI 2026</div>
     <div class="card-body">
-      <div class="alert alert-gold">
-        <strong>Total Pot: $2,200</strong> &nbsp;|&nbsp; Buy-in: $110/player &nbsp;|&nbsp; 20 Players &nbsp;|&nbsp; 2 Teams of 10
-      </div>
-
-      <div class="two-col">
-        <div>
-          <div class="sec-head"><h3>🏌️ Playing Format</h3></div>
-          <p style="line-height:1.8;margin-bottom:12px">Both days follow the same two-game format:</p>
-          <ul style="padding-left:20px;line-height:2.1">
-            <li><strong>4-Man Scramble</strong> — 5 groups of 4. Each player earns points equal to their group's finish among the 5 groups.</li>
-            <li><strong>2v2 Head-to-Head</strong> — 5 matches of 2 Team A players vs 2 Team B players. Points for win/tie AND overall score rank among all 10 pairs.</li>
-            <li><strong>Hole Payouts</strong> — 20 designated holes per day ($20 each). Long Drive, Closest to Pin, Longest Putt.</li>
-          </ul>
-          <p style="margin-top:10px;font-size:.88em;color:#555">All individual points aggregate to team totals for the Team Championship.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px">
+        <div style="flex:1;min-width:120px;background:#f5f0e8;border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:1.6em;font-weight:bold;color:var(--green-dark)">20</div>
+          <div style="font-size:.75em;color:#666;text-transform:uppercase;letter-spacing:.05em">Players</div>
         </div>
-        <div>
-          <div class="sec-head"><h3>💵 Prize Breakdown</h3></div>
-          <table class="fmt-table">
-            <thead><tr><th>Category</th><th>Prize</th></tr></thead>
-            <tbody>
-              <tr><td>🥇 Player 1st Place</td><td class="money">$460</td></tr>
-              <tr><td>🥈 Player 2nd Place</td><td class="money">$230</td></tr>
-              <tr><td>🥉 Player 3rd Place</td><td class="money">$110</td></tr>
-              <tr><td>🎯 Middle Man (10th Place)</td><td class="money">$100</td></tr>
-              <tr><td>Team Champions ($50 × 10)</td><td class="money">$500</td></tr>
-              <tr><td>Hole Payouts (40 holes × $20)</td><td class="money">$800</td></tr>
-              <tr style="font-weight:bold"><td>Total</td><td class="money">$2,200</td></tr>
-            </tbody>
-          </table>
+        <div style="flex:1;min-width:120px;background:#f5f0e8;border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:1.6em;font-weight:bold;color:var(--green-dark)">2</div>
+          <div style="font-size:.75em;color:#666;text-transform:uppercase;letter-spacing:.05em">Teams of 10</div>
+        </div>
+        <div style="flex:1;min-width:120px;background:#f5f0e8;border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:1.6em;font-weight:bold;color:var(--green-dark)">$110</div>
+          <div style="font-size:.75em;color:#666;text-transform:uppercase;letter-spacing:.05em">Buy-in</div>
+        </div>
+        <div style="flex:1;min-width:120px;background:#f5f0e8;border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:1.6em;font-weight:bold;color:var(--green-dark)">$2,200</div>
+          <div style="font-size:.75em;color:#666;text-transform:uppercase;letter-spacing:.05em">Total Pot</div>
         </div>
       </div>
 
-      <div class="three-col" style="margin-top:22px">
+      <div class="sec-head"><h3>&#128071; How GBI Works</h3></div>
+      <ul style="padding-left:20px;line-height:2.2;font-size:.92em;color:#333;margin-top:8px">
+        <li>Before the tournament, all 20 players are <strong>drafted onto one of two teams</strong> — 10 per side.</li>
+        <li>You play <strong>2 days of golf</strong>. Each day you compete in two formats: the <strong>4-Man Scramble</strong> and the <strong>2v2 Head-to-Head</strong>.</li>
+        <li>On top of that, <strong>20 Hole Payouts</strong> are up for grabs each day — Long Drive, Closest to Pin, and Longest Putt.</li>
+        <li>Every point you earn in any format counts toward <strong>your personal total</strong> AND <strong>your team's total</strong> simultaneously.</li>
+        <li>The <strong>team with the most combined points</strong> wins the Team Championship — $500 split 10 ways.</li>
+        <li>The <strong>player with the most points overall</strong> wins $460 — plus bragging rights for a full year.</li>
+        <li><strong>Day 2 points are worth more</strong> — nobody is out of it after Day 1. Comebacks happen.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── PRIZE BREAKDOWN ── -->
+  <div class="card">
+    <div class="card-header">&#128181; Prize Breakdown — What We&rsquo;re Playing For</div>
+    <div class="card-body">
+      <table class="fmt-table">
+        <thead><tr><th>Category</th><th>Prize</th></tr></thead>
+        <tbody>
+          <tr><td>&#127947; Player 1st Place</td><td class="money">$460</td></tr>
+          <tr><td>&#129352; Player 2nd Place</td><td class="money">$230</td></tr>
+          <tr><td>&#129353; Player 3rd Place</td><td class="money">$110</td></tr>
+          <tr><td>&#127919; Middle Man (10th Place)</td><td class="money">$100</td></tr>
+          <tr><td>&#127942; Team Champions ($50 &times; 10 players)</td><td class="money">$500</td></tr>
+          <tr><td>&#9971; Hole Payouts (40 holes &times; $20)</td><td class="money">$800</td></tr>
+          <tr style="font-weight:bold;background:#f5f0e8"><td>Total Pot</td><td class="money">$2,200</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:.82em;color:#888;margin-top:10px;font-style:italic">The Middle Man award ($100) goes to the player who finishes exactly 10th overall — right in the middle of the pack. Not too good, not too bad.</p>
+    </div>
+  </div>
+
+  <!-- ── THE FORMATS ── -->
+  <div class="card">
+    <div class="card-header">&#127948;&#65039; The Formats</div>
+    <div class="card-body">
+      <div class="sec-head"><h3>1. 4-Man Scramble</h3></div>
+      <ul style="padding-left:20px;line-height:2.1;font-size:.9em;color:#333;margin-bottom:16px">
+        <li>All 20 players split into <strong>5 groups of 4</strong>.</li>
+        <li>Each group plays a scramble format — best ball off the tee, everyone hits from the best spot, repeat.</li>
+        <li>Groups are ranked 1st through 5th by their total score vs par.</li>
+        <li>Every player on a group earns the <strong>same point value</strong> based on where their group finishes.</li>
+        <li>Ties between groups split the points evenly across the tied positions.</li>
+      </ul>
+
+      <div class="sec-head"><h3>2. 2v2 Head-to-Head</h3></div>
+      <ul style="padding-left:20px;line-height:2.1;font-size:.9em;color:#333;margin-bottom:16px">
+        <li>All 20 players pair up into <strong>5 matches of 2v2</strong> — two players from each team per match.</li>
+        <li>Each pair plays their own ball. The pair&rsquo;s combined score vs par is their match score.</li>
+        <li>Points earned two ways: <strong>Win/Tie</strong> vs your opponent pair, plus <strong>Rank Points</strong> based on where your pair&rsquo;s score falls among all 10 pairs that day.</li>
+        <li>A pair that loses their head-to-head can still earn solid rank points if their score was strong overall — and vice versa.</li>
+      </ul>
+
+      <div class="sec-head"><h3>3. Hole Payouts</h3></div>
+      <ul style="padding-left:20px;line-height:2.1;font-size:.9em;color:#333">
+        <li><strong>20 designated holes per day</strong> — $20 cash &amp; 2 points per hole.</li>
+        <li>Three contests: <strong>Long Drive</strong>, <strong>Closest to Pin</strong>, and <strong>Longest Putt</strong>.</li>
+        <li>Hole payout points count toward both your individual total and your team total.</li>
+        <li>In the event of a tie on a hole, the payout is split.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── POINTS ── -->
+  <div class="card">
+    <div class="card-header">&#128202; Point Values</div>
+    <div class="card-body">
+      <div class="three-col">
         <div>
-          <div class="sec-head"><h3>⛳ 4-Man Scramble Points</h3></div>
+          <div class="sec-head"><h3>&#9971; 4-Man Scramble</h3></div>
           <table class="fmt-table">
-            <thead><tr><th>Place</th><th>Day 1</th><th>Day 2</th></tr></thead>
+            <thead><tr><th>Finish</th><th>Day 1</th><th>Day 2</th></tr></thead>
             <tbody>
-              <tr><td>🥇 1st</td><td>8</td><td>10.5</td></tr>
-              <tr><td>🥈 2nd</td><td>6</td><td>8.5</td></tr>
-              <tr><td>🥉 3rd</td><td>4</td><td>6.5</td></tr>
+              <tr><td>&#127947; 1st</td><td>8</td><td>10.5</td></tr>
+              <tr><td>&#129352; 2nd</td><td>6</td><td>8.5</td></tr>
+              <tr><td>&#129353; 3rd</td><td>4</td><td>6.5</td></tr>
               <tr><td>4th</td><td>2</td><td>4.5</td></tr>
               <tr><td>5th</td><td>1</td><td>2</td></tr>
             </tbody>
           </table>
         </div>
         <div>
-          <div class="sec-head"><h3>🏌️ 2v2 Match Points</h3></div>
+          <div class="sec-head"><h3>&#9876;&#65039; 2v2 Match Result</h3></div>
           <table class="fmt-table">
-            <thead><tr><th>H2H Result</th><th>Day 1</th><th>Day 2</th></tr></thead>
+            <thead><tr><th>Result</th><th>Day 1</th><th>Day 2</th></tr></thead>
             <tbody>
               <tr><td>Win</td><td>+3</td><td>+5</td></tr>
               <tr><td>Tie</td><td>+1</td><td>+2.5</td></tr>
@@ -3154,9 +3211,9 @@ function renderFormat() {
           </table>
         </div>
         <div>
-          <div class="sec-head"><h3>📊 2v2 Rank Points</h3></div>
+          <div class="sec-head"><h3>&#128202; 2v2 Rank (of 10 pairs)</h3></div>
           <table class="fmt-table">
-            <thead><tr><th>Rank (of 10)</th><th>Day 1</th><th>Day 2</th></tr></thead>
+            <thead><tr><th>Rank</th><th>Day 1</th><th>Day 2</th></tr></thead>
             <tbody>
               <tr><td>1st</td><td>10</td><td>15</td></tr>
               <tr><td>2nd</td><td>9</td><td>12</td></tr>
@@ -3172,27 +3229,38 @@ function renderFormat() {
           </table>
         </div>
       </div>
+      <p style="font-size:.82em;color:#888;margin-top:12px;font-style:italic">Hole Payouts: 2 points per hole win, $20 cash. Both count toward player and team totals.</p>
+    </div>
+  </div>
 
-      <div class="sec-head" style="margin-top:22px"><h3>📌 Key Rules</h3></div>
-      <ul style="padding-left:20px;line-height:2.1;font-size:.9em;color:#333">
-        <li>All points are awarded <strong>per player</strong> and roll up to that player's team total.</li>
-        <li>Ties in 4-Man Scramble or 2v2 ranks receive the <strong>average</strong> of the tied positions' points.</li>
-        <li>Hole payout points (2 pts per win) count toward both the player total and the team total.</li>
-        <li>Day 2 has higher point values — standings can shift significantly on the second day.</li>
-        <li>The Team Championship is the sum of all individual player points on each team.</li>
-        <li>In the <strong>4-Man Scramble</strong>, each group has a <strong>randomly assigned captain</strong> who drafts and selects the other players on their group.</li>
+  <!-- ── RULES ── -->
+  <div class="card">
+    <div class="card-header">&#128204; Key Rules</div>
+    <div class="card-body">
+      <ul style="padding-left:20px;line-height:2.2;font-size:.9em;color:#333">
+        <li>All points are awarded <strong>per player</strong> and automatically roll up to that player&rsquo;s team total.</li>
+        <li>Ties in the 4-Man Scramble or 2v2 rank receive the <strong>average</strong> of the tied positions&rsquo; point values.</li>
+        <li>You compete in <strong>both</strong> a 4-Man group and a 2v2 match every day — that&rsquo;s by design, not an error.</li>
+        <li>Day 2 carries higher point values across the board — a strong Day 2 can flip the entire leaderboard.</li>
+        <li>The Team Championship is decided by the <strong>combined total</strong> of all 10 players&rsquo; points on each team.</li>
+        <li>Hole payout winners are recorded per hole. Split payouts are allowed in the event of a tie.</li>
       </ul>
+    </div>
+  </div>
 
-      <div class="sec-head" style="margin-top:22px"><h3>🏁 Tiebreaker Logic</h3></div>
-      <p style="font-size:.88em;color:#555;margin-bottom:10px">When two or more players share the same point total, final standings are determined in this order:</p>
-      <ol style="padding-left:20px;line-height:2.2;font-size:.9em;color:#333">
+  <!-- ── TIEBREAKER ── -->
+  <div class="card">
+    <div class="card-header">&#127937; Tiebreaker — How We Settle It</div>
+    <div class="card-body">
+      <p style="font-size:.88em;color:#555;margin-bottom:12px">If two or more players finish with the same point total, these tiebreakers are applied in order:</p>
+      <ol style="padding-left:20px;line-height:2.3;font-size:.9em;color:#333">
         <li><strong>Total Points</strong> — most points wins outright.</li>
-        <li><strong>Score to Par</strong> — combined score across all 4-Man and 2-Man events (lower is better).</li>
+        <li><strong>Score to Par</strong> — combined score across all 4-Man and 2v2 events (lower is better).</li>
         <li><strong>Hole Payout Wins</strong> — total LD / C2P / LP wins across both days (more wins = better).</li>
-        <li><strong>Match Win</strong> — player who won at least one 2-Man match ranks higher than one who did not.</li>
+        <li><strong>Match Win</strong> — player who won at least one 2v2 match ranks higher than one who did not.</li>
         <li><strong>Winning Team</strong> — player on the team with the higher overall point total ranks higher.</li>
       </ol>
-      <p style="font-size:.82em;color:#888;margin-top:8px;font-style:italic">This logic determines every position 1st through 20th, including who is officially named the 🍆 Peter Putter.</p>
+      <p style="font-size:.82em;color:#888;margin-top:10px;font-style:italic">This logic determines every position 1st through 20th &mdash; including who is officially named the &#127812; Peter Putter.</p>
     </div>
   </div>
 
