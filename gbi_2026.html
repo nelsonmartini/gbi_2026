@@ -675,7 +675,7 @@ const TOURNEY_DATE = new Date(2026, 8, 18, 8, 30, 0); // Sept 18 2026 8:30 AM lo
 
 const PLAYERS = [
   "Basham","Bode","Bryce","Braden","Kyle",
-  "Evan","Jordan","Jake B","Moose","Nail",
+  "Evan","Jordan","Jake B","Moose","Cam",
   "NateDawg","Neebs","Ponzi","Rusty","Shawn",
   "Tanner","Tom","Trevor","Ty","Zach M."
 ];
@@ -697,7 +697,7 @@ const SC = {
 /* ═══════════════════════════════════════════════════════
    2025 HISTORICAL DATA + PLAYER RATINGS
    Source: GBI Scorecard_upgrades_2.0_FINAL.xlsx
-   Braden = 2026 rookie (no prior data). Carney not returning.
+   Braden, Cam = 2026 rookies (no prior data). Carney/Nail not returning.
 ═══════════════════════════════════════════════════════ */
 const GBI_CHAMPS = { 'Nail': [2025], 'Evan': [2023] };
 const PETER_PUTTER_2025 = 'Neebs';
@@ -718,7 +718,7 @@ const PLAYER_META = {
   'Jordan':   { cat:'bigdawg',   avatar:'avatars/jordan.jpg', prev:null },
   'Jake B':   { cat:'mystery',   avatar:'avatars/jake-b.jpg', prev:{rank:5, total:40.5, d1:17,  d2:23.5, d1m:20, d2m:0,  d1four:8,   d1match:0,d1rank:7, d1pay:2,d2four:6.5, d2match:5,d2rank:12,d2pay:0} },
   'Moose':    { cat:'bigdawg',   avatar:'avatars/moose.jpg', prev:{rank:2, total:49.5, d1:21,  d2:28.5, d1m:0,  d2m:20, d1four:8,   d1match:3,d1rank:10,d1pay:0,d2four:6.5, d2match:5,d2rank:15,d2pay:2} },
-  'Nail':     { cat:'straight',  avatar:'avatars/nail.jpg', prev:{rank:1, total:51.5, d1:21,  d2:30.5, d1m:40, d2m:20, d1four:4,   d1match:3,d1rank:10,d1pay:4,d2four:8.5, d2match:5,d2rank:15,d2pay:2} },
+  'Cam':      { cat:'rookie',    prev:null },
   'NateDawg': { cat:'straight',  avatar:'avatars/natedawg.jpg', prev:{rank:6, total:36.5, d1:18,  d2:18.5, d1m:0,  d2m:60, d1four:6,   d1match:3,d1rank:9, d1pay:0,d2four:8.5, d2match:0,d2rank:4, d2pay:6} },
   'Neebs':    { cat:'mystery',   peterPutter:true, avatar:'avatars/neebs.jpg', prev:{rank:20,total:14,   d1:3,   d2:11,   d1m:0,  d2m:0,  d1four:2,   d1match:0,d1rank:1, d1pay:0,d2four:2,   d2match:0,d2rank:9, d2pay:0} },
   'Ponzi':    { cat:'bigdawg',   avatar:'avatars/ponzi.jpg', prev:{rank:12,total:31,   d1:14,  d2:17,   d1m:40, d2m:0,  d1four:2,   d1match:0,d1rank:8, d1pay:4,d2four:2,   d2match:5,d2rank:10,d2pay:0} },
@@ -741,7 +741,7 @@ const DEFAULT_RATINGS = {
   'Jordan':   { skill:9.4, vibes:8.1, grade:'A' },
   'Jake B':   { skill:6,   vibes:6,   grade:'D' },
   'Moose':    { skill:9.3, vibes:7.3, grade:'A' },
-  'Nail':     { skill:8.8, vibes:8.8, grade:'B' },
+  'Cam':      { skill:6,   vibes:8,   grade:'F' },
   'NateDawg': { skill:7.9, vibes:7.6, grade:'B' },
   'Neebs':    { skill:4.5, vibes:7.8, grade:'F' },
   'Ponzi':    { skill:9.3, vibes:4.4, grade:'A' },
