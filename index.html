@@ -839,9 +839,9 @@ function toggleCollapse(key, day) {
 // ─── SITE PIN ─── change this to whatever PIN you want to share with players
 const SITE_PIN  = 'gbi';
 // ─── COMMISSIONER PIN ─── required to lock/unlock day scores
-const ADMIN_PIN = 'GBIcommish26';
+const ADMIN_PIN = 'gbi69';
 // ─── BODE MATRIX PIN ─── required to unlock editing on the ratings table
-const MATRIX_PIN = 'gbi26';
+const MATRIX_PIN = 'gbi69';
 
 let _db = null, _ref = null, _auth = null;
 let _draftTimer = null;
@@ -3307,8 +3307,8 @@ function rerenderAnalytics() {
 }
 function toggleTeamLock() {
   if (S.locks.teams) {
-    const pin = prompt('Enter site PIN to unlock team names/colors:');
-    if (!pin || pin.trim().toUpperCase() !== SITE_PIN.toUpperCase()) { alert('Incorrect PIN.'); return; }
+    const pin = prompt('Enter PIN to unlock team names/colors:');
+    if (!pin || pin.trim().toUpperCase() !== ADMIN_PIN.toUpperCase()) { alert('Incorrect PIN.'); return; }
   }
   S.locks.teams = !S.locks.teams;
   save(); renderRoster();
