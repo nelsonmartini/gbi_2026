@@ -1846,6 +1846,36 @@ function showPickRoast(playerName) {
   setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 8000);
 }
 
+function showPayoutRoast(playerName) {
+  if (playerName !== 'Tanner') return;
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9998;
+    display:flex;align-items:center;justify-content:center;
+    animation:pickRoastIn .2s ease;
+  `;
+  const el = document.createElement('div');
+  el.style.cssText = `
+    background:white;border-radius:20px;padding:32px 28px 28px;
+    box-shadow:0 16px 60px rgba(0,0,0,.5);
+    text-align:center;max-width:420px;width:92%;
+  `;
+  const _tMeta = PLAYER_META['Tanner'] || {};
+  const _tAvatar = _tMeta.avatar
+    ? `<img src="${esc(_tMeta.avatar)}" alt="Tanner" style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:4px solid #555;margin:0 auto 14px;display:block">`
+    : '';
+  el.innerHTML = `
+    ${_tAvatar}
+    <div style="font-size:.72em;color:#aaa;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">${flag('Tanner')} Tanner &middot; Hole Payout</div>
+    <div style="font-size:1.55em;font-weight:900;color:#222;line-height:1.25;font-family:'Cinzel',serif">Are you guys serious?</div>
+    <div style="margin-top:16px;font-size:.78em;color:#aaa">Tap anywhere to dismiss</div>
+  `;
+  overlay.appendChild(el);
+  overlay.onclick = () => overlay.remove();
+  document.body.appendChild(overlay);
+  setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 6000);
+}
+
 function makePick(playerName) {
   if (!S.draft?.active || S.draft.complete) return;
   if (!Array.isArray(S.draft.picks)) S.draft.picks = [];
@@ -2810,7 +2840,7 @@ function renderPayouts() {
           <td><strong>Hole ${p.hole}</strong></td>
           <td><span class="cat cat-${p.cat}">${catLabel}</span></td>
           <td>
-            <select ${dayLocked ? 'disabled' : `onchange="S.${day}.payouts[${i}].winner=this.value;save();renderPayouts()"`}>
+            <select ${dayLocked ? 'disabled' : `onchange="S.${day}.payouts[${i}].winner=this.value;showPayoutRoast(this.value);save();renderPayouts()"`}>
               <option value="">— No winner —</option>${playerOpts(p.winner)}
             </select>
           </td>
