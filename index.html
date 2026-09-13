@@ -757,7 +757,7 @@ const DEFAULT_RATINGS = {
 
 // 27 holes per day (20 payout, 7 No Prize) — mirrors 2025 structure
 const HOLE_CATS = [
-  'LD','LP','C2P','NP','LP','LD','NP','C2P','LP',
+  'LD','LP','C2P','NP','C2P','LD','NP','C2P','LP',
   'NP','LD','NP','LP','C2P','LD','C2P','NP','LP',
   'LD','LP','C2P','NP','LP','LD','NP','C2P','LP'
 ];
@@ -956,6 +956,13 @@ function applyRoster(loaded) {
     const key = ratingKey(n);
     if (!loaded.ratings[key] && DEFAULT_RATINGS[n]) {
       loaded.ratings[key] = { ...DEFAULT_RATINGS[n] };
+    }
+  });
+  // Always sync payout categories from HOLE_CATS — Firebase stores the cat value and
+  // won't pick up changes to the array otherwise. Preserves winner values.
+  ['day1', 'day2'].forEach(day => {
+    if (loaded[day] && loaded[day].payouts) {
+      loaded[day].payouts.forEach((p, i) => { if (HOLE_CATS[i]) p.cat = HOLE_CATS[i]; });
     }
   });
   return loaded;
