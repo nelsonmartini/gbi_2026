@@ -950,6 +950,14 @@ function applyRoster(loaded) {
     const t = teamMap[n];
     return { name: n, team: (t === 't1' || t === 't2') ? t : null };
   });
+  // Backfill any player whose ratings aren't in Firebase yet (e.g. new players or renames)
+  if (!loaded.ratings) loaded.ratings = {};
+  PLAYERS.forEach(n => {
+    const key = ratingKey(n);
+    if (!loaded.ratings[key] && DEFAULT_RATINGS[n]) {
+      loaded.ratings[key] = { ...DEFAULT_RATINGS[n] };
+    }
+  });
   return loaded;
 }
 
